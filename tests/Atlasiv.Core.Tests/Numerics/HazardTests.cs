@@ -24,7 +24,7 @@ public sealed class HazardTests
     [Fact]
     public void A_rate_year_is_31_556_952_seconds()
     {
-        Assert.Equal(Year, RateTime.SecondsPerYear);
+        Assert.Equal(Year, RateYear.Seconds);
     }
 
     [Theory]

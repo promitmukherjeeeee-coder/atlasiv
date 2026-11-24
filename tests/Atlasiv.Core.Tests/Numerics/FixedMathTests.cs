@@ -67,14 +67,17 @@ public sealed class FixedMathTests
         Assert.Equal(expected, FixedMath.Exp(Q32.FromRaw(input)).Raw);
     }
 
-    /// <summary>Large results: the stated bound allows 2^-56 relative error.</summary>
+    /// <summary>
+    /// Large results. The library's bits are pinned exactly, so any change to them is caught;
+    /// each is 1 raw unit above the true value, inside the stated bound.
+    /// </summary>
     [Theory]
-    [InlineData(90194313216L, 5664270449055626585L)]    // exp 21
-    [InlineData(92255897518L, 9153882479645939135L)]    // exp 21.48, close to the largest value
-    public void Exp_vectors_with_large_results(long input, long expected)
+    [InlineData(90194313216L, 5664270449055626586L, 5664270449055626585L)] // exp 21
+    [InlineData(92255897518L, 9153882479645939136L, 9153882479645939135L)] // exp 21.48, close to the largest value
+    public void Exp_vectors_with_large_results(long input, long pinned, long trueRounded)
     {
-        var actual = FixedMath.Exp(Q32.FromRaw(input)).Raw;
-        Assert.InRange(actual - expected, -(1 + (expected >> 56)), 1 + (expected >> 56));
+        Assert.Equal(pinned, FixedMath.Exp(Q32.FromRaw(input)).Raw);
+        Assert.InRange(pinned - trueRounded, -(1 + (trueRounded >> 56)), 1 + (trueRounded >> 56));
     }
 
     [Theory]

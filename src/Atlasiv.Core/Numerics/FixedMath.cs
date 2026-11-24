@@ -66,6 +66,8 @@ public static class FixedMath
         // exp x = exp(r) * 2^k; exp(r) is in [1, 2) at 62 fractional bits.
         var expR = ExpQ62(r);
         var shift = ExpFractionBits - Q32.FractionBits - (int)k;
+        // Shifts are never overflow-checked. The guard above keeps k at 31 or less, so a left
+        // shift is by at most 1 bit (exp(r) < 2^63 becomes < 2^64) and ToInt64 catches the overflow.
         var raw = shift >= 0 ? WideMath.ShiftRightHalfToEven(expR, shift) : expR << -shift;
         return Q32.FromRaw(WideMath.ToInt64((Int128)raw, "FixedMath.Exp"));
     }
@@ -126,8 +128,7 @@ public static class FixedMath
         {
             var quotient = r64 / (ulong)n;
             var remainder = r64 - (quotient * (ulong)n);
-            var twice = 2 * remainder;
-            var rOverN = twice > (ulong)n || (twice == (ulong)n && (quotient & 1) == 1) ? quotient + 1 : quotient;
+            var rOverN = WideMath.RoundsUpHalfToEven(remainder, (ulong)n, (quotient & 1) == 1) ? quotient + 1 : quotient;
             t = ExpOne + WideMath.ShiftRightHalfToEven((UInt128)rOverN * t, ExpFractionBits);
         }
 
