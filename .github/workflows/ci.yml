@@ -23,12 +23,16 @@ jobs:
         include:
           - name: Windows x64
             os: windows-latest
+            arch: X64
           - name: Linux x64
             os: ubuntu-latest
+            arch: X64
           - name: macOS x64
             os: macos-15-intel
+            arch: X64
           - name: macOS ARM64
             os: macos-latest
+            arch: ARM64
     env:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -40,10 +44,14 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Show runner
+      - name: Check runner processor
         shell: bash
         run: |
-          echo "OS: $RUNNER_OS  Arch: $RUNNER_ARCH"
+          echo "OS: $RUNNER_OS  Arch: $RUNNER_ARCH  Expected: ${{ matrix.arch }}"
+          if [ "$RUNNER_ARCH" != "${{ matrix.arch }}" ]; then
+            echo "::error::Runner ${{ matrix.os }} is $RUNNER_ARCH, expected ${{ matrix.arch }}"
+            exit 1
+          fi
           dotnet --info
 
       - name: Restore
