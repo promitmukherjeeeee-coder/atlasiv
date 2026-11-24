@@ -59,3 +59,6 @@ Engineering document F: every significant engineering decision, its alternatives
 | [ADR-039](0039-pass1-time-rule-clarifications.md) | Pass 1 time-rule clarifications (owner rulings) | Proposed, 24 Nov 2026 (Pass 1 grilling session) |
 | [ADR-040](0040-target-dotnet-10-lts.md) | Target .NET 10 (LTS) | Proposed, 24 Nov 2026 (Pass 1, J0) |
 | [ADR-041](0041-build-test-and-ci-settings.md) | Build, test and CI settings | Proposed, 24 Nov 2026 (Pass 1, J0) |
+| [ADR-042](0042-q32-numerics-rounding-and-overflow.md) | Q32.32 type, rounding and overflow | Proposed, 24 Nov 2026 (Pass 1, J1) |
+| [ADR-043](0043-integer-exp-log-sqrt.md) | Integer exp, log and sqrt with stated accuracy | Proposed, 24 Nov 2026 (Pass 1, J1) |
+| [ADR-044](0044-hazard-primitive-and-integrated-hazard.md) | Hazard primitive and exact integrated hazard | Proposed, 24 Nov 2026 (Pass 1, J1) |
