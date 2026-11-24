@@ -10,6 +10,10 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
 
+    <!-- Hard rule 2: integer overflow throws, never wraps. Code that must wrap
+         (for example a hash mixer) says so explicitly with `unchecked`. -->
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+
     <!-- Every warning is a build error. -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
