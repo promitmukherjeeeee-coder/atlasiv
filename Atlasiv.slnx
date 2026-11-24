@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/bench/">
+    <Project Path="bench/Atlasiv.Benchmarks/Atlasiv.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Atlasiv.Core/Atlasiv.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Atlasiv.Core.Tests/Atlasiv.Core.Tests.csproj" />
+  </Folder>
+</Solution>

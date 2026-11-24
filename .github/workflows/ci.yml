@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+            arch: X64
+          - name: Linux x64
+            os: ubuntu-latest
+            arch: X64
+          - name: macOS x64
+            os: macos-15-intel
+            arch: X64
+          - name: macOS ARM64
+            os: macos-latest
+            arch: ARM64
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Check runner processor
+        shell: bash
+        run: |
+          echo "OS: $RUNNER_OS  Arch: $RUNNER_ARCH  Expected: ${{ matrix.arch }}"
+          if [ "$RUNNER_ARCH" != "${{ matrix.arch }}" ]; then
+            echo "::error::Runner ${{ matrix.os }} is $RUNNER_ARCH, expected ${{ matrix.arch }}"
+            exit 1
+          fi
+          dotnet --info
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (warnings are errors)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --report-xunit-trx --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: TestResults
+          if-no-files-found: ignore

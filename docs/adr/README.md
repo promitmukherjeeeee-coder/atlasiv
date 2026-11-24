@@ -57,3 +57,5 @@ Engineering document F: every significant engineering decision, its alternatives
 | [ADR-037](0037-registries-as-versioned-yaml-files-in-the.md) | Registries as versioned YAML files in the repository | Additions, 24 Nov 2026 (knowledge and historiography amendment, section 59) |
 | [ADR-038](0038-twenty-eight-owner-systems-with-single-writer.md) | Twenty-eight owner systems with single-writer ownership | Additions, 24 Nov 2026 (knowledge and historiography amendment, section 59) |
 | [ADR-039](0039-pass1-time-rule-clarifications.md) | Pass 1 time-rule clarifications (owner rulings) | Proposed, 24 Nov 2026 (Pass 1 grilling session) |
+| [ADR-040](0040-target-dotnet-10-lts.md) | Target .NET 10 (LTS) | Proposed, 24 Nov 2026 (Pass 1, J0) |
+| [ADR-041](0041-build-test-and-ci-settings.md) | Build, test and CI settings | Proposed, 24 Nov 2026 (Pass 1, J0) |
