@@ -27,7 +27,7 @@ Every job follows the same loop:
 ## J0 Repository and CI
 
 - A .NET solution containing three projects: `Atlasiv.Core` (class library, no Godot reference), `Atlasiv.Core.Tests` (xUnit with FsCheck) and `Atlasiv.Benchmarks` (BenchmarkDotNet).
-- Choose the .NET version: the long-term-support version that the current stable Godot 4.x .NET build supports. Record it, with the source checked, in `docs/decisions-log.md`.
+- Choose the .NET version: the long-term-support version that the current stable Godot 4.x .NET build supports. Record it, with the source checked, as a new decision record in `docs/adr/`.
 - A GitHub Actions workflow that builds and tests on Windows, Linux, macOS x64 and macOS ARM.
 - Deterministic build settings (warnings as errors, invariant culture in tests).
 - Done when one placeholder test passes on all four runners.
@@ -42,7 +42,7 @@ Every job follows the same loop:
 
 ## J2 Random streams
 
-- A counter-based generator: each draw is a pure function of (world seed, turn, phase, system ID, entity ID, draw index). Pick Philox or a SplitMix64-style mixer, record the reason in `docs/decisions-log.md`, and publish its test vectors.
+- A counter-based generator: each draw is a pure function of (world seed, turn, phase, system ID, entity ID, draw index). Pick Philox or a SplitMix64-style mixer, record the reason as a new decision record in `docs/adr/`, and publish its test vectors.
 - Helpers: uniform integer, fixed-point uniform, Bernoulli, Poisson, stochastic rounding, time-to-event draw.
 - No `System.Random` anywhere (add an analyzer or test that fails the build if it appears).
 - Done when the test vectors match, and adding unrelated entities leaves existing draws unchanged.
