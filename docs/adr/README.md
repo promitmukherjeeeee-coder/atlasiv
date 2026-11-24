@@ -56,3 +56,4 @@ Engineering document F: every significant engineering decision, its alternatives
 | [ADR-036](0036-ftl-horizon-value-x28.md) | FTL horizon value (X28) | Additions, 24 Nov 2026 (knowledge and historiography amendment, section 59) |
 | [ADR-037](0037-registries-as-versioned-yaml-files-in-the.md) | Registries as versioned YAML files in the repository | Additions, 24 Nov 2026 (knowledge and historiography amendment, section 59) |
 | [ADR-038](0038-twenty-eight-owner-systems-with-single-writer.md) | Twenty-eight owner systems with single-writer ownership | Additions, 24 Nov 2026 (knowledge and historiography amendment, section 59) |
+| [ADR-039](0039-pass1-time-rule-clarifications.md) | Pass 1 time-rule clarifications (owner rulings) | Proposed, 24 Nov 2026 (Pass 1 grilling session) |
