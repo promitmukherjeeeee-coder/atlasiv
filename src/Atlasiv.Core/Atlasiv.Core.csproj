@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The simulation library. Plain .NET, no Godot or other engine reference. -->
+  <PropertyGroup>
+    <RootNamespace>Atlasiv.Core</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

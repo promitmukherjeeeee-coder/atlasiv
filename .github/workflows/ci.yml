@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+          - name: Linux x64
+            os: ubuntu-latest
+          - name: macOS x64
+            os: macos-15-intel
+          - name: macOS ARM64
+            os: macos-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Show runner
+        shell: bash
+        run: |
+          echo "OS: $RUNNER_OS  Arch: $RUNNER_ARCH"
+          dotnet --info
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (warnings are errors)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --report-xunit-trx --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: TestResults
+          if-no-files-found: ignore

@@ -1,0 +1,22 @@
+<Project>
+  <!-- Shared build settings for every project. See docs/adr/0040. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!-- Deterministic build: same source gives the same binaries. -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Every warning is a build error. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- No culture-specific formatting or parsing anywhere. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+</Project>

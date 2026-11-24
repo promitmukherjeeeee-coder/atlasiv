@@ -1,0 +1,12 @@
+<Project>
+  <!-- Central package versions. Pinned exactly so every machine restores the same packages. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+    <PackageVersion Include="FsCheck" Version="3.6.0" />
+    <PackageVersion Include="FsCheck.Xunit.v3" Version="3.6.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+</Project>
