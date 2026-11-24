@@ -1,0 +1,2815 @@
+registry: ATLASIV Mechanic Registry
+version: 0.1.0-draft
+date: '2026-11-24'
+status: Draft generated from Mechanics Brainstorm (rev 30). Owners and layers proposed; confirmed in Pass 2 and
+  Pass 2b.
+source: Mechanics Brainstorm tab
+link_semantics: declared_links = IDs this entry explicitly extends, absorbs or references in the documents. Not
+  yet variable-level inputs and outputs; those come from each 21-field specification.
+mechanics:
+- id: T1
+  name: Variable turn length
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Stepped lengths from 50 years down to 1 month. All rates are stored per year, and the world's tempo follows
+    the leading edge. Each step has a phase count (20, 10, 10, 5, 4, 4, 3 and 5 phases per turn).
+- id: T2
+  name: Standing orders
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Multi-turn orders (migrations, builds, trade routes) progress per phase, carry across turns, and raise
+    alerts only on exceptions.
+- id: T3
+  name: Seasonal aggregation
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Long turns still run harvest, flood and migration cycles inside the turn, so annual rhythms matter even
+    at 50-year turns. Precomputed annual profiles per biome drive them.
+- id: T4
+  name: Event queue
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Scheduled and conditional events resolve in a fixed order each phase.
+- id: T5
+  name: Calendar
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: BCE/CE dating (owner decision 24 Nov 2026), era names, cultural calendars.
+- id: T6
+  name: History log
+  series: T
+  owner: OS-EVENT
+  layer: 0
+  summary: Every state change is logged. The log feeds scoring, the chronicle and replays.
+- id: T7
+  name: Country switching
+  series: T
+  owner: OS-AI
+  layer: cross-cutting
+  summary: The player can switch to any country at a phase boundary (Europa Universalis tag style). The country
+    left returns to AI control, and each entity keeps its own history and score lineage.
+- id: T8
+  name: Action phases
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Each turn is divided into phases, which are the tick for fast systems and for the player's decisions.
+    The phase count scales with the turn step so each decision covers a comparable stretch of felt history.
+- id: T9
+  name: Phase resolution order and phase deltas
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Planning, then resolution in a fixed order (standing orders and events, diplomacy, covert operations,
+    movement and migration, combat, sieges and naval action, character events, unrest). Phase events that touch
+    slow systems are recorded as phase deltas and consumed by the turn-end tick.
+- id: T10
+  name: Advance until and exceptions
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Run phases and turns automatically until a trigger needs a decision (war declared, army enters territory,
+    succession crisis, first contact, disaster, plot discovered, treaty offer, project milestone, famine, new technology).
+    Quiet phases auto-skip.
+- id: T11
+  name: Tempo trigger
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: The leading edge is the fastest transport capability held by any entity with at least 0.5% of world population.
+    The step switches when its candidate differs for 10 consecutive turns (faster) or 20 (slower), with at least
+    20 turns between switches. Each switch is an announced era-transition event (K9), and steps can slow again after
+    a global collapse.
+  declared_links:
+  - K9
+- id: W1
+  name: Height field
+  series: W
+  owner: OS-TERRAIN
+  layer: 1
+  summary: A fine height map, collapsed into four gameplay bands (lowland, plateau, highland, mountain).
+- id: W2
+  name: Tectonics
+  series: W
+  owner: OS-TERRAIN
+  layer: 1
+  summary: Slow uplift, volcanoes, earthquake zones.
+- id: W3
+  name: Hydrology
+  series: W
+  owner: OS-HYDRO
+  layer: 1
+  summary: Flow accumulation makes rivers. Rivers carve valleys, flood, shift course, form deltas, lakes and marshes.
+    Dams and canals change flow.
+- id: W4
+  name: Soil and erosion
+  series: W
+  owner: OS-TERRAIN
+  layer: 1
+  summary: Fertility, depletion, salinization from irrigation, erosion after deforestation.
+- id: W5
+  name: Sea level and ice
+  series: W
+  owner: OS-TERRAIN
+  layer: 1
+  summary: Eustatic rise and fall, glaciers and ice sheets, coastal flooding.
+- id: W6
+  name: Climate model
+  series: W
+  owner: OS-CLIMATE
+  layer: 1
+  summary: Temperature, precipitation, seasonality, monsoons, ocean currents, multi-year oscillations, solar and
+    volcanic cycles.
+- id: W7
+  name: Greenhouse feedback
+  series: W
+  owner: OS-CLIMATE
+  layer: 1
+  summary: Emissions, carbon cycle, albedo, permafrost thaw, warming.
+- id: W8
+  name: Biome dynamics
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: 'Biomes convert when climate thresholds hold for long enough, with lag. Examples: desertification, forest
+    advance, tundra thaw.'
+- id: W9
+  name: Vegetation and fire
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Succession, wildfire regimes, grazing pressure.
+- id: W10
+  name: Disasters
+  series: W
+  owner: OS-HAZARD
+  layer: 1
+  summary: Floods, droughts, quakes, eruptions, storms, wildfires, tsunamis, pandemics, rare impacts. Probability
+    follows geography, and tech and infrastructure mitigate.
+- id: W11
+  name: Deposits
+  series: W
+  owner: OS-DEPOSIT
+  layer: 1
+  summary: Mineral families and mining clusters (one site, several resources) with discovery by prospecting and
+    tech.
+- id: W12
+  name: Animal populations
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Per-species density, carrying capacity, growth and decline, predator-prey links, migration routes.
+- id: W13
+  name: Extinction and extirpation
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Overhunting, habitat loss, invasive species. Extinct species stay gone.
+- id: W14
+  name: Animal kingdoms and biocycles
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Herbivore, predator, scavenger and marine guilds with seasonal and boom-bust cycles.
+- id: W15
+  name: Natural exploitation
+  series: W
+  owner: OS-PROD
+  layer: 2
+  summary: Hunting, fishing, foraging, logging, quarrying, each with a sustainable yield and a collapse threshold.
+- id: W16
+  name: Disease ecology
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Zoonoses, vectors, epidemics linked to density, trade and climate.
+- id: W17
+  name: Domestication
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Plants and animals domesticated by region (real cradle packages), which sets farming and herding options.
+- id: P1
+  name: Population groups
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Integer counts keyed by culture, religion, class and age band, at most about a dozen per province.
+- id: P2
+  name: Demography
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Births, deaths, aging, life expectancy, with famine, epidemic and war losses and a demographic transition
+    with development.
+- id: P3
+  name: Carrying capacity
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Food, water, tech and land use set the ceiling.
+- id: P4
+  name: Migration
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Push and pull factors, seasonal rounds for bands, refugees, mass migrations.
+- id: P5
+  name: Settlement formation
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Camp, village, town, city, driven by surplus, storage, defense and water. One city per region.
+- id: P6
+  name: Settlement costs
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: City cost rises geometrically and universally. Town cost rises progressively per region.
+- id: P7
+  name: Districts and buildings
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Unique districts, buildings and upgrades for each settlement type.
+- id: P8
+  name: Adjacency
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Improvements sit next to a settlement (+3 city, +1 town or village). City-only improvements affect the
+    whole region.
+- id: P9
+  name: Infrastructure
+  series: P
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Roads, bridges, rail, canals, ports, grids, pipelines, networks. Speeds feed back into the tempo.
+- id: P10
+  name: Land use
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Farmland, pasture, forest, urban footprint and their competition.
+- id: P11
+  name: Health and education
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Sanitation, medicine, literacy, schooling.
+- id: P12
+  name: Class and occupation
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Specialization grows with surplus.
+- id: P13
+  name: Language and writing
+  series: P
+  owner: OS-CULTURE
+  layer: 3
+  summary: Language families, drift, prestige, scripts and literacy.
+- id: R1
+  name: Raw resources
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Stone, wood, ores, fuels and minerals from deposit clusters.
+- id: R2
+  name: Food
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Crops, livestock and fisheries by real regional package.
+- id: R3
+  name: Processing chains
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Smelting, refining, chemistry. Discovering an ore unlocks its research path (bauxite, then aluminium
+    smelting).
+- id: R4
+  name: Man-made resources
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Four grades, from basic to advanced (for example transistors, SoCs). Grades follow purity and process
+    complexity.
+- id: R5
+  name: Energy
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Muscle, biomass, water, wind, coal, oil, gas, nuclear, solar, fusion, with grids and storage.
+- id: R6
+  name: Nuclear materials
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Uranium, thorium, plutonium and polonium from shared deposits, convertible by tech or breeder programs.
+- id: R7
+  name: Logistics and stockpiles
+  series: R
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Transport capacity, spoilage, storage.
+- id: R8
+  name: Construction
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Cost, labor and time, scaled to turn length.
+- id: R9
+  name: Pollution and waste
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Local damage and global emissions.
+- id: K1
+  name: Branching tech tree
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: 'Prerequisite graph with path styles (normal, cyber, solar, nature, steampunk). Early choices shape later
+    options. A technology node is never a Boolean unlock: it links knowledge artifacts (K40) to per-actor lifecycle
+    and capability states (K44, K50) that can differ by region and institution and can regress.'
+  declared_links:
+  - K40
+  - K44
+  - K50
+- id: K2
+  name: Independent invention
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Depends on population, connectivity, surplus, specialization, literacy, need and prerequisites.
+- id: K3
+  name: Diffusion
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Channels (trade, migration, media, students, espionage, conquest, diplomacy) with permeability. Catch-up
+    rises as more of the world holds a tech.
+- id: K4
+  name: Absorptive capacity and loss
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Using a tech needs prerequisites and infrastructure. Small or collapsing populations lose techs.
+- id: K5
+  name: Research institutions
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Schools, libraries, universities, labs, corporate R&D, scholars. Expanded by institutional research in
+    K22 to K39 and I11 to I18.
+  declared_links:
+  - I11
+  - I12
+  - I13
+  - I14
+  - I15
+  - I16
+  - I17
+  - I18
+  - K22
+  - K23
+  - K24
+  - K25
+  - K26
+  - K27
+  - K28
+  - K29
+  - K30
+  - K31
+  - K32
+  - K33
+  - K34
+  - K35
+  - K36
+  - K37
+  - K38
+  - K39
+- id: K6
+  name: Civic trees
+  series: K
+  owner: OS-POLITY
+  layer: 3
+  summary: Governance civics, culture civics, religion civics.
+- id: K7
+  name: First-mover rents
+  series: K
+  owner: OS-MARKET
+  layer: 3
+  summary: Patents, monopolies and royalties that fade as a tech spreads.
+- id: K8
+  name: Espionage and theft
+  series: K
+  owner: OS-DIPLO
+  layer: 4
+  summary: Intel, sabotage and technology transfer by theft.
+- id: K9
+  name: Era transitions
+  series: K
+  owner: OS-TIME
+  layer: 0
+  summary: Tempo steps triggered by transport and communication tech.
+- id: K10
+  name: Lost knowledge
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Burned libraries, forgotten crafts, rediscovery.
+- id: E1
+  name: Local economy
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Production, consumption, wages, from subsistence to markets.
+- id: E2
+  name: Trade nodes and routes
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Merchants collect and steer nodes. Traders run routes (caravans, ships, rail, shipping lanes).
+- id: E3
+  name: Markets and prices
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Supply and demand per node, shortages, inflation.
+- id: E4
+  name: Money
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Barter, commodity money, coinage, paper, fiat, digital. Each entity can have its own currency.
+- id: E5
+  name: Exchange and reserves
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Exchange rates, conversion, reserve currency, currency hegemony.
+- id: E6
+  name: Banking
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Credit, interest, fractional reserve, bank runs, central banks, world banks.
+- id: E7
+  name: Debt
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Sovereign debt, default, restructuring, crisis spread.
+- id: E8
+  name: Corporations
+  series: E
+  owner: OS-INST
+  layer: 3
+  summary: Charter companies, joint stock, multinationals, public listings, stock trading, corporate influence.
+- id: E9
+  name: Monopolies
+  series: E
+  owner: OS-INST
+  layer: 3
+  summary: Cost, technology, material and trade monopolies, and antitrust.
+- id: E10
+  name: Embargo and sanctions
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Blockades, tariffs, smuggling, sanction evasion.
+- id: E11
+  name: Taxation and budgets
+  series: E
+  owner: OS-POLITY
+  layer: 3
+  summary: Tribute, corvee, tax systems, spending priorities.
+- id: E12
+  name: Media economy
+  series: E
+  owner: OS-CULTURE
+  layer: 3
+  summary: Media output and influence, entertainers and stars.
+- id: E13
+  name: Internet
+  series: E
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Sector upgrades (corporate, economic, infrastructure) that create open or closed systems.
+- id: E14
+  name: Labor and informal economy
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Unions, strikes, black markets.
+- id: E15
+  name: Inequality
+  series: E
+  owner: OS-POP
+  layer: 2
+  summary: Wealth spread feeds factions and scoring.
+- id: S1
+  name: Factions and approval
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Interest groups (nobles, clergy, merchants, farmers, military, workers, industrialists, students) with
+    approval and demands.
+- id: S2
+  name: Government and legitimacy
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Governance forms, succession law, legitimacy.
+- id: S3
+  name: Culture
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Weighted trait bundles, syncretism, culture groups with visual skins.
+- id: S4
+  name: Religion
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Beliefs, administration, cohesion, factions, schisms, reformations, defender of the faith.
+- id: S5
+  name: Leaders
+  series: S
+  owner: OS-CHAR
+  layer: 3
+  summary: Paragons, heroes, generals, scholars, prophets with traits, aging and death.
+- id: S6
+  name: Families and dynasties
+  series: S
+  owner: OS-CHAR
+  layer: 3
+  summary: Marriage, heirs, claims, regency, succession crises.
+- id: S7
+  name: Unrest
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Protests, revolts, coups, civil war, secession.
+- id: S8
+  name: Law and corruption
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Crime, enforcement, administrative decay.
+- id: S9
+  name: Soft power
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Propaganda, media reach, language spread.
+- id: S10
+  name: Ideologies
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Modern-era belief systems that shape civics and factions.
+- id: N1
+  name: Entity model
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Population groups, territory, institutions, leader and dynasty, culture traits.
+- id: N2
+  name: Entity forms
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Emergent forms from band to supranational union.
+- id: N3
+  name: Cultural pull
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Pull on nearby groups from prestige, surplus, tech, religion, language, trade, proximity, media.
+- id: N4
+  name: Assimilation and absorption
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Voluntary shift by affinity, or conquest and union.
+- id: N5
+  name: Trait inheritance
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Absorbed traits blend into the entity's culture.
+- id: N6
+  name: Fission and fusion
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Bands split, merge, settle, collapse, revolt.
+- id: N7
+  name: National projects
+  series: N
+  owner: OS-PROJ
+  layer: 4
+  summary: Single-entity projects that change form or institutions.
+- id: N8
+  name: Joint and special projects
+  series: N
+  owner: OS-PROJ
+  layer: 4
+  summary: Multi-sponsor and rare projects (wonders, FTL).
+- id: N9
+  name: Lineage
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: The player's history and scoring persist across form changes.
+- id: N10
+  name: Subjects
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Vassals, tributaries, colonies, protectorates.
+- id: D1
+  name: Contact and knowledge
+  series: D
+  owner: OS-INFO
+  layer: 3
+  summary: First contact, map knowledge, rumor.
+- id: D2
+  name: Opinion and reputation
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Trust, grievances, track record.
+- id: D3
+  name: Treaties
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Alliances, pacts, marriage, trade deals, tribute, borders, guarantees.
+- id: D4
+  name: Imperial structures
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: HRE-style elective emperor, imperial authority, free cities, princes.
+- id: D5
+  name: Colonial nations
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Overlords and subjects with liberty desire.
+- id: D6
+  name: International bodies
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Leagues, a UN-like body, trade blocs, currency unions.
+- id: D7
+  name: Religious diplomacy
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Defender of the faith, holy wars, conversion pressure.
+- id: D8
+  name: Corporate diplomacy
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Corporations as treaty partners and lobbyists.
+- id: D9
+  name: Civilian and military channels
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Back channels, attaches, joint exercises.
+- id: D10
+  name: Casus belli and peace
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: War goals, peace terms, reparations.
+- id: D11
+  name: Covert operations
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Intelligence, subversion, sabotage.
+- id: D12
+  name: AI personalities
+  series: D
+  owner: OS-AI
+  layer: cross-cutting
+  summary: Culture and leader shape diplomatic style.
+- id: M1
+  name: Forces by era
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Bands, levies, professional armies, fleets, mechanized, air, space, cyber.
+- id: M2
+  name: Logistics and attrition
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Supply lines, terrain and climate attrition.
+- id: M3
+  name: Terrain and fortification
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Height bands, rivers, forts, chokepoints.
+- id: M4
+  name: Combat resolution
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Deterministic, driven by tech, terrain, leaders, supply and doctrine.
+- id: M5
+  name: Naval and amphibious
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Fleets, blockades, landings.
+- id: M6
+  name: Air and space
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Air superiority, strategic reach, orbital assets.
+- id: M7
+  name: Sieges
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: ''
+- id: M8
+  name: Occupation
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Resistance, garrisons, assimilation or unrest.
+- id: M9
+  name: War support
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Exhaustion and mobilization, conscription.
+- id: M10
+  name: Military industry
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Production, templates, stockpiles.
+- id: M11
+  name: Nuclear weapons
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Proliferation, deterrence, fallout and climate effects.
+- id: M12
+  name: Mercenaries and irregulars
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Private forces, militias, guerrillas.
+- id: M13
+  name: Doctrine and tradition
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Experience and culture shape how forces fight.
+- id: X1
+  name: Story engine
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Events generated from simulation state (famine, discovery, schism) with scripted overlays and anomalies.
+- id: X2
+  name: Chronicle
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: An auto-written history with named ages.
+- id: X3
+  name: Special projects
+  series: X
+  owner: OS-PROJ
+  layer: 4
+  summary: Wonders, large national efforts, the FTL project.
+- id: X4
+  name: FTL project
+  series: X
+  owner: OS-PROJ
+  layer: 4
+  summary: Stages, sponsor shares, espionage, sanctions, secrecy, a final test run that ends the game.
+- id: X5
+  name: FTL pressure
+  series: X
+  owner: OS-PROJ
+  layer: 4
+  summary: 'Two sources, kept separate: emergent pressure from simulated scarcity, demand, project payoffs and competition;
+    and the hard-coded FTL horizon value (X28), which stands for benefits outside the simulation (revised twice
+    on 24 Nov 2026; owner-confirmed).'
+  declared_links:
+  - X28
+- id: X6
+  name: Scoring
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: 24 categories ranked across all peoples.
+- id: X7
+  name: Game creation
+  series: X
+  owner: OS-IDENT
+  layer: 0
+  summary: Real-Earth start for 10,000 BCE, selectable peoples per zone and cradle.
+- id: A1
+  name: Entity AI
+  series: A
+  owner: OS-AI
+  layer: cross-cutting
+  summary: Needs and goal driven. Non-player peoples follow the same rules as the player.
+- id: A2
+  name: Level of detail
+  series: A
+  owner: OS-TIME
+  layer: 0
+  summary: Coarser updates far from the player. The player and contacts act every phase, other entities every 2
+    to 4 phases, and remote entities once per turn at a fixed offset phase derived from the entity id. Any event
+    involving a remote entity wakes it to full cadence.
+- id: A3
+  name: Determinism
+  series: A
+  owner: OS-TIME
+  layer: 0
+  summary: Seeded randomness and fixed-point math.
+- id: A4
+  name: Explainability
+  series: A
+  owner: OS-OBS
+  layer: 5
+  summary: Every number shows its breakdown.
+- id: A5
+  name: Validation suite
+  series: A
+  owner: OS-OBS
+  layer: 5
+  summary: Real cases (Sentinelese, North Korea, China after 1978, Meiji Japan, India, Tasmania) test the equations.
+- id: A6
+  name: Data tables
+  series: A
+  owner: OS-IDENT
+  layer: 0
+  summary: Content in tables for balancing.
+- id: R10
+  name: Electricity generation
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Thermal, hydro, wind, solar, nuclear, geothermal, tidal and fusion plants, each with capacity factor,
+    fuel needs, cooling water and build time.
+- id: R11
+  name: Grid
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Transmission and distribution, losses, voltage and frequency standards, regional grids, interconnectors,
+    cascading blackouts.
+- id: R12
+  name: Dispatch and storage
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Baseload versus peaking, intermittency, batteries, pumped hydro, hydrogen, demand response, price signals.
+- id: R13
+  name: Electrification
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Demand growth by sector, stranded fuel assets, transition cost, electrified transport and heat.
+- id: R14
+  name: Energy security
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Import dependence, pipelines, strategic reserves, supply shocks, producer cartels.
+- id: R15
+  name: Fuel cycles
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Refining, liquefied gas, enrichment, waste storage, decommissioning.
+- id: R16
+  name: Energy-water link
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Cooling needs, hydropower versus irrigation, desalination energy cost.
+- id: W25
+  name: Space weather
+  series: W
+  owner: OS-CLIMATE
+  layer: 1
+  summary: Solar storms damage grids and satellites.
+- id: R17
+  name: Agricultural systems
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Fallow and rotation, irrigation, synthetic fertilizer, mechanization, high-yield and engineered crops,
+    yield variance by climate.
+- id: R18
+  name: Food security
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Storage, famine relief, price shocks, aquaculture, fisheries management.
+- id: R19
+  name: Water supply
+  series: R
+  owner: OS-HYDRO
+  layer: 1
+  summary: Aquifer depletion, desalination, water rights, urban water systems.
+- id: R20
+  name: Materials
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Cement, steel, glass, plastics, chemicals, critical minerals, recycling and a circular economy.
+- id: R21
+  name: Industrial base
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Sector productivity, learning curves, economies of scale, supply chains, semiconductor fabrication.
+- id: R22
+  name: Supply-chain resilience
+  series: R
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Single points of failure, just-in-time versus stockpiles, chokepoints.
+- id: R23
+  name: Standards
+  series: R
+  owner: OS-INST
+  layer: 3
+  summary: Rail gauges, units, protocols, standards wars.
+- id: R24
+  name: Shipping
+  series: R
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Containerization, port capacity, canal and strait chokepoints.
+- id: R25
+  name: Forestry
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Timber, charcoal, managed versus cleared forest.
+- id: P14
+  name: Urban planning
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Housing, zoning, slums, transit, congestion, land value.
+- id: P15
+  name: Real estate
+  series: P
+  owner: OS-MARKET
+  layer: 3
+  summary: Housing markets, mortgages, bubbles.
+- id: P16
+  name: Public services
+  series: P
+  owner: OS-POLITY
+  layer: 3
+  summary: Water, sanitation, healthcare, education, pensions, welfare and their fiscal cost.
+- id: P17
+  name: Transport systems
+  series: P
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Modes, networks, vehicles, airports, speed and capacity.
+- id: P18
+  name: Telecommunications
+  series: P
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Courier, telegraph, telephone, broadcast, internet, satellites. Sets information speed and censorship
+    options.
+- id: P19
+  name: Healthcare systems
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Medicine, vaccines, antibiotics and resistance, chronic disease, aging, pandemic response, pharmaceutical
+    industry.
+- id: P20
+  name: Civil protection
+  series: P
+  owner: OS-POLITY
+  layer: 3
+  summary: Emergency response, disaster relief, civil defense.
+- id: P21
+  name: Waste management
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Collection, landfill, recycling, hazardous waste.
+- id: P22
+  name: Quality of life
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Safety, leisure, happiness. Feeds approval and scoring.
+- id: P23
+  name: Aging and pensions
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Dependency ratios and fiscal burden.
+- id: P24
+  name: Land tenure and labor
+  series: P
+  owner: OS-POLITY
+  layer: 3
+  summary: Commons, feudal, private and state land. Slavery, serfdom, indenture, wage labor, with abolition and
+    reform dynamics.
+- id: W18
+  name: Pollution and ecosystem services
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Air, water, soil and plastic pollution, ozone, pollinators, fisheries collapse, ocean acidification.
+- id: W19
+  name: Conservation
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Reserves, parks, rewilding, species reintroduction.
+- id: W23
+  name: Contact epidemics
+  series: W
+  owner: OS-POP
+  layer: 2
+  summary: Immunity histories per population, first-contact mortality, crop and animal exchange along new routes.
+- id: W24
+  name: Transboundary water
+  series: W
+  owner: OS-HYDRO
+  layer: 1
+  summary: Shared rivers, upstream and downstream conflict, water treaties, dam disputes.
+- id: E16
+  name: Insurance
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Risk pooling for disasters, crops, trade and lives.
+- id: E17
+  name: Property and contract law
+  series: E
+  owner: OS-POLITY
+  layer: 3
+  summary: Property rights, courts, enforcement.
+- id: E18
+  name: Business cycles
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Booms, recessions, unemployment, inflation and deflation, central bank tools.
+- id: E19
+  name: Global finance
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Capital flows, foreign investment, sovereign wealth funds, currency crises, speculative attacks.
+- id: E20
+  name: Labor migration
+  series: E
+  owner: OS-POP
+  layer: 2
+  summary: Remittances, brain drain, guest workers.
+- id: E21
+  name: Trade policy
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Tariffs, quotas, free-trade zones, specialization, resource-curse effects.
+- id: E22
+  name: Intellectual property
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Licensing, copying, patent pools.
+- id: E23
+  name: Aid and development finance
+  series: E
+  owner: OS-DIPLO
+  layer: 4
+  summary: ''
+- id: E24
+  name: Illicit economy
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Smuggling, drugs, organized crime, money laundering.
+- id: E25
+  name: Services and tourism
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: ''
+- id: E26
+  name: Digital economy
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Platforms, data as a resource, cryptocurrency, digital sovereignty.
+- id: S11
+  name: Education systems
+  series: S
+  owner: OS-INST
+  layer: 3
+  summary: Schooling, ideology transmission, skilled labor supply.
+- id: S12
+  name: Civil society and press
+  series: S
+  owner: OS-INST
+  layer: 3
+  summary: NGOs, free press, academia.
+- id: S13
+  name: Elections and parties
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Voting systems, polarization, populism.
+- id: S14
+  name: Courts and constitutions
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Rule of law, judicial independence.
+- id: S15
+  name: State capacity
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Bureaucracy, civil service, corruption.
+- id: S16
+  name: Policing and surveillance
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Privacy, digital authoritarianism.
+- id: S17
+  name: Family and gender
+  series: S
+  owner: OS-POP
+  layer: 2
+  summary: Fertility norms, household structure, women's participation.
+- id: S18
+  name: Mobility and divides
+  series: S
+  owner: OS-POP
+  layer: 2
+  summary: Class, urban-rural and ethnic divides.
+- id: S19
+  name: Movements and nationalism
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Separatism, revolutions, reform movements.
+- id: S20
+  name: Information ecosystem
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Public opinion, misinformation, censorship.
+- id: S21
+  name: Entertainment and sport
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Celebrity culture, mass events.
+- id: S22
+  name: Humanitarian crises
+  series: S
+  owner: OS-POP
+  layer: 2
+  summary: Refugees, famine, aid.
+- id: S23
+  name: Extremism and terrorism
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: ''
+- id: S24
+  name: Philosophy and ideas
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Schools of thought as civic inputs.
+- id: S25
+  name: Culture production and heritage
+  series: S
+  owner: OS-CULTURE
+  layer: 3
+  summary: Art, architecture, literature, music and heritage sites feed influence, identity and scores.
+- id: S26
+  name: Piracy, banditry and outlaw zones
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: They appear wherever state reach is weak and loot is available.
+- id: K11
+  name: Science system
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Basic versus applied research, breakthroughs, scientific revolutions.
+- id: K12
+  name: Skilled labor pipeline
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Education to research capacity.
+- id: K13
+  name: Dual-use control
+  series: K
+  owner: OS-POLITY
+  layer: 3
+  summary: Export controls and nonproliferation.
+- id: K14
+  name: Technology accidents
+  series: K
+  owner: OS-HAZARD
+  layer: 1
+  summary: Reactor and chemical accidents, lab leaks, AI failures.
+- id: K15
+  name: Obsolescence
+  series: K
+  owner: OS-PROD
+  layer: 2
+  summary: Stranded assets, retraining, creative destruction.
+- id: K16
+  name: Biotech, automation, AI and geoengineering
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Life extension and gene tech reshape demographics. Automation reshapes labor. AI affects decisions and
+    risk. Geoengineering is a climate response with side effects.
+- id: N11
+  name: Nomadic and pastoral lifeways
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Mobile camps, herd management, seasonal pasture rounds, horse and camel domestication, steppe confederations,
+    raiding versus tribute versus trade.
+- id: N12
+  name: Administrative reach
+  series: N
+  owner: OS-POLITY
+  layer: 3
+  summary: Control decays with distance and message speed. Governors gain autonomy, orders arrive late, overstretch
+    drives revolt and fission.
+- id: N13
+  name: Exploration and navigation
+  series: N
+  owner: OS-INFO
+  layer: 3
+  summary: Wind- and current-driven sea lanes, ship types, navigational tech, fog of war, discovery rewards, chart
+    trading, port networks.
+- id: N14
+  name: Ruler perspective
+  series: N
+  owner: OS-CHAR
+  layer: 3
+  summary: 'The player plays the character leading the country. The ruler''s traits, health, family and ambitions
+    limit and shape the available actions. Death passes play to the heir, with succession crises where claims conflict.
+    Character detail scales with the era: an anonymous leader for bands and tribes, a named ruler, heir and notables
+    for chiefdoms and early states, house members from 10-year turns, and '
+- id: D13
+  name: Global commons and climate treaties
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Emissions and fishing quotas, free riding, monitoring, enforcement by sanctions.
+- id: D14
+  name: Territorial claims and sovereignty
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Control versus claim, frontiers, unclaimed zones, recognition.
+- id: D15
+  name: Treaty lifecycle
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Negotiation, ratification limits, withdrawal.
+- id: D16
+  name: Global governance
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: A UN-like body, councils, vetoes, courts.
+- id: D17
+  name: Borders and migration policy
+  series: D
+  owner: OS-POLITY
+  layer: 3
+  summary: Passports, visas, walls, refugee quotas.
+- id: D18
+  name: Cultural and language diplomacy
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: ''
+- id: M14
+  name: Arms trade
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Exports, embargoes, dependency.
+- id: M15
+  name: Arms control and deterrence
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Treaties, doctrines, command and control.
+- id: M16
+  name: Civil-military relations
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Coups, military rule.
+- id: M17
+  name: Defense industry
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Procurement, technology cycles, cost overruns.
+- id: M18
+  name: Laws of war
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: War crimes, tribunals.
+- id: M19
+  name: Alliances
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Collective defense, burden sharing.
+- id: M20
+  name: Proxy wars and insurgency
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: ''
+- id: M21
+  name: Peacekeeping and reconstruction
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: ''
+- id: SP1
+  name: Launch and orbit
+  series: SP
+  owner: OS-PROD
+  layer: 2
+  summary: Detailed in Deep Dives section 5.
+- id: X8
+  name: Black swans
+  series: X
+  owner: OS-HAZARD
+  layer: 1
+  summary: Rare high-impact events (supervolcano, novel pandemic, technology surprise).
+- id: X9
+  name: Archaeology and memory
+  series: X
+  owner: OS-KNOW
+  layer: 3
+  summary: Ruins of collapsed peoples, rediscovered knowledge, how later peoples remember the past.
+- id: T12
+  name: Integer clock
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Elapsed seconds from the start, event-driven, with exact calendar boundaries.
+- id: T13
+  name: Interruption classes
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Informational events auto-resolve. Decision-critical events pause Advance Until. Rare designated interruption
+    points exist.
+- id: T14
+  name: Standing-order failure
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Paused, partial or failed states with explained causes, no irreversible action without authority, no
+    automatic refunds.
+- id: T15
+  name: Pacing separation
+  series: T
+  owner: OS-TIME
+  layer: 0
+  summary: Physical travel, strategic deployment, administrative execution and turn tempo are separate quantities.
+- id: W26
+  name: Catchment water graph
+  series: W
+  owner: OS-HYDRO
+  layer: 1
+  summary: Directed graph with inflow, runoff, groundwater, withdrawals, reservoirs, evaporation, flood loss and
+    outflow.
+- id: W27
+  name: Hazard, exposure, vulnerability
+  series: W
+  owner: OS-HAZARD
+  layer: 1
+  summary: Disasters separate the natural event from who is affected and how badly.
+- id: W28
+  name: Ecological thresholds
+  series: W
+  owner: OS-ECOLOGY
+  layer: 1
+  summary: Extinction, salinization, aquifer exhaustion and fisheries collapse with hysteresis and recovery delays.
+- id: W29
+  name: Hierarchical climate
+  series: W
+  owner: OS-CLIMATE
+  layer: 1
+  summary: Global trends, spatial cells, monthly summaries and extreme events, calibrated reduced-order models.
+- id: P25
+  name: Cohort key and age operator
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Province, culture, religion, class with age distributions and a time-based age-transition operator.
+- id: P26
+  name: Migration decisions and conservation
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Utility-based destination choice, matched departures and arrivals.
+- id: P27
+  name: Compartmental disease
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Extended susceptible, exposed, infectious, recovered models linked by trade, armies and migration.
+- id: P28
+  name: Households and families
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Statistical households, explicit families for notables.
+- id: P29
+  name: Urban land consumption
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: Demand for housing, commerce, industry and infrastructure allocated to eligible cells.
+- id: P30
+  name: Collective behavior
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: Group preferences from conditions, producing protest, migration, mobilization or rebellion.
+- id: P31
+  name: Demographic reconciliation
+  series: P
+  owner: OS-POP
+  layer: 2
+  summary: The population identity checked every update.
+- id: R26
+  name: Conservation ledgers
+  series: R
+  owner: OS-LEDGER
+  layer: 0
+  summary: Closing stock identity for every resource, with losses and byproducts.
+- id: R27
+  name: Production constraint and substitution
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Output limited by the scarcest requirement, with substitution rules and unsubstitutable bottlenecks.
+- id: R28
+  name: Capital formation and depreciation
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Construction, installation, commissioning, and separate wear, damage, backlog, obsolescence, stranding
+    and destruction.
+- id: R29
+  name: Ownership versus control
+  series: R
+  owner: OS-LEDGER
+  layer: 0
+  summary: Shares, contracts and legal structures, with ownership summing to the recognized total.
+- id: R30
+  name: Grid failure cascades
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: Capacity violations and dependencies that isolate demand and interrupt hospitals, industry, finance and
+    communications.
+- id: E27
+  name: Market clearing
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Deterministic, damped, with rationing and unsold inventory when markets fail.
+- id: E28
+  name: Money regimes
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Creation and destruction only through modeled issuance, lending and repayment.
+- id: E29
+  name: Bank balance sheets
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Assets equal liabilities plus equity, with losses spreading through counterparties.
+- id: E30
+  name: Government finance
+  series: E
+  owner: OS-POLITY
+  layer: 3
+  summary: Budget identity, creditor claims, recorded arrears and defaults.
+- id: E31
+  name: Inflation from a basket
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Derived from modeled prices and weights, never a modifier.
+- id: E32
+  name: Foreign exchange regimes
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Pegs, managed floats, market and commodity-backed systems with balanced currency ledgers.
+- id: E33
+  name: Economic aggregation
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Value added without double-counting intermediate goods.
+- id: E34
+  name: Informal-economy accounting
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Subsistence and barter in material balances, with gaps between reported and true figures.
+- id: E35
+  name: Crisis propagation
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Through input-output links, inventories, transport, banks, debt, employment, demand and legitimacy.
+- id: K17
+  name: Four knowledge concepts
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Scientific knowledge, technical knowledge, adoption, mastery.
+- id: K18
+  name: Discovery hazard
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Deterministic hazard model from specialization, institutions, materials, contact and need.
+- id: K19
+  name: Mastery
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Accumulated practice that can be lost with people and institutions.
+- id: K20
+  name: Misinformation and scientific uncertainty
+  series: K
+  owner: OS-INFO
+  layer: 3
+  summary: Wrong theories, misread evidence and fabrications, tested and corrected by institutions.
+- id: K21
+  name: Parallel invention provenance
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Independent discoveries keep their own first-discovery claims.
+- id: K22
+  name: Institutional research production
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Organised research originates from institutions, their personnel, infrastructure, resources and activities.
+    Pre-institutional discovery continues through observation, craft practice, experimentation and accumulated experience.
+    Extends K2, K5, K11 and K18.
+  declared_links:
+  - K11
+  - K18
+  - K2
+  - K5
+- id: K23
+  name: Research domain differentiation
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Output is classified by knowledge domain, subtree, research activity and institutional competence. Output
+    in unrelated disciplines is not freely interchangeable. Transferable knowledge and interdisciplinary contributions
+    remain possible.
+- id: K24
+  name: Institutional capability prerequisites
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Technologies and subtrees may require specific institutional competence, qualified personnel, organisational
+    capacity, research infrastructure and accumulated expertise. Scientific accessibility does not grant research
+    eligibility. Requirements are functional, not institution-name-specific. Extends K1, K4 and K18.
+  declared_links:
+  - K1
+  - K18
+  - K4
+- id: K25
+  name: Progressive scientific specialisation
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Rising scientific complexity creates demand for specialised disciplines, departments, laboratories, programmes
+    and independent research organisations. Generalist institutions keep historically appropriate capabilities and
+    may develop specialised internal structures.
+- id: K26
+  name: Research competence and maturity
+  series: K
+  owner: OS-INST
+  layer: 3
+  summary: Competence accumulates through research activity, education, mentorship, experimentation, equipment use
+    and organisational continuity. New institutions inherit only capabilities actually transferred to them. Competence
+    decays through inactivity, disruption, obsolescence or loss of personnel.
+- id: K27
+  name: Research portfolio and allocation
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Institutions allocate personnel, funding, equipment, compute, facilities and other inputs among eligible
+    programmes by mandate, objectives, incentives and authority. Commitments cannot be duplicated across simultaneous
+    programmes.
+- id: K28
+  name: Interdisciplinary research
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Programmes can combine competence from several domains and institutions. Contributions depend on expertise,
+    knowledge compatibility, coordination capacity, information access and contracts.
+- id: K29
+  name: Research activity differentiation
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Basic research, applied research and engineering development have distinct objectives, inputs, institutional
+    requirements and outputs. Discoveries, technical designs, validated prototypes, adoption and mastery are tracked
+    separately.
+- id: K30
+  name: Scientific labour mobility and succession
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Researchers migrate, retire, die, change employers, train successors and found scientific schools. Skilled
+    labour and mentorship networks shape competence, continuity, diffusion and brain drain. Extends K12, K19, P4
+    and S5.
+  declared_links:
+  - K12
+  - K19
+  - P4
+  - S5
+- id: K31
+  name: Scientific freedom and research restrictions
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Laws, religious authority, political interference, institutional governance, commercial secrecy, censorship
+    and security restrictions affect eligibility, priorities, publication and collaboration, with context-specific
+    consequences, not universal penalties.
+- id: K32
+  name: Research infrastructure dependencies
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Laboratories, libraries, archives, observatories, experimental facilities, computing systems and testing
+    infrastructure deliver research capability, subject to operating capacity, maintenance, energy, materials, skilled
+    labour and technical compatibility.
+- id: K33
+  name: Scientific collaboration and competition
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Institutions pursue discoveries alone or jointly. Parallel discoveries keep separate provenance. Collaboration
+    creates attributable contributions, and competition shapes incentives, recruitment, secrecy, intellectual property
+    and priorities. Extends K7, K21 and I7.
+  declared_links:
+  - I7
+  - K21
+  - K7
+- id: K34
+  name: Institutional knowledge continuity and loss
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Dissolution, war, persecution, migration, destruction and decline can reduce research capacity, competence,
+    technical knowledge or mastery independently. Archives, distributed expertise and successor institutions can
+    preserve or recover part of the loss.
+- id: K35
+  name: Scientific discovery and institutional feedback
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Discoveries open new institutional mandates, specialised capabilities and subtrees. Institutional development
+    then widens eligible research and modifies the discovery hazard.
+- id: K36
+  name: Research contribution and provenance accounting
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Discoveries and programmes keep attributable contributions from researchers, institutions, sponsors and
+    collaborators. Financial contribution, scientific contribution, intellectual property ownership and operational
+    control stay distinct. Shared achievements reconcile without duplicated scoring credit.
+- id: K37
+  name: Research aggregation and explainability
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Aggregate research indicators derive from institution-specific and domain-specific activity, and distinguish
+    available capacity, committed capacity, realised output, annual rates, accumulated progress and uncertainty.
+    Aggregate output is not spendable research points.
+- id: K38
+  name: Research resolution and conservation
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Invention, diffusion and competence updates follow the knowledge-system cadence (turn end). Relevant
+    phase events change effective resources and institutional conditions through phase deltas. Calculations use
+    elapsed time, deterministic resolution and seeded discovery streams. Funding, personnel, materials, equipment
+    and compute reconcile with their authoritative systems.
+- id: K39
+  name: Research scalability
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Ordinary researchers are population and occupational aggregates. Notable scientists are characters. Institutions
+    have persistent identities, while departments and programmes are aggregated records unless significance requires
+    more. Resolution evaluates eligible active programmes and their dependencies, not every institution-technology
+    pair.
+- id: S27
+  name: Authority requirement
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Every order needs legal authority and enforcement capacity. Illegal attempts are explicit political acts.
+- id: S28
+  name: Administrative capacity
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Competence x staffing x reach x resources x legitimacy, minus corruption and disruption.
+- id: S29
+  name: Emergent government forms
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Names derived from institutional configuration.
+- id: S30
+  name: Legitimacy by group
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Aggregate with visible constituents.
+- id: S31
+  name: Institutional continuity
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Institutions outlive officeholders and dynasties.
+- id: S32
+  name: Revolution conditions
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Grievance, organization, leadership, resources, support, security loyalty, response, triggers, outside
+    help.
+- id: S33
+  name: Fragmentation allocation
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: Explicit division of territory, people, assets, liabilities and claims.
+- id: N15
+  name: Knowledge states and uncertainty
+  series: N
+  owner: OS-INFO
+  layer: 3
+  summary: Objective state, entity knowledge and player-visible knowledge as separate records.
+- id: N16
+  name: Collapse taxonomy and recovery
+  series: N
+  owner: OS-ENTITY
+  layer: 4
+  summary: Crisis, collapse, fragmentation, transformation, extinction, with recovery needing surviving capability.
+- id: N17
+  name: Civilization lineage network
+  series: N
+  owner: OS-OBS
+  layer: 5
+  summary: Branching ancestry through splits and mergers.
+- id: N18
+  name: Player career record
+  series: N
+  owner: OS-OBS
+  layer: 5
+  summary: Entities led, dates and outcomes, separate from scoring.
+- id: D19
+  name: Treaty architecture
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Parties, obligations, ratification, duration, enforcement, remedies, secrecy.
+- id: D20
+  name: Trust from memory
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Remembered fulfilled and broken commitments, differing by institution and leader.
+- id: D21
+  name: Intelligence estimates
+  series: D
+  owner: OS-INFO
+  layer: 3
+  summary: Ranges, confidence, recency, contradictory assessments.
+- id: M22
+  name: Military hierarchy
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Personnel to strategic command with era-specific forms.
+- id: M23
+  name: Command delay
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Orders in transit, outdated orders, electronic vulnerability.
+- id: M24
+  name: Morale and cohesion
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Casualties, supply, leadership, fatigue, experience, ideology.
+- id: M25
+  name: Occupation versus control
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Needs security forces, cooperation and reach.
+- id: M26
+  name: War termination
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Many end paths, no universal warscore.
+- id: M27
+  name: Postwar accounting
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Casualties, veterans, refugees, damage, debts, transfers, grievances, reconciled with ledgers.
+- id: M28
+  name: Military AI planning
+  series: M
+  owner: OS-AI
+  layer: cross-cutting
+  summary: Objectives to feasible operations from its own intelligence.
+- id: X10
+  name: Event identity and causal attribution
+  series: X
+  owner: OS-EVENT
+  layer: 0
+  summary: Permanent IDs, direct, contributing and background causes.
+- id: X11
+  name: Counterfactuals
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Exact reruns or labeled approximations.
+- id: X12
+  name: Historical replay
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Same state hashes as the original run.
+- id: X13
+  name: Uncertainty presentation
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Estimate, interval, date, source, reliability.
+- id: X14
+  name: Forecasting
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Central, optimistic and adverse scenarios.
+- id: X15
+  name: Narrative selection and explainability checks
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Importance ranking, explanations verified against recorded data.
+- id: A7
+  name: Precision classes
+  series: A
+  owner: OS-TIME
+  layer: 0
+  summary: Exact, fixed-point, statistical, forecast.
+- id: A8
+  name: Adaptive resolution
+  series: A
+  owner: OS-TIME
+  layer: 0
+  summary: Full detail for important actors, integrated rates for quiet regions.
+- id: A9
+  name: Deterministic parallelism
+  series: A
+  owner: OS-TIME
+  layer: 0
+  summary: Disjoint partitions with stable aggregation.
+- id: A10
+  name: Save persistence and migration
+  series: A
+  owner: OS-IDENT
+  layer: 0
+  summary: Versioned, hashed, deterministic migrations.
+- id: A11
+  name: Invariant assertions
+  series: A
+  owner: OS-LEDGER
+  layer: 0
+  summary: Conservation and integrity checks with reproducible diagnostics.
+- id: A12
+  name: Benchmark worlds
+  series: A
+  owner: OS-OBS
+  layer: 5
+  summary: Eight standard scenarios on reference hardware.
+- id: A13
+  name: AI horizons, objectives and coordination
+  series: A
+  owner: OS-AI
+  layer: cross-cutting
+  summary: Hierarchical planning, multi-objective utility, institutional coordination that can fail.
+- id: U1
+  name: Navigation state
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Selection, focus, layers, date, dossier, filters and comparison preserved across levels.
+- id: U2
+  name: Shared entity selection
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: One service, many workspace views.
+- id: U3
+  name: Dossiers
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Universal sections plus domain modules.
+- id: U4
+  name: Map layer combinations
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Semantic categories with visible priority.
+- id: U5
+  name: Semantic zoom
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: More detail without inventing entities.
+- id: U6
+  name: Data provenance
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Every statistic links to variable, owner, method, inputs and uncertainty.
+- id: U7
+  name: Action states and permissions
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Inspect, plan, issue, resolve, with explained blockers.
+- id: U8
+  name: Alert priority
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Critical, important, informational.
+- id: U9
+  name: Accessibility
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: Scaling, contrast, color-independent symbols, keyboard use, search.
+- id: U10
+  name: Screen scaling
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: 1920 x 1080 full dense interface, collapsing panels below.
+- id: K40
+  name: Knowledge artifact entity
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: 'Generalised identity for every artifact class, with sparse domain components, permanent IDs and provenance.
+    Significant works individual, ordinary production aggregated. Extends K5, K21. Owner: knowledge system.'
+  declared_links:
+  - K21
+  - K5
+- id: K41
+  name: Claim-level knowledge
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Typed claims, findings, methods and datasets inside artifacts, with relationships (supports, contradicts,
+    replicates, revises, supersedes, translates, summarises, extends, derives from, corroborates, depends on, applies,
+    refutes) and epistemic categories. Used only where it matters.
+- id: K42
+  name: Content, copies and editions
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Content separate from physical and digital carriers, editions, translations, revisions and locations;
+    non-rivalrous content, rivalrous media. Copies are DS-05 assets owned by resource accounting.
+- id: K43
+  name: Custody, ownership, rights and access
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Twelve distinct properties at individual, institution, organisation, government, population-group, civilisation
+    and international levels, with access granularity (metadata to source code). Extends E22, S27.
+  declared_links:
+  - E22
+  - S27
+- id: K44
+  name: Knowledge lifecycle
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: The fourteen states and their transitions, bottlenecks, throughput, costs, delays and failures, non-linear
+    and domain-specific. Extends K3, K4, K17.
+  declared_links:
+  - K17
+  - K3
+  - K4
+- id: K45
+  name: Acquisition channels
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Acquisition through existing economic, legal, diplomatic, institutional, military, migration, intelligence
+    and information systems; method sets cost, legality, secrecy, provenance, delay and risk.
+- id: K46
+  name: Transmission media
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Era-independent media with latency, reach, bandwidth, reproduction cost, infrastructure, energy, reliability,
+    preservation, censorship, language, security and interoperability. Extends P18, E13, S20.
+  declared_links:
+  - E13
+  - P18
+  - S20
+- id: K47
+  name: Open-network publication
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Publication scopes reachable by all connected, permitted, capable actors, resolved by scopes and lazy
+    queries.
+- id: K48
+  name: Absorptive capacity
+  series: K
+  owner: OS-INST
+  layer: 3
+  summary: Discipline-specific, time-based absorption with decay through turnover, collapse and disuse. Extends
+    K4, K26, K30.
+  declared_links:
+  - K26
+  - K30
+  - K4
+- id: K49
+  name: Forms of knowledge
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Codified, tacit, institutional, embodied, distributed, operational and dormant knowledge, with tacit
+    transfer through apprenticeship, education, migration, employment, joint research and assistance.
+- id: K50
+  name: Operational capability and deployment
+  series: K
+  owner: OS-PROD
+  layer: 2
+  summary: 'Per actor, region, institution and industry: known, understood, demonstrated, prototype, limited reproduction,
+    commercially feasible, deployed, adopted, unavailable, obsolete, known but no longer reproducible. Deployment
+    consumes real resources through production chains. Extends K29, R21, R27.'
+  declared_links:
+  - K29
+  - R21
+  - R27
+- id: K51
+  name: Capability regression and restoration
+  series: K
+  owner: OS-PROD
+  layer: 2
+  summary: Regression from decayed dependencies with documentation surviving; restoration from surviving knowledge,
+    expertise, infrastructure and relationships. Extends K10, K34.
+  declared_links:
+  - K10
+  - K34
+- id: K52
+  name: Institutional knowledge collections
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Owned, custodial, licensed, shared, restricted, untranslated and damaged holdings; collection capabilities
+    (cataloguing, translation, authentication, retrieval, dissemination); survival through succession and collapse.
+    Extends I1, I15, K32.
+  declared_links:
+  - I1
+  - I15
+  - K32
+- id: K53
+  name: Knowledge synthesis
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Universal, recursive research capability producing new attributable artifacts; feasibility and quality
+    from coverage, independence, reliability, competence and hard prerequisites, never book counts.
+- id: K54
+  name: Source independence and provenance
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Copies, translations, summaries, repetition and circular citation never count as independent evidence;
+    sparse dependency structures.
+- id: K55
+  name: Theories and hypotheses
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Bounded hypothesis spaces over accessible evidence, with no access to hidden simulation variables; theories
+    can be correct, approximate, conditional, incomplete, wrong or superseded. Extends K20.
+  declared_links:
+  - K20
+- id: K56
+  name: Peer review, publication, replication and consensus
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Historically situated, fallible scrutiny; replication distinct from acceptance; consensus distinct from
+    political, public, religious and commercial acceptance.
+- id: K57
+  name: Grand Intellectual Works
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Classification of exceptional works; competing, superseding, never scripted, never objective truth.
+- id: K58
+  name: Intellectual first-mover, diffusion and obsolescence
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Prestige, talent and influence with diffusion, saturation, duplication limits and obsolescence. Extends
+    K7.
+  declared_links:
+  - K7
+- id: K59
+  name: Intellectual diplomacy and knowledge agreements
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Access, exchange, joint research, licensing, translation, confidentiality, export restrictions, consortia,
+    sanctions, assistance and repatriation, distinct from training or industrial transfer. Extends D19, I16.
+  declared_links:
+  - D19
+  - I16
+- id: K60
+  name: Intellectual genealogy and legacy
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Ancestry and influence of contributions across civilisations, feeding legacy and significance without
+    rewarding volume.
+- id: K61
+  name: Knowledge benefit rule
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Benefits only through authorised systems with declared owner, scope, conditions and duration; no title
+    bonuses, no duplicated benefits.
+- id: K62
+  name: Comparative disciplinary research
+  series: K
+  owner: OS-KNOW
+  layer: 3
+  summary: Constitutional, sociological, demographic, geological, environmental, economic, financial and other disciplines
+    on the shared architecture; findings never create resources or change natural laws.
+- id: K63
+  name: Separated information properties
+  series: K
+  owner: OS-INFO
+  layer: 3
+  summary: 'For any information item: objective truth value (event store, never actor-readable), actual evidence,
+    evidentiary strength, perceived credibility per actor, belief per actor or group, institutional acceptance,
+    public acceptance and strategic utility, each a separate quantity. Extends K41, K56, S20, A8. Owner: knowledge
+    state, with acceptance owned by institutions and public opinion.'
+  declared_links:
+  - A8
+  - K41
+  - K56
+  - S20
+- id: K64
+  name: Credibility assessment
+  series: K
+  owner: OS-INFO
+  layer: 3
+  summary: Actors judge credibility from perceived evidence, source reputation, corroboration they can see, prior
+    beliefs and incentives, never from objective truth; perceived evidence can differ from actual evidence; repetition
+    and derivative copies are not corroboration (K54); credibility is not correctness. Extends K20, K54, D21.
+  declared_links:
+  - D21
+  - K20
+  - K54
+- id: K65
+  name: Consequence persistence
+  series: K
+  owner: OS-EVENT
+  layer: 0
+  summary: Decisions, transactions, treaties, purges, panics, market moves and wars taken on accepted information
+    stay in the world when the information is later corrected or discredited; correction is a new event with its
+    own consequences (credibility loss, grievances, claims), not a reversal. Extends X10, X24.
+  declared_links:
+  - X10
+  - X24
+- id: D22
+  name: Information leverage
+  series: D
+  owner: OS-DIPLO
+  layer: 4
+  summary: Possessing, threatening to disclose, disclosing, circulating or suppressing information as leverage;
+    value comes from the target's expected consequences (its legitimacy, market, alliance or personal exposure),
+    not from truth; leverage is target-specific and issue-specific and decays or flips through counter-evidence,
+    verification, pre-emptive disclosure, changed circumstances and counter-leverage.
+  declared_links:
+  - D1
+  - D11
+  - S20
+  - S9
+- id: D23
+  name: Belief-based decisions and anticipation
+  series: D
+  owner: OS-AI
+  layer: cross-cutting
+  summary: AI and institutional decisions use accessible information, beliefs, expectations, incentives and estimates
+    of how other actors will respond to what those actors are believed to believe; no access to objective truth.
+    Extends M28, D21, A8.
+  declared_links:
+  - A8
+  - D21
+  - M28
+- id: X16
+  name: Historiography layers
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Objective, observed, recorded, interpreted and published history on the knowledge architecture, keeping
+    distinct what occurred, what contemporaries believed, what later scholars concluded and what consequences followed
+    from those beliefs (K63, K65). Extends X1, X2, X10.
+  declared_links:
+  - K63
+  - K65
+  - X1
+  - X10
+  - X2
+- id: X17
+  name: Universal historical coverage and contextual significance
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Any meaningful entity, place, system or subject, including extinct and dissolved ones. Extends X15.
+  declared_links:
+  - X15
+- id: X18
+  name: Geographic and entity continuity
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Histories follow permanent identities across division, merger, transfer, occupation and renaming without
+    duplicating events.
+- id: X19
+  name: Historical memory forms
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Oral tradition to digital archives, emerging from capability.
+- id: X20
+  name: Historians, authors and perspectives
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Situated, grounded bias; competing accounts; characters and institutions as authors. Extends S5, S20.
+  declared_links:
+  - S20
+  - S5
+- id: X21
+  name: Editions, revisionism and time distinctions
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Dated, preserved editions; eight distinct times; no future knowledge in past works or decisions.
+- id: X22
+  name: Archives, evidence and archaeology
+  series: X
+  owner: OS-KNOW
+  layer: 3
+  summary: Loss and recovery of evidence; archaeology derived only from real surviving evidence. Extends X9.
+  declared_links:
+  - X9
+- id: X23
+  name: Natural and physical history
+  series: X
+  owner: OS-EVENT
+  layer: 0
+  summary: Independent of political ownership; reconstructable by later science.
+- id: X24
+  name: Historical memory as a gameplay input
+  series: X
+  owner: OS-CULTURE
+  layer: 3
+  summary: Legitimacy, identity, claims, grievances and propaganda only through authorised systems.
+- id: X25
+  name: Publication rendering architecture
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Deterministic offline baseline renderer; optional replaceable language-model renderers with claim validation
+    and fallback; versioned publication metadata.
+- id: X26
+  name: Historical reader and intellectual library
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Reading, navigation, search, edition comparison, evidence and dependency inspection, uncertainty indicators,
+    delegation-friendly collection views.
+- id: X27
+  name: Export
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: Open formats without DRM, respecting access modes; omniscient export only in debug.
+- id: X28
+  name: FTL horizon value
+  series: X
+  owner: OS-PROJ
+  layer: 4
+  summary: 'The real benefits of FTL lie beyond Earth and after the game ends, so no simulated system can produce
+    them. They are represented by one hard-coded, declared incentive: the declared exception to Universal Emergent
+    Causality. Every actor, player and AI alike, knows it. It enters only declared valuation paths (AI and institutional
+    utility for FTL-related research, institutions, funding and sponsorshi'
+  declared_links:
+  - K50
+  - X4
+- id: A14
+  name: Information access modes
+  series: A
+  owner: OS-OBS
+  layer: 5
+  summary: Normal, authorised perspective, debug tag-switch and omniscient developer modes, with no leakage into
+    actor knowledge and no effect on state hashes.
+- id: A15
+  name: Knowledge and history storage scaling
+  series: A
+  owner: OS-KNOW
+  layer: 3
+  summary: Deduplicated content, shared scopes, sparse access and dependency graphs, lazy queries, candidate filtering,
+    event-driven invalidation and cached rendering.
+- id: U11
+  name: Knowledge and historiography interface integration
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: WS-E2 and WS-H2 extensions, WS-E2/V2, WS-H2/V1, DS-07 and dossier modules (Final Master Vision 9.11).
+  declared_links:
+  - E2
+- id: L1
+  name: Multidimensional political model
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Continuous, possibly contradictory dimensions of power distribution, rights, participation, centralisation,
+    coercion and ownership. Named forms (S29) are only derived labels. Replaces any government-type selection.
+  declared_links:
+  - S29
+- id: L2
+  name: Civilisational Governance Ledger
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Persistent record of executive acts, legislation, judicial precedents, political practices, social contracts,
+    institutional behaviour and crises across dynasties.
+- id: L3
+  name: Claim, law and practice
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: What a government claims, what its laws prescribe and how it behaves are tracked separately and all visible.
+- id: L4
+  name: Five-layer legal order
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Written law, interpretation, enforcement, public acceptance and precedent, each influencing the others.
+- id: L5
+  name: Precedent weight and constitutional inertia
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Weight grows with repetition, duration, enforcement, adoption, legitimacy, resistance overcome and significance,
+    turning repeated practice into convention.
+- id: L6
+  name: Codification event chain
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Conventions, councils, assemblies, decrees, settlements and peace treaties producing documentary forms
+    (Constitution, Imperial Charter, Sacred Legal Canon, Revolutionary Manifesto, Foundational Covenant, Customary
+    Law Compendium, Party Charter) available only where history supports them. Article-by-article negotiation, faction
+    concessions, imposition or abandonment.
+- id: L7
+  name: Governing documents as artifacts
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Readable text, amendments, provenance of every article, faction positions, interpretation, compliance
+    status and version history. Every substantive provision maps to an operative rule.
+- id: L8
+  name: Constitutional erosion and failure
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Exploited provisions, indefinite emergencies, hollowed elections, courts and legislatures while the text
+    survives.
+- id: L9
+  name: Rupture, inheritance and reinterpretation
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Revolution, conquest, collapse, reformation and fragmentation invalidate or reinterpret parts of the
+    order without erasing them. Successors can share a document and read it differently.
+- id: L10
+  name: Legal validity and revolution
+  series: L
+  owner: OS-POLITY
+  layer: 3
+  summary: Validity chains to a basic norm, and a revolution succeeds legally when the new order becomes effective
+    by and large (Kelsen). Validity and effectiveness are tracked separately.
+- id: I1
+  name: Institution entity model
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Identity, founding history, legal status, governance, leadership, members or shareholders, assets, capital,
+    revenue, liabilities, objectives, influence, technology, and optional jurisdiction, diplomacy and armed forces.
+- id: I2
+  name: Institution types
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Guilds, trading companies, chartered and joint-stock companies, listed and private firms, state enterprises,
+    academies, research associations, universities, conglomerates, professional federations, trade leagues, banks,
+    syndicates, multinationals, international organisations.
+- id: I3
+  name: Institutional lifecycle
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Formation, expansion, consolidation, fragmentation, merger, acquisition, nationalisation, privatisation,
+    listing, dissolution, transformation, all emergent.
+- id: I4
+  name: Separated power dimensions
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Ownership, legal authority, operational control, political influence, territorial administration and
+    effective sovereignty simulated independently.
+- id: I5
+  name: Company sovereignty
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Chartered companies with monopolies, private forces, territorial administration, taxation and treaty-making,
+    holding effective sovereignty without statehood.
+- id: I6
+  name: Institutional governance evolution
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Hereditary ownership, partnerships, shareholder assemblies, boards, cooperatives, state appointment,
+    councils, hybrids.
+- id: I7
+  name: Research institutions as actors
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Originate discoveries, own IP, set standards, steer industry, and in late eras rival states in compute,
+    AI, finance and strategic technology. Internal research structure and competence in I11 to I18 and K22 to K39.
+  declared_links:
+  - I11
+  - I12
+  - I13
+  - I14
+  - I15
+  - I16
+  - I17
+  - I18
+  - K22
+  - K23
+  - K24
+  - K25
+  - K26
+  - K27
+  - K28
+  - K29
+  - K30
+  - K31
+  - K32
+  - K33
+  - K34
+  - K35
+  - K36
+  - K37
+  - K38
+  - K39
+- id: I8
+  name: Regulatory capture and political finance
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Capturing regulators, funding movements, dominating supply chains, becoming indispensable.
+- id: I9
+  name: Institutional memory and agency
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Persistent, independently deciding actors with competing interests.
+- id: I10
+  name: Charters in legal memory
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Charters, monopolies, autonomy, nationalisation precedents and public-private conflicts written into
+    the Governance Ledger (L2).
+  declared_links:
+  - L2
+- id: I11
+  name: Internal institutional hierarchy
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Institutions may contain departments, faculties, laboratories, programmes, branches and subsidiaries,
+    each with mandates, personnel, budgets, capabilities and reporting lines. Separate legal identity only where
+    appropriate.
+- id: I12
+  name: Institutional research reform
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Institutions change research mandates, governance, structure, competence and specialisation through reforms
+    that need authority, resources, personnel, prerequisites and implementation time, and may meet institutional
+    or political resistance.
+- id: I13
+  name: Research institution formation
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: New research organisations and units emerge through public founding, private initiative, scholarly association,
+    religious patronage, corporate investment, fragmentation or joint sponsorship.
+- id: I14
+  name: Institutional research autonomy
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Research institutions choose programmes and allocation within their governance, contracts, legal authority
+    and funding. Government influence does not mean unrestricted operational control.
+- id: I15
+  name: Institutional competence transfer
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Mergers, acquisitions, fragmentation, nationalisation, privatisation and restructuring transfer actual
+    personnel, assets, records, intellectual property and relationships. Capabilities are never copied or duplicated
+    automatically.
+- id: I16
+  name: Institutional research networks
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Collaboration, mentorship, funding, licensing, shared infrastructure and knowledge exchange, across borders
+    where legal, diplomatic and security constraints allow.
+- id: I17
+  name: Institutional concentration and resilience
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Concentrated and distributed research ecosystems differ in coordination costs, economies of scale, dependencies,
+    vulnerabilities and recovery, emerging from their actual structures and resources.
+- id: I18
+  name: Institutional scientific identity and memory
+  series: I
+  owner: OS-INST
+  layer: 3
+  summary: Reputations, traditions, scientific schools, discoveries, internal precedents and experience persist
+    through leadership changes and can be inherited, transformed or lost through succession.
+- id: M42
+  name: Command delegation
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Direct, Guided and Autonomous modes that redistribute decisions, information, authorisation time and
+    commander-independence risk, never an efficiency bonus. Personal command depends on era and institutions.
+- id: M43
+  name: Conditional military interruptions
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Campaigns advance under standing orders until a strategically significant event needs authorisation (rules
+    to be specified and tested). Extends T10 and T13.
+  declared_links:
+  - T10
+  - T13
+- id: M44
+  name: Event-driven military time
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Operational, engagement and consequence events resolve at their own timestamps inside the strategic phase.
+    Extends T9.
+  declared_links:
+  - T9
+- id: M29
+  name: Strategic command and war planning
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Connect political objectives to operations
+  declared_links:
+  - M28
+  - M9
+- id: M30
+  name: Military institutions and command authority
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Hierarchy, staff capacity, command friction
+  declared_links:
+  - M22
+  - M23
+- id: M31
+  name: Operational campaign engine
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Movement, reserves, objectives, engagements, campaign plans
+  declared_links:
+  - M2
+  - M4
+- id: M32
+  name: Military intelligence and reconnaissance
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Observation into uncertain operational knowledge
+  declared_links:
+  - D21
+- id: M33
+  name: Military personnel lifecycle
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Recruitment by demography, training, casualties, veterans, demobilisation
+  declared_links:
+  - M1
+  - M27
+- id: M34
+  name: Equipment lifecycle and readiness
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Condition, repair, replacement, obsolescence
+  declared_links:
+  - M10
+  - M17
+- id: M35
+  name: Military engineering
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Fortifications, bridges, fieldworks, infrastructure restoration
+  declared_links:
+  - M3
+  - M7
+- id: M36
+  name: Coalition and allied command
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Forces under differing political and military authorities
+  declared_links:
+  - M19
+- id: M37
+  name: War termination and peace implementation
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Negotiated settlements, ceasefires, enforcement, reparations
+  declared_links:
+  - D10
+  - M26
+- id: M38
+  name: Military political economy
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: War finance, industrial conversion, procurement, fiscal stress
+  declared_links:
+  - E30
+  - M17
+- id: M39
+  name: Civil-military relations
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Loyalty, political interference, coups, institutional conflict
+  declared_links:
+  - M16
+- id: M40
+  name: Strategic deterrence and escalation
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Coercion, credibility, retaliation, escalation
+  declared_links:
+  - M11
+  - M15
+- id: M41
+  name: Military learning and institutional memory
+  series: M
+  owner: OS-MIL
+  layer: 4
+  summary: Lessons, doctrine revision, experience transfer, decay
+  declared_links:
+  - M13
+- id: SP2
+  name: Satellite services
+  series: SP
+  owner: OS-TRANSPORT
+  layer: 2
+  summary: Detailed in Deep Dives section 5.
+- id: SP3
+  name: Debris and space law
+  series: SP
+  owner: OS-HAZARD
+  layer: 1
+  summary: Detailed in Deep Dives section 5.
+- id: SP4
+  name: Planetary defense
+  series: SP
+  owner: OS-PROJ
+  layer: 4
+  summary: Detailed in Deep Dives section 5.
+- id: SP5
+  name: Space-derived Earth economy
+  series: SP
+  owner: OS-MARKET
+  layer: 3
+  summary: Detailed in Deep Dives section 5.

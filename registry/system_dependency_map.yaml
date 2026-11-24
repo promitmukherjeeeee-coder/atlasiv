@@ -1,0 +1,386 @@
+registry: ATLASIV System Dependency Map
+version: 0.1.0-draft
+date: '2026-11-24'
+status: Draft of engineering document D at system level. Mechanic-level declarations come from each 21-field spec
+  in Pass 2b.
+implicit: Every system depends on Layer 0 (OS-TIME, OS-IDENT, OS-LEDGER, OS-EVENT); OS-OBS and OS-UI read all systems
+  and write none.
+curated_flows:
+- from: OS-CLIMATE
+  to: OS-PROD
+  carries: drought lowers yields
+  source: Mechanics O1
+- from: OS-PROD
+  to: OS-POP
+  carries: food shortfall drives migration
+  source: Mechanics O1
+- from: OS-POP
+  to: OS-POLITY
+  carries: migration and hardship raise unrest
+  source: Mechanics O1
+- from: OS-POLITY
+  to: OS-MIL
+  carries: unrest and conflict
+  source: Mechanics O1
+- from: OS-MIL
+  to: OS-ENTITY
+  carries: conflict drives fission
+  source: Mechanics O1
+- from: OS-PROD
+  to: OS-CLIMATE
+  carries: emissions
+  source: Mechanics O2
+- from: OS-CLIMATE
+  to: OS-HAZARD
+  carries: warming raises disaster rates
+  source: Mechanics O2
+- from: OS-HAZARD
+  to: OS-MARKET
+  carries: disaster costs
+  source: Mechanics O2
+- from: OS-MARKET
+  to: OS-POLITY
+  carries: costs push energy policy
+  source: Mechanics O2
+- from: OS-SETTLE
+  to: OS-ECOLOGY
+  carries: expansion removes habitat
+  source: Mechanics O3
+- from: OS-ECOLOGY
+  to: OS-POP
+  carries: zoonotic disease risk
+  source: Mechanics O3
+- from: OS-KNOW
+  to: OS-INST
+  carries: technology to education
+  source: Mechanics O4
+- from: OS-INST
+  to: OS-SETTLE
+  carries: education to urbanisation
+  source: Mechanics O4
+- from: OS-SETTLE
+  to: OS-POP
+  carries: urbanisation to fertility
+  source: Mechanics O4
+- from: OS-MARKET
+  to: OS-INFO
+  carries: trade routes create contact
+  source: Mechanics O5
+- from: OS-TRANSPORT
+  to: OS-POP
+  carries: routes spread disease
+  source: Mechanics O5
+- from: OS-MARKET
+  to: OS-POLITY
+  carries: credit crises topple governments
+  source: Mechanics O6
+- from: OS-HYDRO
+  to: OS-PROD
+  carries: upstream control changes harvests
+  source: Mechanics O7
+- from: OS-HYDRO
+  to: OS-DIPLO
+  carries: water treaties and disputes
+  source: Mechanics O7
+- from: OS-TRANSPORT
+  to: OS-CULTURE
+  carries: information technology shapes polarisation
+  source: Mechanics O8
+- from: OS-CULTURE
+  to: OS-POLITY
+  carries: opinion shapes legitimacy and faction strength
+  source: Mechanics O8
+- from: OS-TRANSPORT
+  to: OS-POLITY
+  carries: message speed sets administrative reach
+  source: Mechanics O9
+- from: OS-POLITY
+  to: OS-ENTITY
+  carries: overstretch drives fission
+  source: Mechanics O9
+- from: OS-MIL
+  to: OS-PROD
+  carries: war pulls industrial investment
+  source: Mechanics O10
+- from: OS-MIL
+  to: OS-KNOW
+  carries: war speeds research and diffusion
+  source: Mechanics O10
+- from: OS-DEPOSIT
+  to: OS-PROD
+  carries: discoveries open processing chains
+  source: Mechanics O11
+- from: OS-PROD
+  to: OS-MARKET
+  carries: new industries and rents
+  source: Mechanics O11
+- from: OS-MARKET
+  to: OS-DIPLO
+  carries: monopolies provoke sanctions
+  source: Mechanics O11
+- from: OS-CULTURE
+  to: OS-ENTITY
+  carries: cultural pull drives assimilation
+  source: Mechanics O12
+- from: OS-ENTITY
+  to: OS-CULTURE
+  carries: absorbed traits blend
+  source: Mechanics O12
+- from: OS-CLIMATE
+  to: OS-TERRAIN
+  carries: sea level changes coasts
+  source: Mechanics O13
+- from: OS-TERRAIN
+  to: OS-POP
+  carries: flooding forces migration
+  source: Mechanics O13
+- from: OS-PROD
+  to: OS-DIPLO
+  carries: energy dependence shapes alliances
+  source: Mechanics O14
+- from: OS-DIPLO
+  to: OS-MIL
+  carries: alliances and conflict
+  source: Mechanics O14
+- from: OS-KNOW
+  to: OS-PROD
+  carries: automation raises productivity
+  source: Mechanics O15
+- from: OS-PROD
+  to: OS-POP
+  carries: jobs shift with productivity
+  source: Mechanics O15
+- from: OS-PROD
+  to: OS-MARKET
+  carries: grid failure interrupts finance
+  source: Mechanics O16
+- from: OS-PROD
+  to: OS-POLITY
+  carries: blackouts hit public order
+  source: Mechanics O16
+- from: OS-POP
+  to: OS-KNOW
+  carries: educated and specialised labour
+  source: Mechanics S research matrix
+- from: OS-MARKET
+  to: OS-KNOW
+  carries: funding, capital, wages
+  source: Mechanics S research matrix
+- from: OS-PROD
+  to: OS-KNOW
+  carries: materials, energy, operating capacity
+  source: Mechanics S research matrix
+- from: OS-TRANSPORT
+  to: OS-KNOW
+  carries: networks and compute infrastructure
+  source: Mechanics S research matrix
+- from: OS-INST
+  to: OS-KNOW
+  carries: governance, competence, organisation
+  source: Mechanics S research matrix
+- from: OS-POLITY
+  to: OS-KNOW
+  carries: laws, funding, permissions, restrictions
+  source: Mechanics S research matrix
+- from: OS-CHAR
+  to: OS-KNOW
+  carries: leadership, expertise, mentorship
+  source: Mechanics S research matrix
+- from: OS-DIPLO
+  to: OS-KNOW
+  carries: collaboration, treaties, restrictions, acquired knowledge
+  source: Mechanics S research matrix
+- from: OS-MIL
+  to: OS-KNOW
+  carries: research demand, funding
+  source: Mechanics S research matrix
+- from: OS-EVENT
+  to: OS-KNOW
+  carries: prior discoveries, institutional lineage
+  source: Mechanics S research matrix
+- from: OS-PROJ
+  to: OS-KNOW
+  carries: objectives, pooled resources
+  source: Mechanics S research matrix
+- from: OS-EVENT
+  to: OS-INFO
+  carries: observation creates actor knowledge
+  source: Mechanics Q dependencies
+- from: OS-INFO
+  to: OS-KNOW
+  carries: observations recorded as artifacts
+  source: Mechanics Q dependencies
+- from: OS-KNOW
+  to: OS-INFO
+  carries: access and absorption change what actors know
+  source: Mechanics Q dependencies
+- from: OS-INST
+  to: OS-PROD
+  carries: competence enables capability transitions
+  source: Mechanics Q dependencies
+- from: OS-PROD
+  to: OS-MARKET
+  carries: deployment raises productivity and taxes
+  source: Mechanics Q dependencies
+- from: OS-MARKET
+  to: OS-KNOW
+  carries: tax and funding return to research
+  source: Mechanics Q dependencies
+- from: OS-CULTURE
+  to: OS-POLITY
+  carries: historical memory feeds legitimacy and claims (X24)
+  source: Mechanics Q dependencies
+- from: OS-INFO
+  to: OS-AI
+  carries: beliefs and expectations drive decisions (D23)
+  source: Mechanics Q truth and belief
+- from: OS-AI
+  to: OS-TIME
+  carries: orders enter the order queue
+  source: Pass 1 spec section 6
+- from: OS-TRANSPORT
+  to: OS-TIME
+  carries: leading-edge transport sets the turn step
+  source: Pass 1 spec section 4
+- from: OS-PROJ
+  to: OS-AI
+  carries: FTL horizon value enters valuations (X28)
+  source: Mechanics X28
+flows_from_declared_mechanic_links:
+- from: OS-AI
+  to: OS-MIL
+  link_count: 1
+- from: OS-CHAR
+  to: OS-KNOW
+  link_count: 1
+- from: OS-CHAR
+  to: OS-OBS
+  link_count: 1
+- from: OS-CULTURE
+  to: OS-DIPLO
+  link_count: 2
+- from: OS-CULTURE
+  to: OS-EVENT
+  link_count: 1
+- from: OS-CULTURE
+  to: OS-INFO
+  link_count: 1
+- from: OS-CULTURE
+  to: OS-KNOW
+  link_count: 1
+- from: OS-CULTURE
+  to: OS-OBS
+  link_count: 1
+- from: OS-DIPLO
+  to: OS-KNOW
+  link_count: 1
+- from: OS-DIPLO
+  to: OS-MIL
+  link_count: 1
+- from: OS-EVENT
+  to: OS-OBS
+  link_count: 2
+- from: OS-INFO
+  to: OS-AI
+  link_count: 1
+- from: OS-INFO
+  to: OS-DIPLO
+  link_count: 1
+- from: OS-INFO
+  to: OS-KNOW
+  link_count: 1
+- from: OS-INFO
+  to: OS-MIL
+  link_count: 1
+- from: OS-INFO
+  to: OS-OBS
+  link_count: 1
+- from: OS-INST
+  to: OS-KNOW
+  link_count: 13
+- from: OS-KNOW
+  to: OS-INFO
+  link_count: 3
+- from: OS-KNOW
+  to: OS-INST
+  link_count: 19
+- from: OS-KNOW
+  to: OS-PROD
+  link_count: 3
+- from: OS-MARKET
+  to: OS-KNOW
+  link_count: 3
+- from: OS-MARKET
+  to: OS-UI
+  link_count: 1
+- from: OS-POLITY
+  to: OS-INST
+  link_count: 1
+- from: OS-POLITY
+  to: OS-KNOW
+  link_count: 1
+- from: OS-POLITY
+  to: OS-MIL
+  link_count: 1
+- from: OS-POP
+  to: OS-KNOW
+  link_count: 1
+- from: OS-PROD
+  to: OS-KNOW
+  link_count: 1
+- from: OS-PROD
+  to: OS-PROJ
+  link_count: 1
+- from: OS-TIME
+  to: OS-AI
+  link_count: 1
+- from: OS-TIME
+  to: OS-INFO
+  link_count: 1
+- from: OS-TIME
+  to: OS-MIL
+  link_count: 3
+- from: OS-TRANSPORT
+  to: OS-KNOW
+  link_count: 2
+strongly_connected_components:
+- - OS-AI
+  - OS-CLIMATE
+  - OS-CULTURE
+  - OS-DIPLO
+  - OS-ECOLOGY
+  - OS-ENTITY
+  - OS-EVENT
+  - OS-HAZARD
+  - OS-INFO
+  - OS-INST
+  - OS-KNOW
+  - OS-MARKET
+  - OS-MIL
+  - OS-POLITY
+  - OS-POP
+  - OS-PROD
+  - OS-PROJ
+  - OS-SETTLE
+  - OS-TERRAIN
+  - OS-TIME
+coupled_core_excluding_lagged_edges:
+- - OS-CLIMATE
+  - OS-CULTURE
+  - OS-DIPLO
+  - OS-ECOLOGY
+  - OS-ENTITY
+  - OS-HAZARD
+  - OS-INFO
+  - OS-INST
+  - OS-KNOW
+  - OS-MARKET
+  - OS-MIL
+  - OS-POLITY
+  - OS-POP
+  - OS-PROD
+  - OS-PROJ
+  - OS-SETTLE
+  - OS-TERRAIN
+scc_note: Systems in one component form feedback loops. Pass 3 must give each loop an explicit solver contract or
+  a phase-lagged update with saturation and damping (Computational Doctrine; Pass 1 spec section 10).

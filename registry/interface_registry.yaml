@@ -1,0 +1,862 @@
+registry: ATLASIV Interface Architecture Registry
+version: 0.1.0-draft
+date: '2026-11-24'
+status: Draft. Authoritative once committed to the repository (Pass 2). Chart v3.4 is generated from this file.
+counts:
+  levels: 4
+  category_groups: 8
+  workspaces: 28
+  showcase_views: 10
+  dossier_types: 7
+  analysis_types: 6
+  global_systems: 5
+  analytical_patterns: 6
+  menu_items: 13
+id_convention:
+  level: LV1 to LV4
+  category_group: CG-A to CG-H
+  workspace: WS-[A-H][1-6]
+  showcase_view: WS-[A-H][1-6]/V[n]
+  dossier_type: DS-01 to DS-07
+  analysis_type: AN-01 to AN-06
+  global_system: GS-01 to GS-05
+  analytical_pattern: AP-01 to AP-06
+  cross_link: XL-0001 onward (allocated when each link is specified)
+  rule: Interface IDs never reuse mechanic codes; a bare ID such as E1 is always a mechanic.
+levels:
+- id: LV1
+  name: Living Survey Map
+  role: 'Locked core interface: world, regions, actors, conditions and actions'
+- id: LV2
+  name: Domain Workspaces
+  role: 28 primary interfaces for management, planning, operations and policy
+- id: LV3
+  name: Entity and System Dossiers
+  role: Detailed multi-aspect views of entities, organisations, places, systems, processes and knowledge artifacts
+- id: LV4
+  name: Analytical Investigations
+  role: 'Causal, comparative and historical analysis: causes, effects, scenarios, what-if, replay, forecast'
+navigation:
+- 'Contextual, not sequential: any level opens from the map, a workspace, a dossier or an analysis.'
+- Navigation preserves selected entity, geographic focus, layers, historical date, open dossier, workspace, filters
+  and comparison selection (U1).
+- One shared entity-selection service (GS-05, U2) lets every workspace render its own view of the same entity.
+category_groups:
+- id: CG-A
+  name: World, Identity and Development
+  workspaces:
+  - WS-A1
+  - WS-A2
+  - WS-A3
+- id: CG-B
+  name: Population and Society
+  workspaces:
+  - WS-B1
+  - WS-B2
+- id: CG-C
+  name: Government and Institutions
+  workspaces:
+  - WS-C1
+  - WS-C2
+  - WS-C3
+  - WS-C4
+- id: CG-D
+  name: Economy and Finance
+  workspaces:
+  - WS-D1
+  - WS-D2
+  - WS-D3
+  - WS-D4
+  - WS-D5
+  - WS-D6
+- id: CG-E
+  name: Technology and Industry
+  workspaces:
+  - WS-E1
+  - WS-E2
+  - WS-E3
+  - WS-E4
+  - WS-E5
+- id: CG-F
+  name: Culture and Religion
+  workspaces:
+  - WS-F1
+  - WS-F2
+- id: CG-G
+  name: Diplomacy, Intelligence and War
+  workspaces:
+  - WS-G1
+  - WS-G2
+  - WS-G3
+- id: CG-H
+  name: Planetary Systems, History and Legacy
+  workspaces:
+  - WS-H1
+  - WS-H2
+  - WS-H3
+workspaces:
+- id: WS-A1
+  group: CG-A
+  name: World and Territorial Structure
+  menu_item: World
+  contents:
+  - Province and region
+  - Settlement and land use
+  - Exploration and navigation
+  showcase_views: []
+  linked_mechanics:
+  - P5
+  - P6
+  - P8
+  - P10
+  - N13
+  - D14
+  - W1
+  owner_systems_read:
+  - OS-DIPLO
+  - OS-INFO
+  - OS-SETTLE
+  - OS-TERRAIN
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-A2
+  group: CG-A
+  name: Projects and Transformations
+  menu_item: World
+  contents:
+  - National, joint and special projects
+  - Sponsorship and stages
+  - Transformation paths
+  - FTL Grand Project and Consortium (V1)
+  showcase_views:
+  - WS-A2/V1
+  linked_mechanics:
+  - N7
+  - N8
+  - X3
+  - X4
+  - X5
+  - X28
+  owner_systems_read:
+  - OS-PROJ
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-A3
+  group: CG-A
+  name: Civilisation Identity and Lineage
+  menu_item: World
+  contents:
+  - Civilisation identity
+  - Historical lineage
+  - Country switching
+  - Player Career Record
+  showcase_views: []
+  linked_mechanics:
+  - N1
+  - N2
+  - N9
+  - N17
+  - N18
+  - T7
+  owner_systems_read:
+  - OS-AI
+  - OS-ENTITY
+  - OS-OBS
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-B1
+  group: CG-B
+  name: Population and Migration
+  menu_item: People and Society
+  contents:
+  - Population groups
+  - Migration flows
+  - Demographic account
+  showcase_views: []
+  linked_mechanics:
+  - P1
+  - P2
+  - P4
+  - P25
+  - P26
+  - P31
+  owner_systems_read:
+  - OS-POP
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-B2
+  group: CG-B
+  name: Social Development
+  menu_item: People and Society
+  contents:
+  - Health and healthcare
+  - Education and literacy
+  - Welfare, inequality and quality of life
+  showcase_views: []
+  linked_mechanics:
+  - P11
+  - P16
+  - P19
+  - P22
+  - S11
+  - E15
+  owner_systems_read:
+  - OS-INST
+  - OS-POLITY
+  - OS-POP
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-C1
+  group: CG-C
+  name: Government and Administration
+  menu_item: Government
+  contents:
+  - Institutions and charters (V1)
+  - Administrative reach and territory
+  - Governors and state capacity
+  showcase_views:
+  - WS-C1/V1
+  linked_mechanics:
+  - S28
+  - S15
+  - N12
+  - I1
+  - I10
+  owner_systems_read:
+  - OS-INST
+  - OS-POLITY
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-C2
+  group: CG-C
+  name: Civics and State
+  menu_item: Government
+  contents:
+  - Governance civics
+  - Culture civics
+  - Religion civics
+  showcase_views: []
+  linked_mechanics:
+  - K6
+  - L1
+  - S29
+  owner_systems_read:
+  - OS-POLITY
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-C3
+  group: CG-C
+  name: Law, Rights and Politics
+  menu_item: Government
+  contents:
+  - Constitutional Archive and Governance Ledger (V1)
+  - Law and rights
+  - Political factions
+  - Legitimacy
+  - Courts and press
+  showcase_views:
+  - WS-C3/V1
+  linked_mechanics:
+  - L2
+  - L3
+  - L4
+  - L7
+  - S1
+  - S14
+  - S30
+  owner_systems_read:
+  - OS-POLITY
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-C4
+  group: CG-C
+  name: Leaders, Families and Dynasties
+  menu_item: Court and Dynasty
+  contents:
+  - Ruler and court
+  - Dynasty and succession
+  - Characters and relationships
+  showcase_views: []
+  linked_mechanics:
+  - S5
+  - S6
+  - N14
+  owner_systems_read:
+  - OS-CHAR
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-D1
+  group: CG-D
+  name: National Accounts and Macroeconomics
+  menu_item: Economy
+  contents:
+  - Economic sectors
+  - Output, wages and prices
+  - Inflation and business cycle
+  showcase_views: []
+  linked_mechanics:
+  - E1
+  - E18
+  - E31
+  - E33
+  owner_systems_read:
+  - OS-MARKET
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-D2
+  group: CG-D
+  name: Treasury and Public Finance
+  menu_item: Economy
+  contents:
+  - Revenue sources
+  - Budget account
+  - Debt and spending priorities
+  showcase_views: []
+  linked_mechanics:
+  - E11
+  - E30
+  - E7
+  owner_systems_read:
+  - OS-MARKET
+  - OS-POLITY
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-D3
+  group: CG-D
+  name: Currency and Monetary Hegemony
+  menu_item: Economy
+  contents:
+  - Individual currencies
+  - Exchange rates and relations
+  - Reserves and hegemony
+  showcase_views: []
+  linked_mechanics:
+  - E4
+  - E5
+  - E28
+  - E32
+  owner_systems_read:
+  - OS-MARKET
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-D4
+  group: CG-D
+  name: Banking, Credit and Capital Markets
+  menu_item: Economy
+  contents:
+  - Central bank and monetary authority
+  - Commercial banking
+  - Exposure
+  showcase_views: []
+  linked_mechanics:
+  - E6
+  - E19
+  - E29
+  owner_systems_read:
+  - OS-MARKET
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-D5
+  group: CG-D
+  name: Corporations and Monopolies
+  menu_item: Economy
+  contents:
+  - Firms and ownership
+  - Market power and antitrust
+  - Listings and corporate finance
+  showcase_views: []
+  linked_mechanics:
+  - E8
+  - E9
+  - R29
+  - I2
+  owner_systems_read:
+  - OS-INST
+  - OS-LEDGER
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-D6
+  group: CG-D
+  name: Trade, Supply Chains and Logistics
+  menu_item: Economy
+  contents:
+  - Trade nodes and routes
+  - Supply chains
+  - Logistics and stockpiles
+  showcase_views: []
+  linked_mechanics:
+  - E2
+  - E21
+  - R7
+  - R22
+  - R24
+  owner_systems_read:
+  - OS-MARKET
+  - OS-TRANSPORT
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-E1
+  group: CG-E
+  name: Technology Tree
+  menu_item: Technology
+  contents:
+  - Individual technologies
+  - Dependency chain
+  - Path style
+  - Capability states per actor and region (added 24 Nov 2026)
+  showcase_views: []
+  linked_mechanics:
+  - K1
+  - K44
+  - K50
+  - K51
+  owner_systems_read:
+  - OS-KNOW
+  - OS-PROD
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-E2
+  group: CG-E
+  name: Research, Knowledge Diffusion and Innovation
+  menu_item: Technology
+  contents:
+  - Research institutions and programmes (V1)
+  - Scientific competence and specialisation
+  - Research allocation and infrastructure
+  - Collaboration and knowledge networks
+  - Diffusion and absorptive capacity
+  - First-mover rents and knowledge loss
+  - Collections, artifacts and acquisition (added 24 Nov 2026)
+  - Synthesis, peer review and consensus (added 24 Nov 2026)
+  - Global Knowledge Atlas and Intellectual Genealogy (V2)
+  showcase_views:
+  - WS-E2/V1
+  - WS-E2/V2
+  linked_mechanics:
+  - K22
+  - K26
+  - K27
+  - K40
+  - K45
+  - K48
+  - K52
+  - K53
+  - K56
+  - K57
+  - K60
+  owner_systems_read:
+  - OS-INST
+  - OS-KNOW
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-E3
+  group: CG-E
+  name: Materials and Industrial Engineering
+  menu_item: Technology
+  contents:
+  - Resource clusters
+  - Production chains
+  - Industrial capabilities
+  showcase_views: []
+  linked_mechanics:
+  - R3
+  - R4
+  - R20
+  - R21
+  - R27
+  owner_systems_read:
+  - OS-PROD
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-E4
+  group: CG-E
+  name: Energy, Infrastructure and Utility Networks
+  menu_item: Technology
+  contents:
+  - Power generation and fuels
+  - Grid and interconnection
+  - Utility networks
+  showcase_views: []
+  linked_mechanics:
+  - R5
+  - R10
+  - R11
+  - R12
+  - R30
+  - P9
+  owner_systems_read:
+  - OS-PROD
+  - OS-TRANSPORT
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-E5
+  group: CG-E
+  name: Information, Communications and Media Systems
+  menu_item: Technology
+  contents:
+  - Telecom, internet and platforms
+  - Censorship, propaganda and digital sovereignty
+  - Publication and digital distribution (added 24 Nov 2026)
+  showcase_views: []
+  linked_mechanics:
+  - P18
+  - E13
+  - S20
+  - K46
+  - K47
+  owner_systems_read:
+  - OS-CULTURE
+  - OS-KNOW
+  - OS-TRANSPORT
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-F1
+  group: CG-F
+  name: Culture, Philosophy and Traditions
+  menu_item: Culture
+  contents:
+  - Culture and identity
+  - Language
+  - Philosophical movements
+  - Heritage
+  showcase_views: []
+  linked_mechanics:
+  - S3
+  - P13
+  - S24
+  - S25
+  owner_systems_read:
+  - OS-CULTURE
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-F2
+  group: CG-F
+  name: Religion and Religious Institutions
+  menu_item: Religion
+  contents:
+  - Belief systems and sects
+  - Institutions and factions
+  - Doctrine and religious diplomacy
+  showcase_views: []
+  linked_mechanics:
+  - S4
+  - D7
+  owner_systems_read:
+  - OS-CULTURE
+  - OS-DIPLO
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-G1
+  group: CG-G
+  name: Diplomacy and International Order
+  menu_item: Diplomacy
+  contents:
+  - Diplomatic relations
+  - Treaties, subjects and agreements
+  - Leagues, blocs and imperial structures
+  showcase_views: []
+  linked_mechanics:
+  - D2
+  - D3
+  - D4
+  - D6
+  - D19
+  - N10
+  owner_systems_read:
+  - OS-DIPLO
+  - OS-ENTITY
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-G2
+  group: CG-G
+  name: Intelligence and Espionage
+  menu_item: Diplomacy
+  contents:
+  - Espionage operations
+  - Spy networks
+  - Counterintelligence
+  - Sabotage and subversion
+  - Information leverage (added 24 Nov 2026)
+  showcase_views: []
+  linked_mechanics:
+  - D11
+  - D21
+  - D22
+  - K8
+  - M32
+  owner_systems_read:
+  - OS-DIPLO
+  - OS-INFO
+  - OS-MIL
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-G3
+  group: CG-G
+  name: Military Grand Command
+  menu_item: Military
+  contents:
+  - Formations and theatres
+  - Operations and logistics
+  - Occupation, peace and reconstruction
+  showcase_views:
+  - WS-G3/V1
+  - WS-G3/V2
+  - WS-G3/V3
+  - WS-G3/V4
+  linked_mechanics:
+  - M22
+  - M29
+  - M30
+  - M31
+  - M37
+  - M42
+  owner_systems_read:
+  - OS-MIL
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-H1
+  group: CG-H
+  name: Planetary Environment and Ecology
+  menu_item: Environment
+  contents:
+  - Climate and hydrology
+  - Species and biomes
+  - Conservation
+  - Disasters and environmental pressures
+  showcase_views: []
+  linked_mechanics:
+  - W6
+  - W8
+  - W12
+  - W10
+  - W19
+  - W26
+  owner_systems_read:
+  - OS-CLIMATE
+  - OS-ECOLOGY
+  - OS-HAZARD
+  - OS-HYDRO
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-H2
+  group: CG-H
+  name: Historical Atlas and World Chronicle
+  menu_item: History
+  contents:
+  - Historical events
+  - Maps, ages and replay
+  - Lineage timeline
+  - Living Historiography and Historical Library (V1)
+  showcase_views:
+  - WS-H2/V1
+  linked_mechanics:
+  - X2
+  - X10
+  - X12
+  - X16
+  - X20
+  - X26
+  owner_systems_read:
+  - OS-EVENT
+  - OS-OBS
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+- id: WS-H3
+  group: CG-H
+  name: Scoring and Civilisation Legacy
+  menu_item: Scoring
+  contents:
+  - Scoring categories
+  - Historical rankings
+  - Metric audit
+  - Civilisation legacy
+  showcase_views: []
+  linked_mechanics:
+  - X6
+  - K60
+  owner_systems_read:
+  - OS-KNOW
+  - OS-OBS
+  actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
+  access_conditions: GS-03 information access; A14 access modes
+  validation_tests: to specify in Pass 10
+showcase_views:
+- id: WS-A2/V1
+  name: FTL Grand Project and Consortium
+  note: Endgame
+- id: WS-C1/V1
+  name: Institutions and Charters
+  note: Guilds, universities, companies, international bodies
+- id: WS-C3/V1
+  name: Constitutional Archive and Governance Ledger
+  note: Living Constitutional Order
+- id: WS-E2/V1
+  name: Scientific and Institutional Research Ecosystem
+  note: Programmes, competence, allocation, networks
+- id: WS-E2/V2
+  name: Global Knowledge Atlas and Intellectual Genealogy
+  note: Added 24 Nov 2026
+- id: WS-G3/V1
+  name: Theatre Operations and Campaign Planning
+- id: WS-G3/V2
+  name: Military Logistics and Supply Network
+- id: WS-G3/V3
+  name: Armed Forces, Formations and Commands
+- id: WS-G3/V4
+  name: War Council and Peace Negotiations
+- id: WS-H2/V1
+  name: Living Historiography and Historical Library
+  note: Added 24 Nov 2026
+dossier_types:
+- id: DS-01
+  name: Entity
+  covers:
+  - Rulers, characters
+  - Families, dynasties
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+- id: DS-02
+  name: Place
+  covers:
+  - Settlements, regions
+  - Territory, sites
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+- id: DS-03
+  name: Organization
+  covers:
+  - States, institutions
+  - Corporations, banks
+  - Governing-document module (links DS-07)
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+- id: DS-04
+  name: System
+  covers:
+  - Economy, population
+  - Technology, ecology
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+- id: DS-05
+  name: Asset
+  covers:
+  - Facilities, networks
+  - Fleets, armies
+  - Physical copies of works
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+- id: DS-06
+  name: Event
+  covers:
+  - Key events, crises
+  - Treaties, projects
+  - Battle and Campaign Dossier
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+- id: DS-07
+  name: Knowledge Artifact
+  covers:
+  - Content, claims, editions
+  - Access, validation, lineage
+  - Added 24 Nov 2026
+  universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
+    events, actions
+analysis_types:
+- id: AN-01
+  name: Causal Analysis
+  covers:
+  - Cause-effect chains
+  - Contributing factors
+  - System interactions
+  - Military causal analysis
+- id: AN-02
+  name: Comparative Analysis
+  covers:
+  - Entities, regions, eras
+  - Performance and outcomes
+  - Structural differences
+- id: AN-03
+  name: Counterfactual / What-If
+  covers:
+  - Alternative decisions
+  - Plausible divergences
+  - Impact assessment
+- id: AN-04
+  name: Historical Replay
+  covers:
+  - Timed reconstruction
+  - Multi-scale playback
+  - Annotated chronicle
+- id: AN-05
+  name: Trend and Forecast
+  covers:
+  - Trajectory and scenarios
+  - Risk and sensitivity
+  - Uncertainty ranges
+- id: AN-06
+  name: Structural Analysis
+  covers:
+  - Institutions, networks
+  - Resilience and fragility
+  - Long-term evolution
+global_systems:
+- id: GS-01
+  name: World Creation and Starting Conditions
+- id: GS-02
+  name: Turn Resolution, Standing Orders and Exception Management
+- id: GS-03
+  name: Knowledge, Information Access and Uncertainty
+- id: GS-04
+  name: Universal Causal Inspector and Historical Replay
+- id: GS-05
+  name: Search and Entity Selection
+analytical_patterns:
+- id: AP-01
+  name: Entity Analysis
+- id: AP-02
+  name: Relationship Analysis
+- id: AP-03
+  name: Process Analysis
+- id: AP-04
+  name: Comparative Analysis
+- id: AP-05
+  name: Causal Analysis
+- id: AP-06
+  name: Historical Analysis
+cross_links: []
+data_ownership: 'Referenced, not defined here (ADR-018): see state_ownership.yaml, the seed of engineering document
+  B.'
+chart_corrections_v3_4:
+- F2 label (chart showed P2)
+- Showcase views 8 to 10 (WS-E2/V2, WS-H2/V1)
+- DS-07 Knowledge Artifact added; ID format DS-01 to DS-07
+- WS-E4 and WS-E5 bullets separated (communications bullets belong to WS-E5)
+- Dates as BCE/CE
+- Levels labelled LV1 to LV4
