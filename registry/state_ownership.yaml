@@ -374,13 +374,14 @@ owner_systems:
   layer: 3
   owns: Institution entities and their internal structure, competence and absorptive capacity, education systems,
     civil society, corporations and standards bodies
-  mechanic_count: 25
+  mechanic_count: 26
   mechanics:
   - E8
   - E9
   - R23
   - S11
   - S12
+  - E37
   - K26
   - K48
   - I1
@@ -407,7 +408,7 @@ owner_systems:
   layer: 3
   owns: Markets and prices, trade nodes and routes, money and currencies, banks, debt, capital flows, intellectual
     property and monopoly rents
-  mechanic_count: 28
+  mechanic_count: 30
   mechanics:
   - K7
   - E1
@@ -436,6 +437,8 @@ owner_systems:
   - E33
   - E34
   - E35
+  - E36
+  - E38
   - SP5
   notes: Money created only through modelled issuance and lending.
 - id: OS-CHAR
@@ -559,7 +562,7 @@ owner_systems:
   name: Decision making
   layer: cross-cutting
   owns: AI plans, objectives and personalities; control assignment (country switching)
-  mechanic_count: 6
+  mechanic_count: 7
   mechanics:
   - T7
   - D12
@@ -567,6 +570,7 @@ owner_systems:
   - M28
   - A13
   - D23
+  - A16
   notes: Reads only OS-INFO for its actor; writes only orders into OS-TIME.
 - id: OS-OBS
   name: Observation, history and analysis

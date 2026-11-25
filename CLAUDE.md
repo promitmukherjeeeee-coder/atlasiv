@@ -4,7 +4,7 @@ ATLASIV is a single-player grand-strategy simulation of real Earth from 10,000 B
 
 ## Sources of truth
 
-- `docs/01` to `docs/06` are exports of the master design documents, and `docs/adr/0001` to `docs/adr/0038` are the Architectural Decision Registry split into one file per decision. They are read-only here. If code and docs disagree, the docs win. Report the disagreement; never change a doc to match the code.
+- `docs/01` to `docs/07` are exports of the master design documents. They are read-only here. If code and docs disagree, the docs win. Report the disagreement; never change a doc to match the code.
 - `docs/04_pass1_spec.md` is the confirmed spec for the current pass. `docs/06_computational_doctrine.md` is binding for all engineering.
 - `docs/PASS1_PLAN.md` is the job list. Work one job at a time, in order.
 - `registry/` holds the draft machine-readable registries (interface, mechanics, ownership, dependencies). Do not edit them in Pass 1.
@@ -17,7 +17,7 @@ Out of scope: the world state store and identifiers (Pass 2), ledgers and solver
 
 ## Hard rules
 
-1. Determinism. The same seed, rules and inputs give bit-identical state on every machine. Parallelism, logging and UI never change results.
+1. Determinism. The same campaign manifest and inputs give bit-identical state on every machine. Parallelism, logging, UI, the player's view and which country the player controls never change computational detail or results.
 2. No `float` or `double` in authoritative state or its update rules. Use 64-bit integers and Q32.32 fixed point, with `Int128` intermediates and checked overflow. Overflow is an error, never a silent wrap.
 3. No `System.Random`. All randomness comes from the counter-based generator keyed by (seed, turn, phase, system, entity, draw index).
 4. No library math functions (`Math.Exp`, `Math.Log` and so on) in authoritative code. Use the integer or table-based versions with test vectors.
@@ -34,7 +34,7 @@ Out of scope: the world state store and identifiers (Pass 2), ledgers and solver
 3. Write the tests first, then the code. Keep each change small.
 4. Run `dotnet build` and `dotnet test` locally until they are green.
 5. Commit, push and open a pull request. Wait for CI on all runners.
-6. Record each engineering decision you made (with alternatives and reason) as a new file in `docs/adr/`, numbered from 0039 onward and marked Proposed until the owner reviews it.
+6. Add any engineering decision you made (with alternatives and reason) to `docs/decisions-log.md`.
 7. Finish with a summary for the owner: what was built, what the tests prove, the CI result, decisions taken, placeholders left, and what the next job is. Do not merge; the owner merges.
 
 If something in the spec is ambiguous or contradictory, stop and ask the owner rather than guessing.
@@ -45,22 +45,6 @@ If something in the spec is ambiguous or contradictory, stop and ask the owner r
 src/Atlasiv.Core/          simulation library (no Godot)
 tests/Atlasiv.Core.Tests/  xUnit and FsCheck tests
 bench/Atlasiv.Benchmarks/  BenchmarkDotNet
-docs/                      design docs (read-only), plan, reports
-docs/adr/                  architectural decision records, one file per decision
-docs/agents/               configuration for the engineering skills
+docs/                      design docs (read-only), plan, decisions log, reports
 registry/                  draft registries (not used until Pass 2)
 ```
-
-## Agent skills
-
-### Issue tracker
-
-Issues live in GitHub Issues for `promitmukherjeeeee-coder/atlasiv`, used through the `gh` CLI. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Default labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context: one `GLOSSARY.md` at the repo root and decision records in `docs/adr/`. See `docs/agents/domain.md`.

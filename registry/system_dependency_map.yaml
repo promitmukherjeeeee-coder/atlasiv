@@ -272,6 +272,9 @@ flows_from_declared_mechanic_links:
   to: OS-OBS
   link_count: 1
 - from: OS-DIPLO
+  to: OS-INST
+  link_count: 2
+- from: OS-DIPLO
   to: OS-KNOW
   link_count: 1
 - from: OS-DIPLO
@@ -296,6 +299,9 @@ flows_from_declared_mechanic_links:
   to: OS-OBS
   link_count: 1
 - from: OS-INST
+  to: OS-AI
+  link_count: 1
+- from: OS-INST
   to: OS-KNOW
   link_count: 13
 - from: OS-KNOW
@@ -307,17 +313,29 @@ flows_from_declared_mechanic_links:
 - from: OS-KNOW
   to: OS-PROD
   link_count: 3
+- from: OS-LEDGER
+  to: OS-MARKET
+  link_count: 1
+- from: OS-MARKET
+  to: OS-INST
+  link_count: 2
 - from: OS-MARKET
   to: OS-KNOW
   link_count: 3
 - from: OS-MARKET
   to: OS-UI
   link_count: 1
+- from: OS-MIL
+  to: OS-AI
+  link_count: 1
 - from: OS-POLITY
   to: OS-INST
   link_count: 1
 - from: OS-POLITY
   to: OS-KNOW
+  link_count: 1
+- from: OS-POLITY
+  to: OS-MARKET
   link_count: 1
 - from: OS-POLITY
   to: OS-MIL
@@ -333,7 +351,7 @@ flows_from_declared_mechanic_links:
   link_count: 1
 - from: OS-TIME
   to: OS-AI
-  link_count: 1
+  link_count: 3
 - from: OS-TIME
   to: OS-INFO
   link_count: 1

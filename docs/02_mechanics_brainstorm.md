@@ -54,10 +54,10 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 - **P2 Demography.** Births, deaths, aging, life expectancy, with famine, epidemic and war losses and a demographic transition with development.
 - **P3 Carrying capacity.** Food, water, tech and land use set the ceiling.
 - **P4 Migration.** Push and pull factors, seasonal rounds for bands, refugees, mass migrations.
-- **P5 Settlement formation.** Camp, village, town, city, driven by surplus, storage, defense and water. One city per region.
-- **P6 Settlement costs.** City cost rises geometrically and universally. Town cost rises progressively per region.
+- **P5 Settlement formation.** Camp, village, town, city, driven by surplus, storage, defense and water. One city per fixed geographic region; administrative subdivision never creates city capacity (exploit test, revised 25 Nov 2026).
+- **P6 Settlement costs.** City and town costs rise steeply, derived mainly from land, infrastructure, labour, administration and resource constraints; any remaining geometric factor is a labelled, justified gameplay abstraction (revised 25 Nov 2026).
 - **P7 Districts and buildings.** Unique districts, buildings and upgrades for each settlement type.
-- **P8 Adjacency.** Improvements sit next to a settlement (+3 city, +1 town or village). City-only improvements affect the whole region.
+- **P8 Adjacency.** Improvement benefits come from actual geographic accessibility, infrastructure and service capacity, not fixed bonuses; the former +3 city and +1 town values are a calibration reference only. City-level services can reach the whole region where access allows (revised 25 Nov 2026).
 - **P9 Infrastructure.** Roads, bridges, rail, canals, ports, grids, pipelines, networks. Speeds feed back into the tempo.
 - **P10 Land use.** Farmland, pasture, forest, urban footprint and their competition.
 - **P11 Health and education.** Sanitation, medicine, literacy, schooling.
@@ -68,7 +68,7 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 
 - **R1 Raw resources.** Stone, wood, ores, fuels and minerals from deposit clusters.
 - **R2 Food.** Crops, livestock and fisheries by real regional package.
-- **R3 Processing chains.** Smelting, refining, chemistry. Discovering an ore unlocks its research path (bauxite, then aluminium smelting).
+- **R3 Processing chains.** Smelting, refining, chemistry. Discovering an ore makes its research path accessible; processing it still needs operational capability (K50) (bauxite, then aluminium smelting).
 - **R4 Man-made resources.** Four grades, from basic to advanced (for example transistors, SoCs). Grades follow purity and process complexity.
 - **R5 Energy.** Muscle, biomass, water, wind, coal, oil, gas, nuclear, solar, fusion, with grids and storage.
 - **R6 Nuclear materials.** Uranium, thorium, plutonium and polonium from shared deposits, convertible by tech or breeder programs.
@@ -177,15 +177,15 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 ## L. AI and engine (cross-cutting)
 
 - **A1 Entity AI.** Needs and goal driven. Non-player peoples follow the same rules as the player.
-- **A2 Level of detail.** Coarser updates far from the player. The player and contacts act every phase, other entities every 2 to 4 phases, and remote entities once per turn at a fixed offset phase derived from the entity id. Any event involving a remote entity wakes it to full cadence.
+- **A2 Level of detail.** Coarser updates for quiet entities, judged only from simulation state (activity, volatility, involvement in events, significance), never from the player's position, controlled country or view; observing or switching country cannot change outcomes (revised 25 Nov 2026). Active entities act every phase, quieter ones every 2 to 4 phases, and dormant ones once per turn at a fixed offset phase derived from the entity id. Any event involving a remote entity wakes it to full cadence.
 - **A3 Determinism.** Seeded randomness and fixed-point math.
 - **A4 Explainability.** Every number shows its breakdown.
-- **A5 Validation suite.** Real cases (Sentinelese, North Korea, China after 1978, Meiji Japan, India, Tasmania) test the equations.
+- **A5 Validation suite.** Real cases (Sentinelese, North Korea, China after 1978, Meiji Japan, India, Tasmania) test the equations against plausible ranges and causal relationships, not by requiring history to reproduce its actual outcomes.
 - **A6 Data tables.** Content in tables for balancing.
 
 ## M. Entity-transforming projects
 
-An entity changes form when it completes a project. Forms are emergent states set by measurable thresholds, and projects are how the player (or an AI) crosses them. Each project has prerequisites (tech, civics), capacity (surplus, labor, administrators), legitimacy and cohesion, a cost and duration scaled to turn length, a risk of failure or backlash, and effects (form, name, civics, institutions, culture mix). Projects can be national (one entity), joint (several sponsors) or special (rare and huge).
+An entity changes form when it completes a project. Forms are emergent states set by measurable thresholds, and projects are how the player (or an AI) crosses them. Each project has prerequisites (tech, civics), capacity (surplus, labor, administrators), legitimacy and cohesion, a cost and duration scaled to turn length, a risk of failure or backlash, and effects that enable institutional changes (offices, laws, administration, civics, institutions, culture mix). The resulting form and name are derived from the new institutional configuration (L1, S29), never granted as a predefined political form (revised 25 Nov 2026). Projects can be national (one entity), joint (several sponsors) or special (rare and huge).
 
 | Transition | Real example | Project | Key requirements | Main effects |
 | --- | --- | --- | --- | --- |
@@ -421,6 +421,9 @@ Mechanic ID, name, purpose, dependency layer, authoritative owner, state variabl
 - **E33 Economic aggregation.** Value added without double-counting intermediate goods.
 - **E34 Informal-economy accounting.** Subsistence and barter in material balances, with gaps between reported and true figures.
 - **E35 Crisis propagation.** Through input-output links, inventories, transport, banks, debt, employment, demand and legitimacy.
+- **E36 Nominal and real separation (added 25 Nov 2026).** Physical production, financial claims, liquidity, solvency, debt, ownership, purchasing power and political authority are separate quantities. Authorised monetary and credit operations create claims; they never create goods, trained people, machinery or energy (AX-9). Money issuance works through the money regime (E28) and affects prices, exchange rates and trust, not physical stocks. Extends E28, E31, R26.
+- **E37 International financial institutions (added 25 Nov 2026).** World banks and similar bodies are institutions (I1) with capital contributors, funding arrangements, assets, liabilities, lending mandates, governance rights, borrowers, repayment schedules, credit risk and objectives. They never generate money or grant diplomatic bonuses. Extends E6, E19, E23, D6.
+- **E38 Credit lifecycle (added 25 Nov 2026).** Every loan, bond and central-bank operation is double-entry: issuing creates the matching asset and liability; repayment, restructuring, default and write-down post to every affected balance sheet, for commercial, sovereign, central-bank and international credit alike. Money amounts are tested for denomination change, high inflation, redenomination and aggregate exposure, with 128-bit aggregation. Extends E6, E7, E29, E30.
 
 **Knowledge**
 
@@ -496,7 +499,7 @@ Mechanic ID, name, purpose, dependency layer, authoritative owner, state variabl
 - **A10 Save persistence and migration.** Versioned, hashed, deterministic migrations.
 - **A11 Invariant assertions.** Conservation and integrity checks with reproducible diagnostics.
 - **A12 Benchmark worlds.** Eight standard scenarios on reference hardware.
-- **A13 AI horizons, objectives and coordination.** Hierarchical planning, multi-objective utility, institutional coordination that can fail.
+- **A13 AI horizons, objectives and coordination.** Hierarchical planning, multi-objective utility, institutional coordination that can fail. No single general-purpose AI: strategic objectives set institutional priorities, institutions allocate mandates, specialised decision systems evaluate feasible alternatives, and individuals act within their roles, each actor with its own interests, information, authority and horizon (revised 25 Nov 2026).
 
 **Interface**
 
@@ -565,12 +568,13 @@ Implements the Truth–Evidence–Belief–Consequence Separation axiom (Final M
 - **X25 Publication rendering architecture.** Deterministic offline baseline renderer; optional replaceable language-model renderers with claim validation and fallback; versioned publication metadata.
 - **X26 Historical reader and intellectual library.** Reading, navigation, search, edition comparison, evidence and dependency inspection, uncertainty indicators, delegation-friendly collection views.
 - **X27 Export.** Open formats without DRM, respecting access modes; omniscient export only in debug.
-- **X28 FTL horizon value (owner-confirmed 24 Nov 2026).** The real benefits of FTL lie beyond Earth and after the game ends, so no simulated system can produce them. They are represented by one hard-coded, declared incentive: the declared exception to Universal Emergent Causality. Every actor, player and AI alike, knows it. It enters only declared valuation paths (AI and institutional utility for FTL-related research, institutions, funding and sponsorship; the value of FTL sponsor shares; the existing FTL contribution score) and does so only where an FTL-related option exists. It never grants research progress, capability or project stages; those still need the full capability path (K50, X4). Its size and any change over time are calibration parameters, not yet set.
+- **X28 FTL horizon value (owner-confirmed 24 Nov 2026).** The real benefits of FTL lie beyond Earth and after the game ends, so no simulated system can produce them. They are represented by one hard-coded, declared incentive: the declared exception to Universal Emergent Causality. The declared value is public and identical for all, but its weight in each actor's valuation scales with that actor's credible institutional awareness, feasible research paths and expected consequences of investment, so it has no practical influence in prehistory and early civilisation (revised 25 Nov 2026). FTL stays explicitly speculative physics, and the simulation does not guarantee it. It enters only declared valuation paths (AI and institutional utility for FTL-related research, institutions, funding and sponsorship; the value of FTL sponsor shares; the existing FTL contribution score) and does so only where an FTL-related option exists. It never grants research progress, capability or project stages; those still need the full capability path (K50, X4). Its size and any change over time are calibration parameters, not yet set.
 
 ### Engine and interface
 
 - **A14 Information access modes.** Normal, authorised perspective, debug tag-switch and omniscient developer modes, with no leakage into actor knowledge and no effect on state hashes.
 - **A15 Knowledge and history storage scaling.** Deduplicated content, shared scopes, sparse access and dependency graphs, lazy queries, candidate filtering, event-driven invalidation and cached rendering.
+- **A16 Mandates and delegation (added 25 Nov 2026).** In every domain the ruler can set mandates, appoint institutional leadership, allocate resources, set restrictions and intervene on exceptions, while institutions and characters carry out the work with their own competence, reliability, interests and authority. Close management is always possible but never compulsory. Delegation shifts decisions and risk, never grants an efficiency bonus. Generalises M42 and I14; works with T2, T10 and the hierarchical AI in A13.
 - **U11 Knowledge and historiography interface integration.** WS-E2 and WS-H2 extensions, WS-E2/V2, WS-H2/V1, DS-07 and dossier modules (Final Master Vision 9.11).
 
 ### Dependencies and feedback loops (inputs to Pass 2b)

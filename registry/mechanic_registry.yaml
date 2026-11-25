@@ -1,8 +1,8 @@
 registry: ATLASIV Mechanic Registry
 version: 0.1.0-draft
 date: '2026-11-24'
-status: Draft generated from Mechanics Brainstorm (rev 30). Owners and layers proposed; confirmed in Pass 2 and
-  Pass 2b.
+status: Draft generated from Mechanics Brainstorm (25 Nov 2026). Owners and layers proposed; confirmed in Pass 2
+  and Pass 2b.
 source: Mechanics Brainstorm tab
 link_semantics: declared_links = IDs this entry explicitly extends, absorbs or references in the documents. Not
   yet variable-level inputs and outputs; those come from each 21-field specification.
@@ -224,13 +224,16 @@ mechanics:
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Camp, village, town, city, driven by surplus, storage, defense and water. One city per region.
+  summary: Camp, village, town, city, driven by surplus, storage, defense and water. One city per fixed geographic
+    region; administrative subdivision never creates city capacity (exploit test, revised 25 Nov 2026).
 - id: P6
   name: Settlement costs
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: City cost rises geometrically and universally. Town cost rises progressively per region.
+  summary: City and town costs rise steeply, derived mainly from land, infrastructure, labour, administration and
+    resource constraints; any remaining geometric factor is a labelled, justified gameplay abstraction (revised
+    25 Nov 2026).
 - id: P7
   name: Districts and buildings
   series: P
@@ -242,8 +245,9 @@ mechanics:
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Improvements sit next to a settlement (+3 city, +1 town or village). City-only improvements affect the
-    whole region.
+  summary: Improvement benefits come from actual geographic accessibility, infrastructure and service capacity,
+    not fixed bonuses; the former +3 city and +1 town values are a calibration reference only. City-level services
+    can reach the whole region where access allows (revised 25 Nov 2026).
 - id: P9
   name: Infrastructure
   series: P
@@ -291,8 +295,10 @@ mechanics:
   series: R
   owner: OS-PROD
   layer: 2
-  summary: Smelting, refining, chemistry. Discovering an ore unlocks its research path (bauxite, then aluminium
-    smelting).
+  summary: Smelting, refining, chemistry. Discovering an ore makes its research path accessible; processing it still
+    needs operational capability (K50) (bauxite, then aluminium smelting).
+  declared_links:
+  - K50
 - id: R4
   name: Man-made resources
   series: R
@@ -843,9 +849,10 @@ mechanics:
   series: A
   owner: OS-TIME
   layer: 0
-  summary: Coarser updates far from the player. The player and contacts act every phase, other entities every 2
-    to 4 phases, and remote entities once per turn at a fixed offset phase derived from the entity id. Any event
-    involving a remote entity wakes it to full cadence.
+  summary: 'Coarser updates for quiet entities, judged only from simulation state (activity, volatility, involvement
+    in events, significance), never from the player''s position, controlled country or view; observing or switching
+    country cannot change outcomes (revised 25 Nov 2026). Active entities act every phase, quieter ones every 2
+    to 4 phases, and dormant ones once per turn at a fixed offset phase derived '
 - id: A3
   name: Determinism
   series: A
@@ -863,7 +870,8 @@ mechanics:
   series: A
   owner: OS-OBS
   layer: 5
-  summary: Real cases (Sentinelese, North Korea, China after 1978, Meiji Japan, India, Tasmania) test the equations.
+  summary: Real cases (Sentinelese, North Korea, China after 1978, Meiji Japan, India, Tasmania) test the equations
+    against plausible ranges and causal relationships, not by requiring history to reproduce its actual outcomes.
 - id: A6
   name: Data tables
   series: A
@@ -1578,6 +1586,47 @@ mechanics:
   owner: OS-MARKET
   layer: 3
   summary: Through input-output links, inventories, transport, banks, debt, employment, demand and legitimacy.
+- id: E36
+  name: Nominal and real separation
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: Physical production, financial claims, liquidity, solvency, debt, ownership, purchasing power and political
+    authority are separate quantities. Authorised monetary and credit operations create claims; they never create
+    goods, trained people, machinery or energy (AX-9). Money issuance works through the money regime (E28) and affects
+    prices, exchange rates and trust, not physical stocks. Extends E28,
+  declared_links:
+  - E28
+  - E31
+  - R26
+- id: E37
+  name: International financial institutions
+  series: E
+  owner: OS-INST
+  layer: 3
+  summary: World banks and similar bodies are institutions (I1) with capital contributors, funding arrangements,
+    assets, liabilities, lending mandates, governance rights, borrowers, repayment schedules, credit risk and objectives.
+    They never generate money or grant diplomatic bonuses. Extends E6, E19, E23, D6.
+  declared_links:
+  - D6
+  - E19
+  - E23
+  - E6
+  - I1
+- id: E38
+  name: Credit lifecycle
+  series: E
+  owner: OS-MARKET
+  layer: 3
+  summary: 'Every loan, bond and central-bank operation is double-entry: issuing creates the matching asset and
+    liability; repayment, restructuring, default and write-down post to every affected balance sheet, for commercial,
+    sovereign, central-bank and international credit alike. Money amounts are tested for denomination change, high
+    inflation, redenomination and aggregate exposure, with 128-bit aggregation.'
+  declared_links:
+  - E29
+  - E30
+  - E6
+  - E7
 - id: K17
   name: Four knowledge concepts
   series: K
@@ -1974,7 +2023,10 @@ mechanics:
   series: A
   owner: OS-AI
   layer: cross-cutting
-  summary: Hierarchical planning, multi-objective utility, institutional coordination that can fail.
+  summary: 'Hierarchical planning, multi-objective utility, institutional coordination that can fail. No single
+    general-purpose AI: strategic objectives set institutional priorities, institutions allocate mandates, specialised
+    decision systems evaluate feasible alternatives, and individuals act within their roles, each actor with its
+    own interests, information, authority and horizon (revised 25 Nov 2026).'
 - id: U1
   name: Navigation state
   series: U
@@ -2394,8 +2446,8 @@ mechanics:
   layer: 4
   summary: 'The real benefits of FTL lie beyond Earth and after the game ends, so no simulated system can produce
     them. They are represented by one hard-coded, declared incentive: the declared exception to Universal Emergent
-    Causality. Every actor, player and AI alike, knows it. It enters only declared valuation paths (AI and institutional
-    utility for FTL-related research, institutions, funding and sponsorshi'
+    Causality. The declared value is public and identical for all, but its weight in each actor''s valuation scales
+    with that actor''s credible institutional awareness, feasible research paths '
   declared_links:
   - K50
   - X4
@@ -2413,6 +2465,21 @@ mechanics:
   layer: 3
   summary: Deduplicated content, shared scopes, sparse access and dependency graphs, lazy queries, candidate filtering,
     event-driven invalidation and cached rendering.
+- id: A16
+  name: Mandates and delegation
+  series: A
+  owner: OS-AI
+  layer: cross-cutting
+  summary: In every domain the ruler can set mandates, appoint institutional leadership, allocate resources, set
+    restrictions and intervene on exceptions, while institutions and characters carry out the work with their own
+    competence, reliability, interests and authority. Close management is always possible but never compulsory.
+    Delegation shifts decisions and risk, never grants an efficiency bonus. Generali
+  declared_links:
+  - A13
+  - I14
+  - M42
+  - T10
+  - T2
 - id: U11
   name: Knowledge and historiography interface integration
   series: U

@@ -36,7 +36,7 @@ The buildable specification for the simulation clock, phases, event ordering, de
 | 6 months | 3 | 2 months |
 | 1 month | 5 | about 6 days |
 
-**Boundary rules \[Confirmed\].** Phases are defined by calendar dates, not fixed second counts, so leap years and month lengths are handled exactly.
+**Boundary rules \[Confirmed\].** Phases are defined by calendar dates, not fixed second counts, so leap years and month lengths are handled exactly. Every turn and phase is a half-open interval \[start, end): it includes its start instant and excludes its end instant (clarified 24 Nov 2026). An event timestamped exactly on a boundary therefore belongs to the phase that begins there; an event at 00:00 on 1 July belongs to the phase starting 1 July. When that boundary is also a turn boundary, the old turn's turn-end stages run first and the event resolves in the first phase of the new turn.
 
 - Steps of a year or longer: every turn starts on 1 January.
 - 50-year step: phase boundaries alternate between 1 January and 1 July, giving 2.5-year phases.
@@ -46,7 +46,7 @@ The buildable specification for the simulation clock, phases, event ordering, de
 - 6-month step: turns start on 1 January or 1 July. Phases start on the 1st of the turn's first, third and fifth months.
 - 1-month step: turns start on the 1st of a month. Phases start on days 1, 7, 13, 19 and 25, and the last phase runs to the end of the month (4 to 7 days).
 
-**Elapsed time for rates \[Confirmed and Confirmed\].** All rates are stored per year \[Confirmed\]. A per-year rate applied over an interval uses the exact elapsed seconds divided by the mean Gregorian year of 31,556,952 seconds \[Proposed\], so a leap day counts correctly and results do not depend on how a period is split into turns.
+**Elapsed time for rates \[Confirmed\].** All rates are stored per year \[Confirmed\]. A per-year rate applied over an interval uses the exact elapsed seconds divided by the mean Gregorian year of 31,556,952 seconds \[Confirmed\], so a leap day counts correctly and results do not depend on how a period is split into turns.
 
 ## 4. Step transitions
 
@@ -83,9 +83,11 @@ The buildable specification for the simulation clock, phases, event ordering, de
 
 **\[Confirmed\] Each turn end:** climate and water; ecology and biomes; demographic reconciliation; agriculture, extraction, production and consumption; trade, markets and logistics accounting; finance and ownership; knowledge and diffusion; culture, religion and institutions; derived statistics and scoring samples; records, summaries and snapshots.
 
+**Terms (clarified 24 Nov 2026; no rule changes).** A *step* is a turn length: one of the eight values in section 3 (50 years down to 1 month). A *phase* is one subdivision of a turn. A *stage* is a numbered resolution slot: phase stages 1 to 11 run in every phase, and turn-end stages 1 to 10 (climate and water through records, summaries and snapshots, in the order listed) run once at the end of every turn. A *substep* is one of the calendar-exact subintervals (budget 4 by default) the adaptive driver may use inside a turn-end stage (section 10). A *time step* (Δt) is any legal elapsed interval used to look up the propagator cache.
+
 - **\[Confirmed\]** Simultaneous orders resolve against the same snapshot by domain contest or allocation rules, never by internal list order.
 - **\[Confirmed\]** Military operational and engagement events resolve at their own timestamps inside a phase.
-- **\[Confirmed\]** In Pass 1 every system registers with a declared stage (one of the steps above), natural period and update cadence. The scheduler calls systems only in their stage, and only when their period is due.
+- **\[Confirmed\]** In Pass 1 every system registers with a declared stage (one of the 11 phase stages or one of the 10 turn-end stages listed above), natural period and update cadence. The scheduler calls systems only in their stage, and only when their period is due.
 
 ## 7. Standing orders and Advance Until (hooks only)
 
@@ -99,7 +101,7 @@ The buildable specification for the simulation clock, phases, event ordering, de
 - **\[Confirmed\]** Fixed-point math for conserved and authoritative quantities, exact integers for population and ledgers, seeded stochastic rounding where hazards convert to whole people. Floating point is not used in authoritative state.
 - **\[Confirmed\]** No `float` or `double` in authoritative state or its update rules, except under a deterministic floating-point profile approved in the Architectural Decision Registry after benchmarks (ADR-005). Presentation, forecasts, analysis and labelled approximations may use floating point. Transcendental functions (exponential, logarithm, roots) use integer algorithms or precomputed fixed-point tables with test vectors, because library math functions can differ between platforms and runtimes.
 - **\[Confirmed\]** Per-quantity scaled integers (ADR-004): every quantity declares its unit and scale in the data schema. Counts, money and mass use 64-bit integer base units. Rates, probabilities and other dimensionless values use scaled fixed point, with Q32.32 as the default format for them. A single format is not used for everything, because 32.32 overflows above about 2.1 billion, which world population and economic totals exceed. Multiplication and division use 128-bit intermediates (`System.Int128`) with checked overflow.
-- **\[Confirmed\]** Money is stored as integer minor units. Population counts are 64-bit integers.
+- **\[Confirmed\]** Money is stored as integer minor units. Population counts are 64-bit integers. Sums, aggregates and exposures accumulate in 128-bit integers. Overflow tests cover denomination change, high inflation, redenomination and aggregate financial exposure; whether a per-currency scale is also needed is decided in Pass 2 using those tests (added 25 Nov 2026).
 - **\[Confirmed\]** Deterministic rounding is round-half-to-even unless a rule specifies stochastic rounding.
 - **\[Confirmed\]** Overflow is a simulation error that stops the commit, never a silent wrap.
 
@@ -113,16 +115,16 @@ The buildable specification for the simulation clock, phases, event ordering, de
 ## 10. Adaptive integration (hooks)
 
 - **\[Confirmed\]** Slow systems integrate in closed form over the full turn. Seasonal cycles use precomputed annual profiles per biome. Random events are Poisson draws (rate x duration).
-- **\[Confirmed\]** Provinces flagged volatile (famine, flood, siege, epidemic) may use up to 4 adaptive substeps at the turn-end tick.
+- **\[Confirmed\]** Provinces flagged volatile (famine, flood, siege, epidemic) may use adaptive substeps at the turn-end tick. Four is the initial engineering budget, not an accuracy ceiling: an unstable system may use more under a deterministic escalation rule, and every escalation is logged for benchmarking (revised 25 Nov 2026).
 - **\[Confirmed\]** Circular dependencies get explicit solvers with convergence criteria, iteration caps and fallbacks. Outcomes never depend on execution order. The solvers themselves are Pass 3.
-- **\[Confirmed\]** Pass 1 provides the substep driver (splits an interval into 1 to 4 calendar-exact subintervals) and the solver interface (iteration cap, tolerance, fallback). Tolerances are set during calibration.
+- **\[Confirmed\]** Pass 1 provides the substep driver (splits an interval into 1 to N calendar-exact subintervals, N configurable with a default budget of 4) and the solver interface (iteration cap, tolerance, fallback). Tolerances are set during calibration.
 
 * **\[Confirmed\]** Hazard and rate primitives: integrate per-year rates and hazards over exact elapsed time, with probability within an interval = 1 − exp(−λΔt) and integrated hazards for varying λ. A time-to-event draw schedules rare events in the event queue and is resampled only when the hazard changes (ADR-012).
 * **\[Confirmed\]** A propagator cache keyed by legal time step: because there are only eight turn steps and a small set of phase lengths, decay factors and transition matrices are computed once per legal Δt and reused (ADR-011). Pass 1 builds the cache mechanism; real matrices arrive with their systems.
 
 ## 11. Input log and replay hash
 
-- **\[Confirmed\]** Identical conditions, rules, seeds and decisions give identical authoritative states. Parallelism, UI, zoom, logging and rendering never change results.
+- **\[Confirmed\]** Identical conditions, rules, seeds and decisions give identical authoritative states. Parallelism, UI, zoom, logging, rendering, the player's view and which country the player controls never change computational detail or results. Each run records a campaign manifest: core build identifier, ruleset version, schema version, active first-party expansions with exact versions and load order, content hashes, execution configuration, world seed and initial-conditions hash (added 25 Nov 2026). Replay requires an identical manifest.
 - **\[Confirmed\]** Every phase writes its validated orders (player and AI) to an ordered input log. A replay is the initial state plus the world seed plus the input log.
 - **\[Confirmed\]** After each phase and each turn end, the authoritative state is serialized canonically (fixed field order, entities sorted by stable ID, integers in little-endian) and hashed. Candidate: XxHash128 from the System.IO.Hashing package for per-phase hashes, and SHA-256 for save integrity.
 - **\[Confirmed\]** A replay passes only if every per-phase hash matches the recorded run.
@@ -177,3 +179,23 @@ Also in Pass 1 **\[Confirmed\]**: the hazard, rate and propagator-cache primitiv
 2. The reference undertaking for step transitions is set in the data phase.
 
 Engineering decisions in this spec are recorded in the Architectural Decision Registry: ADR-004 (number formats), ADR-005 (floating-point policy), ADR-006 (random generator), ADR-011 (propagator cache) and ADR-012 (time-to-event sampling). The Computational Doctrine tab is binding for this pass.
+
+## 15. Clarifications (24 Nov 2026)
+
+Answers to build questions. They follow from the rules above and add no new game design.
+
+1. **Step versus stage.** A step is a turn length; a stage is a numbered resolution slot (Terms, section 6).
+2. **Boundary instants.** Turns and phases are half-open intervals \[start, end); an event exactly on a boundary belongs to the phase that begins there (section 3).
+3. **Turn end in keys.** The turn end has its own fixed slot after the last phase in random-draw keys and stable event IDs, and the substep index is part of the key, so no two substeps share a draw.
+4. **Step at the epoch.** The first turn uses the candidate step at once, with no waiting. The 20-turn minimum gap counts from the epoch, which is treated as the first switch.
+5. **Hysteresis counting.** The count tracks direction (faster or slower), not the exact candidate. It resets when the candidate equals the current step or changes direction. A switch is always one step. A completed count that meets the 20-turn gap fires on the first turn the gap allows, provided the count still holds then.
+6. **Committed switches.** Once the era-transition event is announced, the switch is committed even if the candidate drifts during the alignment wait. The 20-turn gap counts from the turn the switch takes effect.
+7. **Ties.** A target exactly halfway between two steps on the log scale goes to the slower step. Targets beyond the table use 50 years or 1 month. The comparison uses nominal lengths in whole seconds (target squared against the product of the two neighbouring steps), so no logarithm is needed.
+8. **When a system is due.** Due follows the calendar: a system with a 1-year period runs at the first turn end on or after each 1 January (every 12th turn on the 1-month step) and covers all time since its last run in one closed-form pass (one 50-year pass on the 50-year step). Natural periods are restricted to legal step or phase lengths, so every elapsed interval has a cached propagator.
+9. **Advance Until on a mid-phase event.** The phase finishes and control returns at the next phase boundary. The rare in-phase interruption points and conditional military interruptions remain empty hooks in Pass 1.
+10. **Era-transition preview in Pass 1.** The preview lists the old and new step, the date the switch takes effect, the new phase count and the first turn's phase dates under the new step. Later passes add game consequences. It is issued when the switch is decided, for faster and slower switches alike. It is an informational event, so Advance Until does not stop for it unless the player adds it to the filters.
+11. **Advance Until, turn ends, summaries and auto-skip.** Advance Until runs straight through turn ends and stops only on a stop condition. Turn-end stage 10 (records, summaries and snapshots) produces the turn summary as data in Pass 1; the screen that shows it comes in Pass 10. "Auto-skip" never skips computation: every phase is still resolved and hashed, and a quiet phase simply does not hand control to the player. A run that is stopped and resumed gives the same hashes as an uninterrupted run.
+12. **Observer-independent cadence (25 Nov 2026).** System and entity cadence depends only on simulation state. Changing the observed or selected entity, or the player's country, never changes which updates run or their results. Tested in J9.
+13. **Substep budget (25 Nov 2026).** The substep driver accepts any N; 4 is the default budget. Escalation beyond the budget follows a deterministic rule based on state and is logged.
+14. **Money and aggregates (25 Nov 2026).** 128-bit accumulation for sums and exposures, with overflow tests for denomination change, high inflation and redenomination in J1.
+15. **Campaign manifest (25 Nov 2026).** The input log starts with the manifest (section 11). There are no third-party mods; a build from modified source has its own build identifier.
