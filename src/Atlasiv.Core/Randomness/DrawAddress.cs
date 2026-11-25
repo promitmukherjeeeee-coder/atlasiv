@@ -27,7 +27,8 @@ namespace Atlasiv.Core.Randomness;
 /// block <c>i / 4</c>.
 /// </para>
 /// <para>
-/// The default value (turn 0) is not a valid address and cannot draw.
+/// The default value (turn 0, slot 0) is not a valid address and cannot draw, nor can a
+/// copy of it made with <c>with</c> that leaves either field unset.
 /// </para>
 /// </remarks>
 public readonly record struct DrawAddress
@@ -97,7 +98,7 @@ public readonly record struct DrawAddress
     public ulong EntityId { get; init; }
 
     /// <summary>Draw number <paramref name="drawIndex"/> of this stream: 64 uniformly distributed bits.</summary>
-    /// <exception cref="InvalidOperationException">This is the default address, which is not valid.</exception>
+    /// <exception cref="InvalidOperationException">The address has no valid turn or slot (see <see cref="EnsureValid"/>).</exception>
     public ulong Draw(ulong drawIndex)
     {
         var input = GeneratorInput(drawIndex);
@@ -108,13 +109,10 @@ public readonly record struct DrawAddress
     /// The Philox counter, key and output word that draw <paramref name="drawIndex"/> uses.
     /// Public so the layout can be checked and published; simulation code calls <see cref="Draw"/>.
     /// </summary>
-    /// <exception cref="InvalidOperationException">This is the default address, which is not valid.</exception>
+    /// <exception cref="InvalidOperationException">The address has no valid turn or slot (see <see cref="EnsureValid"/>).</exception>
     public PhiloxInput GeneratorInput(ulong drawIndex)
     {
-        if (_turn < 1)
-        {
-            throw new InvalidOperationException("The default DrawAddress is not a valid address: turns count from 1.");
-        }
+        EnsureValid();
 
         var counter = new Block4x64(
             drawIndex >> 2,
@@ -122,5 +120,22 @@ public readonly record struct DrawAddress
             (ulong)_turn,
             ((ulong)_slot.Value << 32) | (uint)_substep);
         return new PhiloxInput(counter, WorldSeed, SystemId, (int)(drawIndex & 3));
+    }
+
+    /// <summary>
+    /// Checks that the address can draw. The constructor and the property setters refuse bad
+    /// values, but the default value, or a copy of it made with <c>with</c>, can still hold
+    /// turn 0 or slot 0.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The turn is below 1 or the slot is the default value.</exception>
+    public void EnsureValid()
+    {
+        if (_turn < 1 || _slot.Value == 0)
+        {
+            throw new InvalidOperationException(
+                "This DrawAddress is not valid: it holds turn " + _turn.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                + " and slot value " + _slot.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                + ", but turns and phases count from 1. Build addresses with the constructor.");
+        }
     }
 }

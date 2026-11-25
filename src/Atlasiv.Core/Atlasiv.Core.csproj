@@ -4,4 +4,8 @@
     <RootNamespace>Atlasiv.Core</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Lets the tests check internal numerics helpers against their test vectors (hard rule 4). -->
+    <InternalsVisibleTo Include="Atlasiv.Core.Tests" />
+  </ItemGroup>
 </Project>

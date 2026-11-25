@@ -31,16 +31,6 @@ public sealed class RandomDrawsTests
         Assert.Equal(9UL, draws.NextDrawIndex);
     }
 
-    [Fact]
-    public void A_stream_can_start_at_a_later_draw_index()
-    {
-        var key = Key();
-        var draws = new RandomDraws(key, firstDrawIndex: 100);
-
-        Assert.Equal(key.Draw(100), draws.NextUInt64());
-        Assert.Equal(101UL, draws.NextDrawIndex);
-    }
-
     // ---- Uniform integers ----
 
     [Theory]

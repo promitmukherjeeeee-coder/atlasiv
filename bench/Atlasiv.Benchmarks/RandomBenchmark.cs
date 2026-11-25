@@ -11,7 +11,7 @@ namespace Atlasiv.Benchmarks;
 [MemoryDiagnoser]
 public class RandomBenchmark
 {
-    private readonly DrawAddress _key = new(0x5EED_0000_0000_0001UL, 12, DrawSlot.Phase(3), 0, 7, 42);
+    private readonly DrawAddress _address = new(0x5EED_0000_0000_0001UL, 12, DrawSlot.Phase(3), 0, 7, 42);
     private readonly Q32 _halfChance = Q32.FromRatio(1, 2);
     private readonly Q32 _poissonMean = Q32.FromRatio(5, 2);
     private readonly Q32 _rate = Q32.FromRatio(3, 100);
@@ -20,7 +20,7 @@ public class RandomBenchmark
 
     /// <summary>A fresh stream for each benchmark.</summary>
     [GlobalSetup]
-    public void Setup() => _draws = new RandomDraws(_key);
+    public void Setup() => _draws = new RandomDraws(_address);
 
     /// <summary>One Philox4x64-10 block (four draws' worth).</summary>
     [Benchmark]
@@ -28,7 +28,7 @@ public class RandomBenchmark
 
     /// <summary>One keyed draw by address, with no block reuse.</summary>
     [Benchmark]
-    public ulong KeyedDraw() => _key.Draw(_index++);
+    public ulong AddressDraw() => _address.Draw(_index++);
 
     /// <summary>One draw from a stream, reusing each block for four draws.</summary>
     [Benchmark]
@@ -36,7 +36,7 @@ public class RandomBenchmark
 
     /// <summary>Creating a stream for one entity and taking one draw: the per-entity cost.</summary>
     [Benchmark]
-    public ulong NewStreamAndDraw() => new RandomDraws(_key with { EntityId = _index++ }).NextUInt64();
+    public ulong NewStreamAndDraw() => new RandomDraws(_address with { EntityId = _index++ }).NextUInt64();
 
     /// <summary>A Bernoulli draw.</summary>
     [Benchmark]

@@ -171,6 +171,17 @@ public sealed class DrawAddressTests
     public void The_default_address_cannot_draw()
     {
         Assert.Throws<InvalidOperationException>(() => default(DrawAddress).Draw(0));
+        Assert.Throws<InvalidOperationException>(() => new RandomDraws(default));
+    }
+
+    [Fact]
+    public void An_address_built_from_the_default_without_a_slot_cannot_draw()
+    {
+        // `with` sets only the named fields, so the slot keeps the default's invalid 0.
+        var noSlot = default(DrawAddress) with { Turn = 5 };
+
+        Assert.Throws<InvalidOperationException>(() => noSlot.Draw(0));
+        Assert.Throws<InvalidOperationException>(() => new RandomDraws(noSlot));
     }
 
     private static Dictionary<ulong, ulong[]> RunDummySystem(IEnumerable<ulong> entities)

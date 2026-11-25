@@ -119,7 +119,7 @@ public static class FixedMath
 
     /// <summary>
     /// exp(-<paramref name="mu"/>) at 64 fractional bits (2^64 stands for 1), for a
-    /// non-negative <paramref name="mu"/>. Absolute error about 2^-62, so the result keeps
+    /// non-negative <paramref name="mu"/>. Absolute error at most 2^-62 (4 units of 2^-64), so the result keeps
     /// far more precision than a Q32 value when it is close to 0 or 1. Used by Poisson
     /// draws (ENG-009).
     /// </summary>

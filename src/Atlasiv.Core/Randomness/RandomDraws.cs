@@ -19,25 +19,18 @@ public sealed class RandomDraws
     private ulong _blockNumber = ulong.MaxValue;
     private Block4x64 _block;
 
-    /// <summary>Creates a stream that starts at <paramref name="firstDrawIndex"/>.</summary>
-    /// <param name="key">The stream's address.</param>
-    /// <param name="firstDrawIndex">The index of the first draw; 0 unless resuming a stream.</param>
-    /// <exception cref="ArgumentException"><paramref name="key"/> is the default address, which is not valid.</exception>
-    public RandomDraws(DrawAddress key, ulong firstDrawIndex = 0)
+    /// <summary>Creates a stream that starts at draw 0 of <paramref name="address"/>.</summary>
+    /// <exception cref="InvalidOperationException">The address is not valid (see <see cref="DrawAddress.EnsureValid"/>).</exception>
+    public RandomDraws(DrawAddress address)
     {
-        if (key.Turn < 1)
-        {
-            throw new ArgumentException("The default DrawAddress is not a valid address: turns count from 1.", nameof(key));
-        }
-
-        Key = key;
-        NextDrawIndex = firstDrawIndex;
+        address.EnsureValid();
+        Address = address;
     }
 
     /// <summary>The stream's address.</summary>
-    public DrawAddress Key { get; }
+    public DrawAddress Address { get; }
 
-    /// <summary>The index of the next draw: the number of draws used so far, when the stream started at 0.</summary>
+    /// <summary>The index of the next draw: the number of draws used so far.</summary>
     public ulong NextDrawIndex { get; private set; }
 
     /// <summary>The next draw: 64 uniformly distributed bits.</summary>
@@ -45,7 +38,7 @@ public sealed class RandomDraws
     {
         // Each Philox call yields four draws (DrawAddress layout); keep the block for the next three.
         var index = NextDrawIndex;
-        var input = Key.GeneratorInput(index);
+        var input = Address.GeneratorInput(index);
         var blockNumber = input.Counter.W0;
         if (blockNumber != _blockNumber)
         {
@@ -53,7 +46,10 @@ public sealed class RandomDraws
             _blockNumber = blockNumber;
         }
 
-        NextDrawIndex = checked(index + 1);
+        // Unreachable in practice (2^64 draws), but a wrap would repeat draw 0.
+        NextDrawIndex = index < ulong.MaxValue
+            ? index + 1
+            : throw new SimulationOverflowException("RandomDraws ran out of draw indices.");
         return _block[input.Word];
     }
 
