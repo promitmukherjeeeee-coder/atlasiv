@@ -27,7 +27,7 @@ Every job follows the same loop:
 ## J0 Repository and CI
 
 - A .NET solution containing three projects: `Atlasiv.Core` (class library, no Godot reference), `Atlasiv.Core.Tests` (xUnit with FsCheck) and `Atlasiv.Benchmarks` (BenchmarkDotNet).
-- Choose the .NET version: the long-term-support version that the current stable Godot 4.x .NET build supports. Record it, with the source checked, as a new decision record in `docs/adr/`.
+- Choose the .NET version: the long-term-support version that the current stable Godot 4.x .NET build supports. Record it, with the source checked, in `docs/decisions-log.md`.
 - A GitHub Actions workflow that builds and tests on Windows, Linux, macOS x64 and macOS ARM.
 - Deterministic build settings (warnings as errors, invariant culture in tests).
 - Done when one placeholder test passes on all four runners.
@@ -37,12 +37,13 @@ Every job follows the same loop:
 - 64-bit integer base units for counts, money and mass. A Q32.32 fixed-point type for rates, probabilities and other dimensionless values. Multiplication and division use `Int128` intermediates with checked overflow.
 - Round-half-to-even, plus stochastic rounding as a hook that J2 completes.
 - Overflow throws a simulation error. It never wraps silently.
+- Sums, aggregates and exposures accumulate in `Int128`. Overflow tests cover money through denomination change, high inflation, redenomination and large aggregate exposures (spec section 8, clarification 14).
 - Integer or table-based exp, log and sqrt, and the hazard primitive 1 − exp(−λΔt), all with published test vectors.
 - Done when arithmetic test vectors, overflow tests, rounding cases and FsCheck properties (commutativity, inverses within stated error) pass.
 
 ## J2 Random streams
 
-- A counter-based generator: each draw is a pure function of (world seed, turn, phase, system ID, entity ID, draw index). Pick Philox or a SplitMix64-style mixer, record the reason as a new decision record in `docs/adr/`, and publish its test vectors.
+- A counter-based generator: each draw is a pure function of (world seed, turn, phase, system ID, entity ID, draw index). Pick Philox or a SplitMix64-style mixer, record the reason in `docs/decisions-log.md`, and publish its test vectors.
 - Helpers: uniform integer, fixed-point uniform, Bernoulli, Poisson, stochastic rounding, time-to-event draw.
 - No `System.Random` anywhere (add an analyzer or test that fails the build if it appears).
 - Done when the test vectors match, and adding unrelated entities leaves existing draws unchanged.
@@ -51,9 +52,9 @@ Every job follows the same loop:
 
 - A signed 64-bit clock in seconds from the epoch, 1 January 10,000 BCE 00:00, proleptic Gregorian.
 - Astronomical year numbering internally. BCE/CE display with no year zero. Gregorian leap rule over the whole timeline.
-- The step table (8 steps and their phase counts) and the boundary calculator for every step's phase dates.
+- The step table (8 steps and their phase counts) and the boundary calculator for every step's phase dates. Turns and phases are half-open intervals [start, end), so a boundary instant belongs to the phase that starts there.
 - Rate time = elapsed seconds ÷ 31,556,952.
-- Done when BCE/CE round trips, leap years at 1600, 1700, 1900 and 2000, every step's phase dates across month ends and leap years, and FsCheck round-trip properties all pass.
+- Done when events exactly on a boundary land in the starting phase, BCE/CE round trips, leap years at 1600, 1700, 1900 and 2000, every step's phase dates across month ends and leap years, and FsCheck round-trip properties all pass.
 
 ## J4 Step controller
 
@@ -73,8 +74,8 @@ Every job follows the same loop:
 ## J6 Scheduler and resolution order
 
 - System registration with a declared stage, natural period and cadence. Systems run only in their stage, and only when due.
-- The 11-stage phase runner and the turn-end runner, in the order fixed by spec section 6.
-- A substep driver (1 to 4 calendar-exact subintervals) and a solver interface (iteration cap, tolerance, fallback).
+- The phase runner (phase stages 1 to 11) and the turn-end runner (turn-end stages 1 to 10), in the order fixed by spec section 6. "Step" always means turn length; "stage" always means a resolution slot (spec section 6, Terms).
+- A substep driver (1 to N calendar-exact subintervals, N configurable, default budget 4; escalation beyond the budget is deterministic and logged) and a solver interface (iteration cap, tolerance, fallback).
 - The propagator cache keyed by legal time step.
 - Done when stage order, due-period logic and time-step consistency (the same elapsed time split differently gives identical results, or documented bounded differences) pass.
 
@@ -87,6 +88,7 @@ Every job follows the same loop:
 
 ## J8 Input log, serializer and replay hash
 
+- A campaign manifest at the start of the input log: core build identifier, ruleset version, schema version, active first-party expansions with versions and load order, content hashes, execution configuration, world seed and initial-conditions hash. Replay refuses a different manifest.
 - An ordered input log of validated orders for each phase.
 - Canonical serialization: fixed field order, entities sorted by stable ID, little-endian integers.
 - XxHash128 per phase and turn end, and SHA-256 for save integrity.
@@ -98,6 +100,7 @@ Every job follows the same loop:
 - Dummy systems: a counter, a random walk and two mutually dependent systems.
 - A synthetic 1,000-turn scenario covering all eight steps and several transitions.
 - CI compares per-phase hashes across Windows, Linux, macOS x64 and macOS ARM, with and without parallelism.
+- Observer independence: runs that differ only in the observed entity, the selected entity or the player's controlled country (same orders) give identical hashes (clarification 12, test RC-05).
 - A convergence test: a dummy slow system at 50-year steps matches the 1-year run within a set tolerance.
 - Done when this, the confirmed exit test (identical replay hashes on two machines), passes in CI.
 

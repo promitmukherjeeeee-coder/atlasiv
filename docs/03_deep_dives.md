@@ -31,7 +31,7 @@ The four man-made grades apply per chain, so every chain climbs at most four gra
 ### 1.3 Rules
 
 - **Recipe graph.** Each recipe has inputs, outputs, energy, labor skill, tech, byproducts and waste.
-- **Unlock chain.** Discovering a deposit unlocks a research option. Research unlocks the recipe. An asset of the previous grade unlocks the next grade (bauxite, then smelting, then aluminium).
+- **Unlock chain.** Discovering a deposit makes a research option accessible. Research makes the recipe known. Operating it needs real capability (K50): an asset of the previous grade, plant, energy, skills and inputs, which is what makes the next grade feasible (bauxite, then smelting, then aluminium). Revised 25 Nov 2026: knowledge availability is kept separate from operational industrial capability.
 - **Co-products.** One deposit yields several materials (for example gallium from bauxite processing).
 - **Purity and quality.** Higher grades need higher purity, which needs more energy and better process control.
 - **Substitution.** Some inputs can be swapped at a cost in performance.
