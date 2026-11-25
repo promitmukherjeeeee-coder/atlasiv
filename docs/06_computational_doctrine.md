@@ -297,7 +297,7 @@ Scope: Final Master Vision 9.18, Mechanics section Q (K40 to K62, X16 to X27, A1
 
 ### 18.1 Formal axioms
 
-- **AX-1 Universal Emergent Causality.** For every authoritative quantity q, every change Δq in a phase is the sum of contributions from declared causal inputs registered in document D. A contribution with no declared input is a defect. No rule may take an era label, a technology name or a title as its only input. One declared exogenous input is allowed (owner decision 24 Nov 2026): the FTL horizon value (X28), registered in document D as an exogenous constant or schedule that feeds only valuation terms (AI and institutional utility, sponsor-share value, the FTL contribution score) and never a state change directly.
+- **AX-1 Universal Emergent Causality.** For every authoritative quantity q, every change Δq in a phase is the sum of contributions from declared causal inputs registered in document D. A contribution with no declared input is a defect. No rule may take an era label, a technology name or a title as its only input. One declared exogenous input is allowed (owner decision 24 Nov 2026): the FTL horizon value (X28), registered in document D as an exogenous constant or schedule that feeds only valuation terms (AI and institutional utility, sponsor-share value, the FTL contribution score) and never a state change directly. Its weight for each actor is scaled by that actor's credible awareness, feasible research paths and expected consequences of investment (revised 25 Nov 2026).
 - **AX-2 Knowledge–Capability Separation.** For actor a and capability c, the states access(a,c), understood(a,c) and capability(a,c,region,institution) are separate variables. A change in one changes another only through a declared transition (absorption K48, development K50). Access never implies understanding; understanding never implies capability.
 - **AX-3 Truth isolation.** No actor-facing computation (research, synthesis, AI decisions, publication) reads objective state except through an observation channel that writes an actor-knowledge record (ADR-015). Testable by instrumenting reads.
 - **AX-4 Non-duplication of evidence.** The effective evidence of a set of sources equals the evidence of their distinct origins after collapsing copies, translations, derivatives and citation cycles (K54).
@@ -429,10 +429,56 @@ New mechanics: K40 to K62 (23), X16 to X27 (12), A14 to A15 (2), U11 (1): 38 ent
 
 ### 20.6 Unresolved questions and unavailable sources
 
-- Addressed 24 Nov 2026 (draft 0.1.0 files, to be committed in Pass 2): interface\_registry.yaml (the machine-readable Interface Architecture Registry), mechanic\_registry.yaml (all 407 mechanics with owner, layer and declared links), state\_ownership.yaml (28 owner systems, the seed of document B) and system\_dependency\_map.yaml (system-level draft of document D). Plugin and open-source requirements: none, confirmed by the owner. Still open by design: variable-level inputs and outputs, which need each mechanic's 21-field specification (Pass 2b).
+- Addressed 24 Nov 2026 (draft 0.1.0 files, to be committed in Pass 2): interface\_registry.yaml (the machine-readable Interface Architecture Registry), mechanic\_registry.yaml (all 411 mechanics with owner, layer and declared links, updated 25 Nov 2026), state\_ownership.yaml (28 owner systems, the seed of document B) and system\_dependency\_map.yaml (system-level draft of document D). Plugin and open-source requirements: none, confirmed by the owner. Still open by design: variable-level inputs and outputs, which need each mechanic's 21-field specification (Pass 2b).
 - Owner decisions, all resolved 24 Nov 2026: no modding, plugins or extension API (ADR-032); BCE/CE; the FTL horizon value (X28, ADR-036); interface chart redrawn as v3.4 from the registry.
 - Engineering questions: event-store compaction over 10,000 turns; claim granularity in the digital era; how often synthesis runs; the offline renderer's quality bar for human evaluation.
 
 ### 20.7 Gameplay audit
 
 The risk is a system that is correct and invisible. The player must feel it through decisions: what to acquire and how, whom to hire or poach, which institutions to fund, what to publish or keep secret, when to build the production chain behind a known technology, and how to use history for legitimacy. Delegation follows the Autonomous Institutions model, so the player sets priorities and institutions do the volume. Test KH-100 is the gate; the Pass 7a prototype must show these choices matter before the full system is built.
+
+## 21. Reconciliation amendments (25 Nov 2026)
+
+Owner review of earlier simplifications. Governing principle: an abstraction is acceptable when it preserves meaningful strategic behaviour, not merely because it is easier to program; every remaining abstraction is labelled as a gameplay abstraction in its specification (template field 6).
+
+### 21.1 Audit result
+
+| Item | Before | Change | Where |
+| --- | --- | --- | --- |
+| City costs | Geometric rule | Derived from land, infrastructure, labour, administration and resources; any residual factor labelled | Vision 5, P6 |
+| One city per region | Rule only | Tied to fixed geographic region; administrative subdivision exploit test | Vision 5, P5 |
+| Adjacency | Fixed +3 and +1 | Accessibility, infrastructure and service capacity; old values as calibration reference | Vision 5, P8 |
+| Unlock wording | K1 fixed; R3 and Deep Dives 1.3 still "unlock" | Accessibility versus operational capability | R3, Deep Dives 1.3 |
+| Transformations | Projects grant forms and names | Projects enable institutional changes; forms and names derived | Vision 6, Mechanics M |
+| Cadence | Set by player proximity | Set only by simulation state; observer and country switching cannot change outcomes | Vision 8 and 9.9, A2, Pass 1 section 11 |
+| Substeps | Up to 4 | 4 is an initial budget; deterministic, logged escalation | Pass 1 section 10 |
+| Money | 64-bit minor units | 128-bit aggregation and overflow tests; per-currency scale decided in Pass 2 | Pass 1 section 8, E38 |
+| FTL | "Will eventually be discovered" | Powerful objective, not guaranteed; speculative physics; X28 weight scaled by awareness and feasibility | Vision 4.4, X28, AX-1 |
+| Historical validation | Cases as the suite | Plausible ranges and causal relationships, not reproduced outcomes | Vision pillar 1, A5 |
+| Economy | Balance sheets and issuance rules | Nominal and real separation, double-entry credit lifecycle, international financial institutions | Vision 9.4, E36 to E38, AX-9 |
+| AI | Hierarchical horizons | Explicit decision hierarchy across all actor levels; no single general AI | Vision 9.9, A13 |
+| Player workload | Military delegation, institutions, Advance Until | General mandate and delegation layer for every domain | Vision axioms, A16 |
+| Determinism record | Save versions and seed | Full campaign manifest; first-party expansions only, no mods | Vision 9.9, Pass 1 section 11 |
+
+### 21.2 Axiom
+
+- **AX-9 Nominal and real separation.** Ledgers for real stocks (people, goods, energy, capital equipment) close only through physical processes (R26). Financial ledgers close only through double-entry operations (E38). No operation on a financial ledger may write a real-stock ledger directly; purchases move real goods only through a market or allocation event that also moves the matching claim.
+
+### 21.3 Acceptance tests RC-01 to RC-12
+
+None has been run.
+
+1. RC-01: subdividing a region administratively never raises city capacity or lowers city costs.
+2. RC-02: city and town costs trace to land, infrastructure, labour, administration and resource inputs in the Causal Inspector; any residual factor is labelled.
+3. RC-03: improvement benefit falls when accessibility, infrastructure or service capacity falls, with no fixed adjacency bonus.
+4. RC-04: a project completion changes institutions; the form label follows from the resulting configuration.
+5. RC-05: identical runs differing only in the observed entity, the selected entity or the player's controlled country (with identical orders) give identical hashes.
+6. RC-06: a stiff test system exceeds the substep budget deterministically and logs it; results are identical across machines.
+7. RC-07: money sums survive extreme inflation, redenomination and aggregate exposures without overflow.
+8. RC-08: printing money never changes any real-stock ledger directly.
+9. RC-09: a loan, repayment, restructuring, default and write-down each balance every affected balance sheet.
+10. RC-10: a world bank lends only from its funding within its mandate and records credit losses.
+11. RC-11: in prehistory the FTL horizon value has no measurable effect on any actor's decisions.
+12. RC-12: a campaign with mandates and delegation runs a full era without compulsory per-phase management, and a player can still intervene in any domain.
+
+Counts after this section: mechanics add E36, E37, E38 and A16 (4); axioms 9; ADRs now 44; acceptance tests add 12.

@@ -5,7 +5,7 @@ namespace Atlasiv.Core.Tests;
 
 /// <summary>
 /// Hard rule 2: overflow is an error, never a silent wrap. The whole build
-/// compiles with checked arithmetic (ADR-041), so plain integer operations
+/// compiles with checked arithmetic (ENG-003), so plain integer operations
 /// throw on overflow unless code explicitly opts out with <c>unchecked</c>.
 /// </summary>
 public sealed class OverflowCheckingTests
