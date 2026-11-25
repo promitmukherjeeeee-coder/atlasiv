@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Atlasiv.Core.Numerics;
 
 namespace Atlasiv.Core.Time;
 
@@ -52,11 +53,11 @@ public readonly record struct DisplayYear
     public long Astronomical => Era == CalendarEra.Ce ? Number : -_numberMinusOne;
 
     /// <summary>The displayed year for astronomical year <paramref name="astronomicalYear"/>.</summary>
-    /// <exception cref="OverflowException">The year is <see cref="long.MinValue"/>, whose BCE number does not fit in 64 bits.</exception>
+    /// <exception cref="SimulationOverflowException">The year is <see cref="long.MinValue"/>, whose BCE number does not fit in 64 bits.</exception>
     public static DisplayYear FromAstronomical(long astronomicalYear) =>
         astronomicalYear >= 1
             ? new DisplayYear(astronomicalYear, CalendarEra.Ce)
-            : new DisplayYear(1 - astronomicalYear, CalendarEra.Bce);
+            : new DisplayYear(WideMath.ToInt64(1 - (Int128)astronomicalYear, "DisplayYear.FromAstronomical"), CalendarEra.Bce);
 
     /// <summary>
     /// The year as text, such as "1066 CE" or "10,000 BCE". Numbers of five or more digits

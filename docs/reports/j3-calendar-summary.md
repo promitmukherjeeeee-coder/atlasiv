@@ -41,7 +41,9 @@ The usual Gregorian rule applies in every year, BCE included: a year divisible b
 
 ## Turns and phases
 
-There are eight steps (turn lengths). Every turn and phase starts at midnight on an exact calendar date, so month lengths and leap days come out right. Turns of a year or longer start on any 1 January, not only in round years. A 50-year turn may start in 1901.
+There are eight steps; a step is how long each turn lasts. Every turn and phase starts at midnight on an exact calendar date, so month lengths and leap days come out right.
+
+**For your yes or no:** turns of a year or longer can start on any 1 January, not only in round years, so a 50-year turn may start in 1901. The spec says only "every turn starts on 1 January". Section 4 says a switch to a slower step waits at most a year, which would not be true if 50-year turns had to start in years divisible by 50. If you want round-year starts instead, it is a small change.
 
 | Step | Phases | Example turn | Phase start dates (then the next turn) |
 | --- | --- | --- | --- |
@@ -76,7 +78,7 @@ Each turn and phase **includes its first moment but not its last**. Something th
 - An event at 00:00 on 1 July 2000, in a 1-year turn, is in phase 3 (the one starting 1 July). One second earlier, 23:59:59 on 30 June, is still phase 2.
 - An event at 00:00 on the first day of a new turn belongs to phase 1 of the new turn, not to the old one. The old turn ends first.
 
-A randomised test checks this across thousands of turns of every step, over billions of years. Every second belongs to exactly one phase, and the phases fit together with no gaps and no overlaps.
+A randomised test checks this on thousands of turns of every step, half of them between 10,001 BCE and 3000 CE and half up to about 2 billion years away. Every second belongs to exactly one phase, and the phases fit together with no gaps and no overlaps.
 
 ## Rate time
 
@@ -88,7 +90,7 @@ Rates are stored per year. When a rate is applied over a stretch of time, the ti
 | 366 days (leap year) | 1.00207 years |
 | 1 day | 0.00274 years |
 
-A leap day therefore counts in full, and splitting the same time into different turns gives the same total.
+A leap day therefore counts in full. Seconds always add up exactly, however a period is split into turns. Converting a stretch to years rounds it to about 0.007 seconds, so adding up years converted turn by turn can differ from converting the whole period at once by that tiny amount per turn. The hazard calculations built in J1 work from the exact seconds, so they are not affected.
 
 ## Not covered by J3
 

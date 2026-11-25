@@ -55,11 +55,19 @@ public static class StepTable
     public static int PhaseCount(TurnStep step) => Phases[Index(step)];
 
     /// <summary>
-    /// The phase length in calendar months for steps of two months or more per phase; 0 for
-    /// the 1-month step, whose phases follow day numbers instead.
+    /// The phase length in calendar months. Every step except 1 month has phases of whole
+    /// months; the 1-month step's phases follow day numbers instead (see <see cref="TurnDates"/>).
     /// </summary>
-    internal static int MonthsPerPhase(TurnStep step) =>
-        step == TurnStep.OneMonth ? 0 : MonthsPerTurn(step) / PhaseCount(step);
+    /// <exception cref="ArgumentOutOfRangeException">The step is the 1-month step, or not one of the eight.</exception>
+    internal static int MonthsPerPhase(TurnStep step)
+    {
+        if (step == TurnStep.OneMonth)
+        {
+            throw new ArgumentOutOfRangeException(nameof(step), step, "1-month phases are not whole months.");
+        }
+
+        return MonthsPerTurn(step) / PhaseCount(step);
+    }
 
     private static int Index(TurnStep step)
     {

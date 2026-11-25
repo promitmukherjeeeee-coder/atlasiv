@@ -40,10 +40,15 @@ public sealed class StepTableTests
     [InlineData(TurnStep.TwoYears, 6)]
     [InlineData(TurnStep.OneYear, 3)]
     [InlineData(TurnStep.SixMonths, 2)]
-    [InlineData(TurnStep.OneMonth, 0)]   // the 1-month step uses day numbers instead
     public void Phases_are_whole_months_except_on_the_1_month_step(TurnStep step, int monthsPerPhase)
     {
         Assert.Equal(monthsPerPhase, StepTable.MonthsPerPhase(step));
+    }
+
+    [Fact]
+    public void The_1_month_step_has_no_phase_length_in_months()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => StepTable.MonthsPerPhase(TurnStep.OneMonth));
     }
 
     [Fact]

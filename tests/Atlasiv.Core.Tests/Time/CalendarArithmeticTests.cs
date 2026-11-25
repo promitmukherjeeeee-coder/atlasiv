@@ -1,4 +1,5 @@
 using System;
+using Atlasiv.Core.Numerics;
 using Atlasiv.Core.Time;
 using FsCheck;
 using FsCheck.Fluent;
@@ -26,8 +27,10 @@ public sealed class CalendarArithmeticTests
     [InlineData(-10_000L, 12, 31, -1L)]   // the day before the epoch
     public void Days_since_epoch_vectors(long year, int month, int day, long days)
     {
-        Assert.Equal(days, Calendar.DaysSinceEpoch(year, month, day));
-        Assert.Equal((year, month, day), Calendar.DateFromDaysSinceEpoch(days));
+        var date = new CalendarDate(year, month, day);
+
+        Assert.Equal(days, Calendar.DaysSinceEpoch(date));
+        Assert.Equal(date, Calendar.DateFromDaysSinceEpoch(days));
     }
 
     [Fact]
@@ -39,8 +42,10 @@ public sealed class CalendarArithmeticTests
             {
                 var expected = DaysFromEpochTo1Ce + (date - DateTime.MinValue).Days;
 
-                Assert.Equal(expected, Calendar.DaysSinceEpoch(date.Year, date.Month, date.Day));
-                Assert.Equal((date.Year, date.Month, date.Day), Calendar.DateFromDaysSinceEpoch(expected));
+                var calendarDate = new CalendarDate(date.Year, date.Month, date.Day);
+
+                Assert.Equal(expected, Calendar.DaysSinceEpoch(calendarDate));
+                Assert.Equal(calendarDate, Calendar.DateFromDaysSinceEpoch(expected));
                 if (date.Year == 9_999 && date.Month == 12 && date.Day == 31)
                 {
                     break;
@@ -59,20 +64,16 @@ public sealed class CalendarArithmeticTests
             select new DateTime(year, month, day);
 
         TimeGen.Check(Prop.ForAll(Arb.From(gen), date =>
-            Calendar.DaysSinceEpoch(date.Year, date.Month, date.Day)
+            Calendar.DaysSinceEpoch(new CalendarDate(date.Year, date.Month, date.Day))
                 == DaysFromEpochTo1Ce + (date - DateTime.MinValue).Days));
     }
 
     [Fact]
     public void Day_counts_and_dates_round_trip_over_a_huge_range()
     {
+        // CalendarDate refuses impossible days, so building one checks the date is real.
         TimeGen.Check(Prop.ForAll(Arb.From(TimeGen.Days()), days =>
-        {
-            var (year, month, day) = Calendar.DateFromDaysSinceEpoch(days);
-            return month is >= 1 and <= 12
-                && day >= 1 && day <= Calendar.DaysInMonth(year, month)
-                && Calendar.DaysSinceEpoch(year, month, day) == days;
-        }));
+            Calendar.DaysSinceEpoch(Calendar.DateFromDaysSinceEpoch(days)) == days));
     }
 
     [Fact]
@@ -80,11 +81,12 @@ public sealed class CalendarArithmeticTests
     {
         TimeGen.Check(Prop.ForAll(Arb.From(TimeGen.Days()), days =>
         {
-            var (year, month, day) = Calendar.DateFromDaysSinceEpoch(days);
+            var date = Calendar.DateFromDaysSinceEpoch(days);
+            var (year, month, day) = (date.Year, date.Month, date.Day);
             var next = Calendar.DateFromDaysSinceEpoch(days + 1);
-            var expected = day < Calendar.DaysInMonth(year, month) ? (year, month, day + 1)
-                : month < 12 ? (year, month + 1, 1)
-                : (year + 1, 1, 1);
+            var expected = day < Calendar.DaysInMonth(year, month) ? new CalendarDate(year, month, day + 1)
+                : month < 12 ? new CalendarDate(year, month + 1, 1)
+                : new CalendarDate(year + 1, 1, 1);
             return next == expected;
         }));
     }
@@ -105,7 +107,17 @@ public sealed class CalendarArithmeticTests
     [Fact]
     public void Absurd_years_overflow_instead_of_wrapping()
     {
-        Assert.Throws<OverflowException>(() => Calendar.DaysSinceEpoch(long.MaxValue / 2, 1, 1));
-        Assert.Throws<OverflowException>(() => Calendar.AddMonths(long.MaxValue / 2, 1, 0));
+        Assert.Throws<SimulationOverflowException>(() => Calendar.DaysSinceEpoch(new CalendarDate(long.MaxValue / 2, 1, 1)));
+        Assert.Throws<SimulationOverflowException>(() => Calendar.DaysSinceEpoch(new CalendarDate(long.MinValue, 1, 1)));
+        Assert.Throws<SimulationOverflowException>(() => Calendar.AddMonths(long.MaxValue, 12, 1));
+        Assert.Throws<SimulationOverflowException>(() => Calendar.AddMonths(long.MinValue, 1, -1));
+    }
+
+    [Theory]
+    [InlineData(long.MinValue)]
+    [InlineData(long.MaxValue)]
+    public void Every_64_bit_day_count_has_a_date(long days)
+    {
+        Assert.Equal(days, Calendar.DaysSinceEpoch(Calendar.DateFromDaysSinceEpoch(days)));
     }
 }

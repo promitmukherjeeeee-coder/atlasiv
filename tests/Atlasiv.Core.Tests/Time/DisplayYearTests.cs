@@ -1,4 +1,5 @@
 using System;
+using Atlasiv.Core.Numerics;
 using Atlasiv.Core.Time;
 using Xunit;
 
@@ -39,6 +40,15 @@ public sealed class DisplayYearTests
         var oneCe = new DisplayYear(1, CalendarEra.Ce).Astronomical;
 
         Assert.Equal(new DisplayYear(1, CalendarEra.Bce), DisplayYear.FromAstronomical(oneCe - 1));
+    }
+
+    [Fact]
+    public void The_extreme_years_convert_or_overflow_cleanly()
+    {
+        Assert.Equal(long.MaxValue, DisplayYear.FromAstronomical(long.MaxValue).Number);
+        Assert.Equal(long.MaxValue, DisplayYear.FromAstronomical(long.MinValue + 2).Number);   // 1 - (MinValue + 2) = MaxValue
+        Assert.Throws<SimulationOverflowException>(() => DisplayYear.FromAstronomical(long.MinValue + 1));
+        Assert.Throws<SimulationOverflowException>(() => DisplayYear.FromAstronomical(long.MinValue));
     }
 
     [Fact]

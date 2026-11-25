@@ -114,6 +114,8 @@ public sealed class InstantTests
         Assert.Throws<SimulationOverflowException>(() => new Instant(long.MinValue).AddSeconds(-1));
         Assert.Throws<SimulationOverflowException>(() => new Instant(long.MinValue).SecondsSince(new Instant(1)));
         Assert.Throws<SimulationOverflowException>(() => Instant.FromDate(new CalendarDate(400_000_000_000L, 1, 1)));
+        Assert.Throws<SimulationOverflowException>(() => Instant.FromDate(new CalendarDate(long.MaxValue / 2, 1, 1)));
+        Assert.Throws<SimulationOverflowException>(() => Instant.FromDate(new CalendarDate(long.MinValue, 1, 1)));
     }
 
     [Fact]

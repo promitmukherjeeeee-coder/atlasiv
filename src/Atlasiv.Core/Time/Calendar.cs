@@ -1,4 +1,5 @@
 using System;
+using Atlasiv.Core.Numerics;
 
 namespace Atlasiv.Core.Time;
 
@@ -41,54 +42,54 @@ public static class Calendar
     // Day-counting core: Howard Hinnant's days_from_civil and civil_from_days
     // ("chrono-Compatible Low-Level Date Algorithms"), which count days from 1 March of
     // astronomical year 0 in 400-year cycles, with years starting in March so the leap day
-    // falls at the end. Integer only; checked arithmetic throws on overflow (ENG-010).
+    // falls at the end. Integer only. The work is done in 128 bits, so only the final
+    // 64-bit result can overflow, and that raises a SimulationOverflowException naming the
+    // operation (ENG-004 decision 4, ENG-010).
 
     /// <summary>Days from 1 March, year 0, to the epoch (1 January 10,000 BCE): negative.</summary>
     private const long EpochFromMarchYear0 = (-25 * DaysPer400Years) + 306;
 
-    /// <summary>
-    /// Whole days from the epoch to <paramref name="year"/>-<paramref name="month"/>-<paramref name="day"/>.
-    /// The date must be valid; callers check it.
-    /// </summary>
-    /// <exception cref="OverflowException">The year is so far out that the day count leaves the 64-bit range.</exception>
-    internal static long DaysSinceEpoch(long year, int month, int day)
+    /// <summary>Whole days from the epoch to <paramref name="date"/>; negative before it.</summary>
+    /// <exception cref="SimulationOverflowException">The year is so far out that the day count leaves the 64-bit range.</exception>
+    internal static long DaysSinceEpoch(CalendarDate date)
     {
-        var y = month <= 2 ? year - 1 : year;
+        var y = date.Month <= 2 ? (Int128)date.Year - 1 : date.Year;
         var era = FloorDivide(y, 400);
-        var yearOfEra = y - (era * 400);                                  // 0 to 399
-        var monthFromMarch = (month + 9) % 12;                            // March = 0
-        var dayOfYear = (((153 * monthFromMarch) + 2) / 5) + day - 1;     // 0 to 365
+        var yearOfEra = y - (era * 400);                                       // 0 to 399
+        var monthFromMarch = (date.Month + 9) % 12;                            // March = 0
+        var dayOfYear = (((153 * monthFromMarch) + 2) / 5) + date.Day - 1;     // 0 to 365
         var dayOfEra = (yearOfEra * 365) + (yearOfEra / 4) - (yearOfEra / 100) + dayOfYear;
-        return (era * DaysPer400Years) + dayOfEra - EpochFromMarchYear0;
+        return WideMath.ToInt64((era * DaysPer400Years) + dayOfEra - EpochFromMarchYear0, "Calendar.DaysSinceEpoch");
     }
 
-    /// <summary>The date (astronomical year, month 1 to 12, day 1 to 31) <paramref name="days"/> whole days after the epoch.</summary>
-    /// <exception cref="OverflowException">The day count is so large that the date leaves the 64-bit range.</exception>
-    internal static (long Year, int Month, int Day) DateFromDaysSinceEpoch(long days)
+    /// <summary>The date <paramref name="days"/> whole days after (or, if negative, before) the epoch.</summary>
+    internal static CalendarDate DateFromDaysSinceEpoch(long days)
     {
-        var z = days + EpochFromMarchYear0;
+        var z = (Int128)days + EpochFromMarchYear0;
         var era = FloorDivide(z, DaysPer400Years);
-        var dayOfEra = z - (era * DaysPer400Years);                       // 0 to 146,096
+        var dayOfEra = z - (era * DaysPer400Years);                            // 0 to 146,096
         var yearOfEra = (dayOfEra - (dayOfEra / 1_460) + (dayOfEra / 36_524) - (dayOfEra / 146_096)) / 365;
         var dayOfYear = dayOfEra - ((365 * yearOfEra) + (yearOfEra / 4) - (yearOfEra / 100));
         var monthFromMarch = ((5 * dayOfYear) + 2) / 153;
         var day = (int)(dayOfYear - (((153 * monthFromMarch) + 2) / 5) + 1);
         var month = (int)(monthFromMarch < 10 ? monthFromMarch + 3 : monthFromMarch - 9);
-        var year = (yearOfEra + (era * 400)) + (month <= 2 ? 1 : 0);
-        return (year, month, day);
+        var year = yearOfEra + (era * 400) + (month <= 2 ? 1 : 0);             // |year| < 2^56 for any 64-bit day count
+        return new CalendarDate((long)year, month, day);
     }
 
     /// <summary>The year and month <paramref name="months"/> calendar months after (or before) the given one.</summary>
-    /// <exception cref="OverflowException">The result is so far out that the month count leaves the 64-bit range.</exception>
+    /// <exception cref="SimulationOverflowException">The resulting year leaves the 64-bit range.</exception>
     internal static (long Year, int Month) AddMonths(long year, int month, long months)
     {
-        var total = (year * 12) + (month - 1) + months;
+        var total = ((Int128)year * 12) + (month - 1) + months;
         var resultYear = FloorDivide(total, 12);
-        return (resultYear, (int)(total - (resultYear * 12)) + 1);
+        return (WideMath.ToInt64(resultYear, "Calendar.AddMonths"), (int)(total - (resultYear * 12)) + 1);
     }
 
     /// <summary>Division rounding towards minus infinity, for a positive divisor.</summary>
-    internal static long FloorDivide(long dividend, long divisor)
+    internal static long FloorDivide(long dividend, long divisor) => (long)FloorDivide((Int128)dividend, divisor);
+
+    private static Int128 FloorDivide(Int128 dividend, Int128 divisor)
     {
         var quotient = dividend / divisor;
         return dividend % divisor < 0 ? quotient - 1 : quotient;

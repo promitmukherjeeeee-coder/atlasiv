@@ -249,10 +249,11 @@ public sealed class TurnDatesTests
         }));
     }
 
-    // A random step and a random valid start for it, over a wide range of years.
+    // A random step and a random valid start for it: half on the real timeline, half up to
+    // about 2 billion years either side.
     private static Gen<TurnDates> TurnGen() =>
         from step in Gen.Elements(StepTable.All.ToArray())
-        from year in Gen.Choose(-2_000_000, 2_000_000)
+        from year in Gen.OneOf(Gen.Choose(-10_000, 3_000), Gen.Choose(-2_000_000_000, 2_000_000_000))
         from month in Gen.Choose(1, 12)
         let startMonth = step == TurnStep.OneMonth ? month
             : step == TurnStep.SixMonths ? (month <= 6 ? 1 : 7)

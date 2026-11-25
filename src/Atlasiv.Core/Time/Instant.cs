@@ -26,18 +26,13 @@ public readonly record struct Instant : IComparable<Instant>
     public long SecondsSinceEpoch { get; }
 
     /// <summary>The calendar day this instant falls on.</summary>
-    public CalendarDate Date
-    {
-        get
-        {
-            var (year, month, day) = Calendar.DateFromDaysSinceEpoch(Calendar.FloorDivide(SecondsSinceEpoch, Calendar.SecondsPerDay));
-            return new CalendarDate(year, month, day);
-        }
-    }
+    public CalendarDate Date => Calendar.DateFromDaysSinceEpoch(WholeDaysSinceEpoch);
 
     /// <summary>Seconds since midnight, 0 to 86,399.</summary>
-    public int SecondOfDay =>
-        (int)(SecondsSinceEpoch - (Calendar.FloorDivide(SecondsSinceEpoch, Calendar.SecondsPerDay) * Calendar.SecondsPerDay));
+    public int SecondOfDay => (int)(SecondsSinceEpoch - (WholeDaysSinceEpoch * Calendar.SecondsPerDay));
+
+    // Whole days from the epoch to this instant's midnight, rounding down (so before the epoch too).
+    private long WholeDaysSinceEpoch => Calendar.FloorDivide(SecondsSinceEpoch, Calendar.SecondsPerDay);
 
     /// <summary>The hour, 0 to 23.</summary>
     public int Hour => SecondOfDay / 3_600;
@@ -64,7 +59,7 @@ public readonly record struct Instant : IComparable<Instant>
         ArgumentOutOfRangeException.ThrowIfNegative(second);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(second, 59);
 
-        var days = Calendar.DaysSinceEpoch(date.Year, date.Month, date.Day);
+        var days = Calendar.DaysSinceEpoch(date);
         var seconds = ((Int128)days * Calendar.SecondsPerDay) + (hour * 3_600) + (minute * 60) + second;
         return new Instant(WideMath.ToInt64(seconds, "Instant.FromDate"));
     }
