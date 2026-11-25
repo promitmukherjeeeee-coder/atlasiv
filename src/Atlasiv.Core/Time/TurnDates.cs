@@ -115,6 +115,13 @@ public readonly record struct TurnDates
         return (int)(monthsIn / StepTable.MonthsPerPhase(Step)) + 1;
     }
 
+    /// <summary>The turn as text, such as "OneMonth turn from 1 September 9999 BCE".</summary>
+    /// <remarks>
+    /// Overrides the record's generated text, which prints every property: <see cref="Next"/>
+    /// is another turn, so that text never ends.
+    /// </remarks>
+    public override string ToString() => Step + " turn from " + Start.Date;
+
     private Instant PhaseStart(int phase) =>
         Step == TurnStep.OneMonth
             ? Start.AddSeconds((phase - 1) * OneMonthPhaseDays * Calendar.SecondsPerDay)

@@ -260,6 +260,16 @@ public sealed class TurnDatesTests
             : 1
         select TurnDates.Starting(step, Instant.FromDate(new CalendarDate(year, startMonth, 1)));
 
+    [Fact]
+    public void A_turn_reads_as_its_step_and_start_date()
+    {
+        // Regression: the record's generated text printed every property, including Next (another
+        // turn), so it recursed until the stack overflowed and crashed any failing assertion.
+        Assert.Equal(
+            "OneMonth turn from 1 September 9999 BCE",
+            TurnDates.Starting(TurnStep.OneMonth, At("-9998-09-01")).ToString());
+    }
+
     private static Instant At(string date)
     {
         var negative = date.StartsWith('-');
