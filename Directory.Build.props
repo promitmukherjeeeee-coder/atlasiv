@@ -23,4 +23,11 @@
     <!-- No culture-specific formatting or parsing anywhere. -->
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
+
+  <!-- Hard rule 3: no System.Random or other unseeded randomness in any project. Using a symbol
+       listed in BannedSymbols.txt is warning RS0030, which fails the build. See ENG-008. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
 </Project>

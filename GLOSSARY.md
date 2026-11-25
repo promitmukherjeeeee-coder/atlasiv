@@ -103,3 +103,24 @@ A number leaving its representable range. It is an error that stops the commit, 
 **Integrated hazard**:
 The sum of rate × elapsed time over the pieces of an interval, H. The chance that the event happens within the interval is 1 − exp(−H).
 _Avoid_: Cumulative probability (H is not a probability)
+
+## Randomness
+
+**World seed**:
+The 64-bit number, recorded in the campaign manifest, from which every random draw in a campaign follows.
+_Avoid_: Random seed (there is only one)
+
+**Draw address**:
+The (world seed, turn, draw slot, substep, system, entity) that names one random stream. Each draw is a pure function of its address and its draw index, never of iteration order.
+_Avoid_: RNG state, generator (there is no per-system state)
+
+**Draw slot**:
+Where in a turn a draw is made: phase 1 to N, or the turn end, which has its own fixed slot after every phase.
+_Avoid_: Stage (a stage is a resolution slot; a draw slot is a phase or the turn end)
+
+**Draw index**:
+The position of a draw within one address's stream, counting from 0.
+
+**Time-to-event draw**:
+A random waiting time until an event with a known rate, drawn once and scheduled in the event queue, and redrawn only when the rate changes.
+_Avoid_: Per-phase check

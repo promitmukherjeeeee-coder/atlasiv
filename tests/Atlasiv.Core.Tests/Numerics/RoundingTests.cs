@@ -9,7 +9,7 @@ namespace Atlasiv.Core.Tests.Numerics;
 
 /// <summary>
 /// Rounding to whole base units: round-half-to-even by default, and the stochastic
-/// rounding hook, which takes a 64-bit uniform draw that J2's random streams will supply.
+/// rounding hook, which takes a 64-bit uniform draw from a keyed random stream (RandomDraws).
 /// </summary>
 public sealed class RoundingTests
 {

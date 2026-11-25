@@ -1,0 +1,3 @@
+T:System.Random;Hard rule 3: use Atlasiv.Core.Randomness (counter-based, keyed streams) instead. System.Random's algorithm can change between .NET versions.
+T:System.Security.Cryptography.RandomNumberGenerator;Hard rule 3: unseeded randomness breaks replay. Use Atlasiv.Core.Randomness.
+M:System.Guid.NewGuid;Hard rule 3: random identifiers break replay. Derive identifiers from stable state.

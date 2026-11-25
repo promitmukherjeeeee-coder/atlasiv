@@ -70,7 +70,7 @@ public sealed partial class NoFloatingPointTests
         return Forbidden().IsMatch(code);
     }
 
-    private static string RepositoryRoot()
+    internal static string RepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Atlasiv.slnx")))
