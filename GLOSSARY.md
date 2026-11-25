@@ -70,3 +70,36 @@ The record of what happened in a turn, produced in the last turn-end stage, sepa
 
 **Interruption class**:
 Whether an event resolves on its own (informational) or halts Advance Until (decision-critical).
+
+## Numerics
+
+**Base unit**:
+The smallest whole unit in which a count, an amount of money or a mass is stored, as a 64-bit integer (for example one person, or one minor unit of currency).
+
+**Q32**:
+The Q32.32 fixed-point format for rates, probabilities and other dimensionless values: a 64-bit integer read as that integer divided by 2^32.
+_Avoid_: Fixed (ambiguous), float, decimal
+
+**Round half to even**:
+The default rounding: a value goes to the nearest whole number, and an exact half goes to the even neighbour.
+_Avoid_: Banker's rounding (same thing; use one name)
+
+**Stochastic rounding**:
+Rounding down or up at random, going up with probability equal to the fractional part, so the expected result equals the exact value. Used only where a rule says so.
+
+**Accumulator**:
+A running total of base-unit amounts held in a 128-bit integer, used for sums, aggregates and exposures. Read back as 64 bits only where a 64-bit value is needed.
+_Avoid_: Sum (too generic), aggregate (overloaded)
+
+**Exposure**:
+The value of a position: quantity × price, in minor units. Exposures are added up in an accumulator, because a single one can exceed the 64-bit range.
+
+**Simulation overflow**:
+A number leaving its representable range. It is an error that stops the commit, never a wrap or a clip.
+
+**Rate year**:
+31,556,952 seconds (365.2425 days). Per-year rates apply to elapsed seconds divided by this length.
+
+**Integrated hazard**:
+The sum of rate × elapsed time over the pieces of an interval, H. The chance that the event happens within the interval is 1 − exp(−H).
+_Avoid_: Cumulative probability (H is not a probability)

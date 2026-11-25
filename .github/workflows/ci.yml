@@ -17,6 +17,7 @@ jobs:
   build-and-test:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.may-be-missing == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -33,6 +34,9 @@ jobs:
           - name: macOS ARM64
             os: macos-latest
             arch: ARM64
+            # GitHub sometimes has no ARM machine free. A missing machine is not a
+            # failure; a test failure on a machine that ran still is ("CI result" below).
+            may-be-missing: true
     env:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -70,3 +74,47 @@ jobs:
           name: test-results-${{ matrix.os }}
           path: TestResults
           if-no-files-found: ignore
+
+  # The verdict for the whole run. A runner passes only if its Test step ran and
+  # succeeded. A runner listed in MAY_BE_MISSING that never got a machine is a
+  # warning, not a failure. Anything else (including a missing machine for any
+  # other runner, or fewer runners than expected) fails.
+  ci-result:
+    name: CI result
+    needs: build-and-test
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_RUNNERS: 4
+      MAY_BE_MISSING: macOS ARM64
+    steps:
+      - name: Check every runner
+        shell: bash
+        run: |
+          gh api --paginate             "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs"             --jq '.jobs[] | select(.name != "CI result")
+                  | [.name, (.runner_name // ""), ([.steps[]? | select(.name == "Test") | .conclusion][0] // "none")]
+                  | join("|")' > jobs.txt
+          failed=0
+          count=0
+          while IFS='|' read -r name runner test; do
+            count=$((count + 1))
+            if [ "$test" = "success" ]; then
+              echo "$name: tests passed"
+            elif [ -z "$runner" ] && [ "$name" = "$MAY_BE_MISSING" ]; then
+              echo "::warning::$name: GitHub had no machine available, so it did not run. Not counted as a failure."
+            elif [ -z "$runner" ]; then
+              echo "::error::$name: no machine was available"
+              failed=1
+            else
+              echo "::error::$name: tests did not pass (Test step: $test)"
+              failed=1
+            fi
+          done < jobs.txt
+          if [ "$count" -ne "$EXPECTED_RUNNERS" ]; then
+            echo "::error::Expected $EXPECTED_RUNNERS runners, found $count"
+            failed=1
+          fi
+          exit $failed
