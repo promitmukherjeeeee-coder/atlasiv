@@ -73,12 +73,12 @@ public static class FixedMath
     }
 
     /// <summary>The natural logarithm of <paramref name="x"/>.</summary>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> is zero or negative.</exception>
+    /// <exception cref="SimulationDomainException"><paramref name="x"/> is zero or negative.</exception>
     public static Q32 Log(Q32 x)
     {
         if (x.Raw <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(x), x, "The logarithm needs a positive value.");
+            throw new SimulationDomainException(nameof(x), x, "The logarithm needs a positive value.");
         }
 
         // x = m * 2^e with m in [1, 2), held at 62 fractional bits.
@@ -101,12 +101,12 @@ public static class FixedMath
     }
 
     /// <summary>The square root of <paramref name="x"/>, correctly rounded.</summary>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> is negative.</exception>
+    /// <exception cref="SimulationDomainException"><paramref name="x"/> is negative.</exception>
     public static Q32 Sqrt(Q32 x)
     {
         if (x.Raw < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(x), x, "The square root needs a non-negative value.");
+            throw new SimulationDomainException(nameof(x), x, "The square root needs a non-negative value.");
         }
 
         // sqrt(raw / 2^32) * 2^32 = sqrt(raw * 2^32).

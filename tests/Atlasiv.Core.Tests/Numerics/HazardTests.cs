@@ -75,8 +75,8 @@ public sealed class HazardTests
     [Fact]
     public void Negative_rates_and_times_are_errors()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => Hazard.Probability(-Q32.Epsilon, Year));
-        Assert.Throws<ArgumentOutOfRangeException>(() => Hazard.Probability(Q32.One, -1));
+        Assert.Throws<SimulationDomainException>(() => Hazard.Probability(-Q32.Epsilon, Year));
+        Assert.Throws<SimulationDomainException>(() => Hazard.Probability(Q32.One, -1));
     }
 
     /// <summary>

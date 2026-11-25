@@ -20,7 +20,7 @@ Engineering decisions taken while building ATLASIV, each with its alternatives a
 3. The repository's former records move here:
    - former repo ADR-040 (.NET 10) becomes ENG-002;
    - former repo ADR-041 (build, test and CI settings) becomes ENG-003;
-   - former repo ADR-039 (owner's time-rule rulings of 24 Nov 2026) is superseded by spec sections 3, 6 and 15, which now contain those rulings. The one ruling the spec does not yet contain is kept below under "Owner rulings not yet in the spec".
+   - former repo ADR-039 (owner's time-rule rulings of 24 Nov 2026) is superseded by spec sections 3, 6 and 15, which now contain those rulings. Its one ruling the spec did not yet contain (turn numbering) was added to spec section 15 as clarification 16 on 25 Nov 2026, at the owner's request.
 4. Code comments cite `ENG-` numbers for engineering decisions and `ADR-` numbers only for registry decisions.
 
 ### Alternatives considered
@@ -79,6 +79,7 @@ Related: ADR-001, ADR-002, ENG-003.
 6. **Checked arithmetic everywhere (owner decision, 24 Nov 2026).** `CheckForOverflowUnderflow` is on for every project, so any integer operation that overflows throws an error instead of silently wrapping (hard rule 2). Code that must wrap on purpose, such as a hash or random-number mixer, marks that code `unchecked` explicitly, where a reviewer can see it. Tests confirm that addition, multiplication and narrowing conversions throw on overflow.
 7. **Line endings.** `.gitattributes` stores and checks out every text file with LF endings on every machine, so a file that a test reads is byte-identical on Windows, Linux and macOS.
 8. **CI matrix.** One GitHub Actions workflow (`.github/workflows/ci.yml`) restores, builds in Release and tests on `windows-latest`, `ubuntu-latest`, `macos-15-intel` (macOS x64) and `macos-latest` (macOS ARM64). `fail-fast` is off, so one failing runner does not hide the others. Each runner checks that its processor is the expected one (X64 or ARM64) and fails if not, so a relabelled GitHub image cannot silently drop a platform. Test results are uploaded from every runner.
+9. **A missing ARM machine is not a failure (owner decision, 25 Nov 2026).** GitHub sometimes has no macOS ARM machine free, and the job then never starts. A final job, **CI result**, gives the verdict for the run: each runner passes only if its Test step ran and succeeded; macOS ARM64 with no machine assigned is a warning, not a failure; a missing machine on any other runner, a test failure on any runner (ARM included), or fewer than four runners is a failure. The ARM job is marked `continue-on-error` so that its missing machine does not fail the run either. The script was checked against two past runs (ARM with no machine, all four passing) and a simulated ARM test failure.
 
 ### Alternatives considered
 
@@ -90,6 +91,8 @@ Related: ADR-001, ADR-002, ENG-003.
 - **Checked arithmetic only inside the numerics types (J1).** Rejected by the owner: any plain integer operation anywhere in the code could still wrap silently. A small speed cost on arithmetic is accepted.
 - **CLS-compliance attributes.** Not used: the library has no public extension API (hard rule 7), so there is no consumer in another .NET language to promise compatibility to.
 - **`macos-13` for macOS x64.** Rejected: GitHub has retired that image; `macos-15-intel` is the current Intel image.
+- **`continue-on-error` on the ARM job alone (for decision 9).** Rejected: a real ARM test failure would then also stop counting, which would hide a cross-platform determinism break (hard rule 1).
+- **Dropping macOS ARM from CI.** Rejected: J0 and J9 require all four platforms.
 
 ### Consequences
 
@@ -111,7 +114,7 @@ Related: ADR-004, ADR-006, ENG-002.
 1. **One fixed-point type, `Q32`.** A `readonly struct` that holds a signed 64-bit raw value read as raw / 2^32. The range is -2^31 to 2^31 - 2^-32, in steps of 2^-32 (about 2.3 × 10^-10). It has `+`, `-`, `*`, `/` and negation, comparisons, `FromInt`, `FromRatio` and `FromRaw`. Its text form is the exact decimal value (every Q32 value has at most 32 decimal places), so test failures and reports show true values, not approximations.
 2. **Base units stay plain `long` for now.** Counts, money and mass are `long` in base units. Unit-typed wrappers (`People`, `Money` and so on) are ADR-014, which is to be decided in Pass 2 with the state store. J1 adds only the operations that cross between them and `Q32`: count × rate (`Rounding.MultiplyHalfToEven`, `Rounding.MultiplyStochastic`) and a × b ÷ c (`Rounding.MultiplyDivideHalfToEven`) for scale conversions.
 3. **Every product and quotient goes through `Int128`, then rounds half to even once.** Multiplication rounds the exact 128-bit product, and division rounds the exact quotient, so the result is the true value rounded half to even. Addition and subtraction are exact.
-4. **Overflow throws `SimulationOverflowException`, which derives from `OverflowException`.** Every numerics operation whose result can leave the 64-bit range checks its exact 128-bit result and throws with a message naming the operation and the exact value. (Operations whose range is provably bounded, such as sqrt, log and rounding a Q32 to a whole number, convert directly.) Because it derives from `OverflowException`, a commit boundary (Pass 2 onward) that stops on `OverflowException` also catches the plain checked-arithmetic overflows that ENG-003 turns on everywhere. Division by zero stays the standard `DivideByZeroException`. A logarithm of zero or a negative number, and a square root of a negative number, throw `ArgumentOutOfRangeException`. These are invalid inputs, and the doctrine says invalid states are prevented, never clipped.
+4. **Overflow throws `SimulationOverflowException`, which derives from `OverflowException`.** Every numerics operation whose result can leave the 64-bit range checks its exact 128-bit result and throws with a message naming the operation and the exact value. (Operations whose range is provably bounded, such as sqrt, log and rounding a Q32 to a whole number, convert directly.) Because it derives from `OverflowException`, a commit boundary (Pass 2 onward) that stops on `OverflowException` also catches the plain checked-arithmetic overflows that ENG-003 turns on everywhere. Division by zero stays the standard `DivideByZeroException`. Impossible inputs (a logarithm of zero or a negative number, a square root of a negative number, a negative hazard rate or elapsed time) throw `SimulationDomainException`, which derives from `ArgumentOutOfRangeException`. The doctrine says invalid states are prevented, never clipped. **Owner decision, 25 Nov 2026: an impossible input stops the commit exactly as an overflow does.** So the commit boundary (Pass 2 onward) treats `OverflowException` and `SimulationDomainException` alike as a failed commit. Internal guards against programming mistakes (for example an out-of-range shift count inside `WideMath`) keep the plain `ArgumentOutOfRangeException`.
 5. **The stochastic-rounding hook is a pure function of a 64-bit uniform draw.** `Rounding.Stochastic(value, uniform)` and `Rounding.MultiplyStochastic(count, rate, uniform)` round up exactly when the top 32 bits of the draw are below the fraction (in units of 2^-32). So the chance of rounding up is exactly the fraction, and the expected result equals the exact value. J2 completes the hook by supplying the draw from the keyed random stream; J1 contains no randomness.
 6. **A source scan enforces hard rules 2 and 4.** A test reads every C# file in `src/Atlasiv.Core`, ignores comments and string literals, and fails if it finds `float`, `double`, `decimal`, `Half`, `Math`, `MathF`, `BigInteger.Log` or a floating-point literal. `decimal` is banned too: it is not one of the two approved formats.
 
@@ -127,7 +130,7 @@ Related: ADR-004, ADR-006, ENG-002.
 ### Consequences
 
 - Q32 results are bit-identical on every machine: there is no floating point, and every rounding is defined.
-- The commit boundary (Pass 2 onward) must treat `OverflowException`, and therefore `SimulationOverflowException`, as a failed commit.
+- The commit boundary (Pass 2 onward) must treat `OverflowException` (and therefore `SimulationOverflowException`) and `SimulationDomainException` as a failed commit.
 - J2 supplies uniform draws to the stochastic-rounding functions.
 
 Related: ADR-004, ADR-005, ADR-014, ENG-003, ENG-005, ENG-006, ENG-007.
@@ -243,11 +246,3 @@ Related: ADR-011, ADR-012, ENG-004, ENG-005.
 - The findings above are the evidence for the per-currency scale decision.
 
 Related: ADR-004, ADR-014, ADR-042 (registry), ENG-004.
-
----
-
-## Owner rulings not yet in the spec
-
-Rulings the owner gave that the spec does not yet state. They bind the code until a spec revision covers them; the spec then wins.
-
-- **Turn numbering (24 Nov 2026, formerly repo ADR-039 ruling 3).** Turns count from 1 at the epoch and never reset, including across step switches. Phases are numbered 1 to N within their turn. Pass 1 does not enforce the 10,000-turn cap, which is a design budget, not a clock rule.

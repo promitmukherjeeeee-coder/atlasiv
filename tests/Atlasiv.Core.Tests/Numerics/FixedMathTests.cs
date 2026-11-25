@@ -113,13 +113,13 @@ public sealed class FixedMathTests
     [InlineData(long.MinValue)]
     public void Log_of_zero_or_a_negative_value_is_an_error(long raw)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => FixedMath.Log(Q32.FromRaw(raw)));
+        Assert.Throws<SimulationDomainException>(() => FixedMath.Log(Q32.FromRaw(raw)));
     }
 
     [Fact]
     public void Sqrt_of_a_negative_value_is_an_error()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => FixedMath.Sqrt(Q32.FromRaw(-1)));
+        Assert.Throws<SimulationDomainException>(() => FixedMath.Sqrt(Q32.FromRaw(-1)));
     }
 
     // ---- Properties against the high-precision reference ----

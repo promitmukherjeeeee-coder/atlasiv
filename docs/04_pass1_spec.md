@@ -199,3 +199,4 @@ Answers to build questions. They follow from the rules above and add no new game
 13. **Substep budget (25 Nov 2026).** The substep driver accepts any N; 4 is the default budget. Escalation beyond the budget follows a deterministic rule based on state and is logged.
 14. **Money and aggregates (25 Nov 2026).** 128-bit accumulation for sums and exposures, with overflow tests for denomination change, high inflation and redenomination in J1.
 15. **Campaign manifest (25 Nov 2026).** The input log starts with the manifest (section 11). There are no third-party mods; a build from modified source has its own build identifier.
+16. **Turn numbering (owner ruling 24 Nov 2026, added to the spec 25 Nov 2026).** Turns count from 1 at the epoch and never reset, including across step switches. Phases are numbered 1 to N within their turn. Pass 1 does not enforce the 10,000-turn cap, which is a design budget, not a clock rule.

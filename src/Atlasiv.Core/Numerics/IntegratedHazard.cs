@@ -44,12 +44,19 @@ public readonly struct IntegratedHazard : IEquatable<IntegratedHazard>
     /// <summary>Adds a piece with a constant rate over an exact elapsed time.</summary>
     /// <param name="ratePerYear">λ, events per rate year; must not be negative.</param>
     /// <param name="elapsedSeconds">Δt in seconds; must not be negative.</param>
-    /// <exception cref="ArgumentOutOfRangeException">The rate or the time is negative.</exception>
+    /// <exception cref="SimulationDomainException">The rate or the time is negative.</exception>
     /// <exception cref="SimulationOverflowException">The running sum leaves the 128-bit range.</exception>
     public IntegratedHazard Add(Q32 ratePerYear, long elapsedSeconds)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(ratePerYear, Q32.Zero);
-        ArgumentOutOfRangeException.ThrowIfNegative(elapsedSeconds);
+        if (ratePerYear < Q32.Zero)
+        {
+            throw new SimulationDomainException(nameof(ratePerYear), ratePerYear, "A hazard rate cannot be negative.");
+        }
+
+        if (elapsedSeconds < 0)
+        {
+            throw new SimulationDomainException(nameof(elapsedSeconds), elapsedSeconds, "An elapsed time cannot be negative.");
+        }
 
         var piece = (Int128)ratePerYear.Raw * elapsedSeconds; // below 2^126
         if (_rateSeconds > Int128.MaxValue - piece)
