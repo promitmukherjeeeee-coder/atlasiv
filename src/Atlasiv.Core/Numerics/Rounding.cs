@@ -35,7 +35,7 @@ public static class Rounding
     /// </summary>
     /// <param name="value">The value to round.</param>
     /// <param name="uniform">
-    /// A uniform 64-bit draw from a seeded random stream (supplied by J2). Only its top
+    /// A uniform 64-bit draw from a keyed random stream (see Randomness.RandomDraws). Only its top
     /// 32 bits are used: the value rounds up exactly when they are below the fraction
     /// in units of 2^-32, which happens with probability fraction exactly.
     /// </param>

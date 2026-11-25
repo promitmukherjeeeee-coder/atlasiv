@@ -117,6 +117,39 @@ public static class FixedMath
         return Q32.FromRaw((long)(remainder > root ? root + 1 : root));
     }
 
+    /// <summary>
+    /// exp(-<paramref name="mu"/>) at 64 fractional bits (2^64 stands for 1), for a
+    /// non-negative <paramref name="mu"/>. Absolute error at most 2^-62 (4 units of 2^-64), so the result keeps
+    /// far more precision than a Q32 value when it is close to 0 or 1. Used by Poisson
+    /// draws (ENG-009).
+    /// </summary>
+    internal static UInt128 ExpNegativeQ64(Q32 mu)
+    {
+        if (mu.Raw <= 0)
+        {
+            return mu.Raw == 0
+                ? UInt128.One << 64
+                : throw new SimulationDomainException(nameof(mu), mu, "ExpNegativeQ64 needs a non-negative input.");
+        }
+
+        // mu = k ln2 - r with k = ceil(mu / ln 2) and 0 <= r < ln 2, worked out at 96 fractional bits.
+        var mu96 = (Int128)mu.Raw << (96 - Q32.FractionBits); // below 2^127, so the shift cannot wrap
+        var k = -FloorDivide(-mu96, Ln2Q96);
+
+        // exp(-mu) = exp(r) * 2^-k is below 2^(1 - k); from k = 67 on that is under half of 2^-64.
+        if (k >= 67)
+        {
+            return UInt128.Zero;
+        }
+
+        var r96 = (k * Ln2Q96) - mu96;
+        var expR = ExpQ62(WideMath.ShiftRightHalfToEven((UInt128)r96, 96 - ExpFractionBits));
+
+        // exp(r) at 62 fractional bits times 2^-k, written at 64 fractional bits: shift by k - 2.
+        var shift = (int)k - 2;
+        return shift >= 0 ? WideMath.ShiftRightHalfToEven(expR, shift) : expR << -shift;
+    }
+
     /// <summary>exp(r) for r in [0, ln 2), both at 62 fractional bits, by Horner's rule on the Taylor series.</summary>
     private static UInt128 ExpQ62(UInt128 r)
     {

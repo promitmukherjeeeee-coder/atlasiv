@@ -23,7 +23,10 @@ internal static class ReferenceMath
     }
 
     /// <summary>exp(raw / 2^32), correctly rounded, as a Q32 raw value (may exceed 64 bits).</summary>
-    public static BigInteger Exp(long raw)
+    public static BigInteger Exp(long raw) => Exp(raw, 32);
+
+    /// <summary>exp(raw / 2^32), correctly rounded to <paramref name="outputBits"/> fractional bits.</summary>
+    public static BigInteger Exp(long raw, int outputBits)
     {
         var x = (BigInteger)raw << (Bits - 32);
         var k = NumericGen.DivideHalfToEven(x, Ln2);    // x = k ln2 + r, |r| <= ln2 / 2
@@ -36,8 +39,8 @@ internal static class ReferenceMath
             sum += term;
         }
 
-        // value = sum * 2^k / 2^Bits; as a Q32 raw value that is sum * 2^(k + 32 - Bits).
-        var shift = (int)k + 32 - Bits;
+        // value = sum * 2^k / 2^Bits; with outputBits fractional bits that is sum * 2^(k + outputBits - Bits).
+        var shift = (int)k + outputBits - Bits;
         return shift >= 0 ? sum << shift : NumericGen.DivideHalfToEven(sum, BigInteger.One << -shift);
     }
 

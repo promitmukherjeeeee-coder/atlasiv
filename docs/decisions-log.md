@@ -246,3 +246,117 @@ Related: ADR-011, ADR-012, ENG-004, ENG-005.
 - The findings above are the evidence for the per-currency scale decision.
 
 Related: ADR-004, ADR-014, ADR-042 (registry), ENG-004.
+
+---
+
+## ENG-008: Random generator (Philox4x64-10) and the draw-key layout
+
+- **Status:** Proposed (Pass 1, J2, 25 Nov 2026). Records the choice that spec section 9 and registry ADR-006 leave to Pass 1.
+- **Context:** Spec section 9 (Confirmed) requires a counter-based generator in which each draw is a pure function of (world seed, turn, phase, system ID, entity ID, draw index), with Philox or a SplitMix64-style mixer as candidates, the choice fixed in code with published test vectors, and no `System.Random`. Clarification 3 adds that the turn end has its own fixed slot after the last phase, and that the substep index is part of the key, so no two substeps share a draw. (Issue #6 cites "ADR-039 §4"; that was the repository's former record of the owner's 24 Nov rulings, now superseded by clarification 3, per ENG-001.) Pass 1 uses placeholder 64-bit entity IDs; Pass 2 brings the permanent ones.
+
+### Decisions
+
+1. **Generator: Philox4x64-10**, exactly as in the reference implementation Random123 (Salmon, Moraes, Dror and Shaw, "Parallel random numbers: as easy as 1, 2, 3", SC 2011). It maps a 256-bit counter and a 128-bit key to 256 output bits, keeps no state, and needs only 64-bit multiplies, XORs and additions, so it is bit-identical on every processor.
+2. **Key layout, with no hashing.** Every field gets its own space in Philox's input:
+
+   | Philox input | Contents |
+   | --- | --- |
+   | key word 0 | world seed (64 bits) |
+   | key word 1 | system ID (32 bits, low half); high 32 bits zero, reserved |
+   | counter word 0 | draw index ÷ 4 (the block number) |
+   | counter word 1 | entity ID (64 bits) |
+   | counter word 2 | turn (counts from 1; 64 bits) |
+   | counter word 3 | slot (high 32 bits) and substep (low 32 bits) |
+
+   Draw index *i* is output word *i* mod 4 of block *i* ÷ 4, so one Philox call serves four draws.
+3. **Slot.** Phase *n* of a turn is slot *n* (phases count from 1). The turn end is slot 4,294,967,295 (2^32 − 1), above every possible phase number: this is clarification 3's "own fixed slot after the last phase". Slot 0 is invalid.
+4. **Substep.** Substeps count from 0. A stage that is not split uses substep 0, so it draws the same values as the first substep of a split run of the same stage. Phase draws use substep 0. J6's substep driver numbers its substeps 0 to N − 1.
+5. **Guarantee.** The layout is one-to-one: two different addresses (or draw indices) always give a different Philox counter or key. For a fixed key, Philox is a bijection, so two draws within the same seed and system can never come from the same output word. Across different keys an equal 64-bit value can occur only by chance (about 1 in 2^64 per pair), as with any good generator.
+6. **Streams.** `RandomDraws` reads one address's draws in order and keeps the current block. It is a class, not a struct, so it cannot be copied by accident: a copied struct would hand out the same draws twice. (The analyzers forbid type names ending in "Stream", hence the name.) A stream always starts at draw 0 of its address.
+7. **Errors.** A bad turn, phase or substep given to the constructor is a programming mistake and throws the plain `ArgumentOutOfRangeException` (ENG-004 decision 4, internal guards). An address that still holds turn 0 or slot 0 (the default value, or a copy of it made with `with`) throws `InvalidOperationException` when it is used, through one check, `DrawAddress.EnsureValid`. A bad helper argument, such as a bound of 0 or a probability above 1, can come from game data, so it is an impossible input and throws `SimulationDomainException`, which stops the commit.
+8. **The ban on `System.Random` is a build error.** Every project runs Microsoft's banned-API analyzer (`Microsoft.CodeAnalysis.BannedApiAnalyzers` 5.6.0) over `BannedSymbols.txt`, which lists `System.Random`, `System.Security.Cryptography.RandomNumberGenerator` and `Guid.NewGuid`. Any use is error RS0030 and fails the build on every CI runner. This was checked by adding `new System.Random(1)` to the library and, separately, to the test project: both builds failed with RS0030. A test keeps the list and its wiring in place.
+
+### Published test vectors
+
+- **Philox4x64-10 itself:** the three vectors in Random123's `tests/kat_vectors` (all zeros, all ones, digits of pi). The code matches all three.
+- **Keyed draws:** twelve (address, draw index, value) vectors in `tests/Atlasiv.Core.Tests/Randomness/DrawVectorTests.cs`. For example, seed 0, turn 1, phase 1, substep 0, system 0, entity 0, draw 0 gives `0x8b42ce270989c8fd`. They were computed by a separate Python implementation of Philox and this layout, itself checked against the Random123 vectors first. The C# code matches all twelve.
+
+### Measured cost (Release, x64 development machine, BenchmarkDotNet short run)
+
+| Operation | Mean |
+| --- | --- |
+| One Philox4x64-10 block (four draws) | 9 ns |
+| One draw by address, no block reuse | 11 ns |
+| One draw from a stream | 4 ns |
+| New stream for an entity plus one draw | 17 ns (104 bytes allocated) |
+
+### Alternatives considered
+
+- **A SplitMix64-style mixer.** Rejected. The key fields total over 300 bits, so a 64-bit mixer would first have to hash them into 64 bits. Two different addresses could then collide (by the birthday bound, likely somewhere among about 2^32 addresses, which a long campaign can reach), and the combined hash would be our own construction, with no outside test vectors. Philox takes the whole address without hashing, and has published vectors from its authors.
+- **Philox4x32-10.** Rejected: its 128-bit counter and 64-bit key cannot hold the address without hashing, for the same reason.
+- **Threefry or AES-based counter generators.** Not needed: Threefry is slower in plain code, and AES-based generators need hardware instructions whose availability differs between machines.
+- **A stateful generator per system (the alternative named in ADR-006).** Rejected by ADR-006: one more draw for one entity would shift every later draw.
+- **A 64-bit system ID.** Not needed for Pass 1: systems are few and compiled in. The high 32 bits of key word 1 stay reserved, so Pass 2 can widen it without moving any other field, and existing draws do not change while those bits stay zero.
+- **Turn end as slot N + 1 (one after the turn's last phase).** Rejected: the number would depend on the step's phase count. A single constant is simpler and can never meet a phase number.
+- **A struct stream.** Rejected for now (decision 6). It would save the 104-byte allocation per stream; revisit if Pass 4 benchmarks show the allocation matters.
+- **A source-scan test instead of the analyzer.** Rejected: the analyzer works on resolved symbols, so it also catches `using static`, aliases and fully qualified names, and it fails the build itself rather than a later test.
+
+### Consequences
+
+- Any change to the generator or the layout changes every draw, and so every replay hash. The vectors above make such a change visible; it must be a deliberate, reviewed decision.
+- Pass 2 replaces the placeholder entity IDs with permanent ones, keeping counter word 1 as the entity's 64-bit ID.
+- J6's scheduler builds one `DrawAddress` per (system, entity, phase or turn end, substep) and passes the substep index from its substep driver.
+
+Related: ADR-006, ADR-012, ENG-003, ENG-004, ENG-009.
+
+---
+
+## ENG-009: Draw helpers
+
+- **Status:** Proposed (Pass 1, J2, 25 Nov 2026).
+- **Context:** Spec section 9 asks for helpers on the generator: uniform integers, fixed-point uniform values, Bernoulli and Poisson draws and stochastic rounding. Section 10 and ADR-012 add the time-to-event draw. The spec does not say which algorithms to use.
+
+### Decisions
+
+Each helper is a method on `RandomDraws` and uses a stated number of draws, so a stream's later draws are predictable from what it was asked for.
+
+1. **Uniform integer** (`NextBelow`, `NextInRange`): Lemire's multiply-and-reject method. Every value is exactly equally likely. It uses one draw, and a further draw only in the rare case (probability below bound ÷ 2^64) that the first would bias the result.
+2. **Fixed-point uniform** (`NextUnit`): the top 32 bits of one draw, read as a Q32 value in [0, 1). Each of the 2^32 values is exactly equally likely.
+3. **Bernoulli** (`NextBernoulli`): true when `NextUnit` is below the probability, so the chance is exactly the probability, to the 2^-32 grid. A probability outside 0 to 1 is an impossible input (`SimulationDomainException`).
+4. **Stochastic rounding** (`RoundStochastic`, `MultiplyStochastic`): one draw passed to J1's hook (`Rounding.Stochastic`, `Rounding.MultiplyStochastic`, ENG-004 decision 5). This completes the hook.
+5. **Poisson** (`NextPoisson`): the mean is split into pieces of at most 16. Each piece is drawn by inversion from one 64-bit draw, with the probabilities P(K = k) held at 64 fractional bits, starting from exp(−mean) and stepping by mean ÷ k. A sum of independent Poisson counts is Poisson with the summed mean, so the split does not change the distribution. exp(−mean) comes from a new internal function, `FixedMath.ExpNegativeQ64`, which reuses J1's exp series and returns 64 fractional bits, within 2^-62 (4 units of 2^-64; at most 2 observed), so tiny means keep their precision: a Q32 result would round exp(−2^-32) to within one unit of 1 and badly distort the rarest events. A mean of 0 uses no draw.
+6. **Time to event** (`NextUnitExponential`, `NextTimeToEventSeconds`): a unit exponential is −ln U, with U = (top 32 bits + 1) ÷ 2^32 in (0, 1], using J1's `FixedMath.Log`. The waiting time for a constant per-year rate is that value × 31,556,952 ÷ rate, rounded half to even to whole seconds. A rate of 0 returns "never" (null) but still uses its draw, so later draws stay where they were. For a rate that varies, the unit exponential is the integrated hazard the event waits for (compare it with `IntegratedHazard`).
+
+### Accuracy and limits
+
+- Uniform integers, `NextUnit`, Bernoulli and stochastic rounding are exact.
+- Poisson: probabilities carry an error of a few units of 2^-64. When P(K = k) underflows to 0 at the tail, the remaining tail (below about 2^-58) is given to that k.
+- Time to event: U takes 2^32 values, so the largest unit exponential is about 22.18, and the cut-off tail has probability 2^-32. The log adds at most 1 unit of 2^-32.
+- **Cost grows with the Poisson mean, with no cap:** one draw and a short loop per 16 of mean (about 140 ns for mean 2.5). A mean in the thousands is fine; a mean in the millions would take milliseconds, and the largest Q32 mean (about 2.1 billion) about 130 million draws in one call. No cap is set, because the spec gives none and an error would be a new rule. If a later system needs huge means, it should add a constant-time method (for example Hörmann's PTRS) with its own benchmark and vectors.
+
+### Published test vectors
+
+`ExpNegativeQ64Tests` lists twelve exp(−mean) vectors, computed in Python with 90-digit decimals, and checks 2,000 random inputs from 0 to 48 against a 160-bit reference, all within the stated bound (hard rule 4). `RandomDrawsTests.A_fixed_sequence_of_helper_draws_matches_the_published_values` runs a fixed sequence of every helper on one stream and checks each result. The expected values were computed independently in Python with exact fractions and 80-digit decimals. The C# code matches all of them exactly. Statistical tests (fixed seeds, bounds of about five standard deviations) check fairness, means, variances, a chi-squared fit for Poisson, and that time-to-event draws agree with J1's hazard primitive.
+
+### Measured cost (Release, x64 development machine, BenchmarkDotNet short run)
+
+| Operation | Mean |
+| --- | --- |
+| Bernoulli | 5 ns |
+| Poisson, mean 2.5 | 142 ns |
+| Time to event | 162 ns |
+
+### Alternatives considered
+
+- **Modulo for uniform integers.** Rejected: biased. With a bound of 3 × 2^62, half the results would fall in the lowest third (a test checks this).
+- **Knuth's multiply-uniforms method for Poisson.** Rejected: it uses one draw per event counted, not one per 16 of mean, and needs the same exp(−mean).
+- **Normal or PTRS approximations for large means.** Not needed yet, and they need more transcendental functions with their own vectors. Deferred until a system needs large means.
+- **Piece size for Poisson.** 16 keeps exp(−16) (about 2^-23) at about 39 significant bits inside the 64-bit probabilities. A smaller piece uses more draws; a much larger one loses precision. This is an engineering setting, not a game value.
+- **Returning a sentinel such as `long.MaxValue` for a zero rate.** Rejected: "never" is not a time, and a sentinel could be scheduled by mistake.
+
+### Consequences
+
+- The event queue (J5) and scheduler (J6) can schedule rare events from `NextTimeToEventSeconds`, resampling only when the rate changes (ADR-012).
+- Any change to a helper's algorithm or draw count changes replay hashes; the vectors make that visible.
+
+Related: ADR-006, ADR-012, ENG-004, ENG-005, ENG-006, ENG-008.
