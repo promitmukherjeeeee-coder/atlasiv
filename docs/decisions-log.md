@@ -210,6 +210,42 @@ Related: ADR-011, ADR-012, ENG-004, ENG-005.
 
 ---
 
+## ENG-007: 128-bit accumulation and money overflow tests
+
+- **Status:** Proposed (Pass 1, J1, 25 Nov 2026).
+- **Context:** Spec section 8 and clarification 14 (added 25 Nov 2026) require sums, aggregates and exposures to accumulate in 128-bit integers, and overflow tests for money through denomination change, high inflation, redenomination and large aggregate exposures. Registry ADR-042 defers the per-currency scale question to Pass 2, to be decided "using those tests".
+
+### Decisions
+
+1. **One total type, `Accumulator`.** A `readonly struct` holding an `Int128` total, in the same style as `IntegratedHazard`. `Add(amount)` adds a 64-bit amount (negative for debits and liabilities); `AddProduct(quantity, price)` adds an exact product such as an exposure (at most 2^126, so always exact); `Add(other)` combines partial totals; `ToInt64()` reads the total back as 64 bits. Integer addition is exact, so order and grouping never change the result, which keeps parallel partial totals deterministic.
+2. **Leaving 128 bits is a simulation overflow.** The check is done explicitly and the error names the operation and both terms. In practice it needs more than 2^64 amounts, or two exposures near the 64-bit limit in both quantity and price. Reading a total that does not fit 64 bits is also a simulation overflow.
+3. **Money conversions reuse `Rounding.MultiplyDivideHalfToEven`.** A denomination change or redenomination is amount × b ÷ c, rounded half to even. J1 adds no money-specific type: unit-typed wrappers are ADR-014, decided in Pass 2.
+4. **The stress tests use historical cases as test data** (not game values): UK decimalisation in 1971 (240 old pence = 100 new pence), Hungary's 1946 100 million b.-pengő note, Zimbabwe's 100 trillion dollar note and its 2008 redenomination, and Turkey's 2005 redenomination.
+
+### Findings for the Pass 2 decision (registry ADR-042)
+
+- **Single amounts.** 64-bit minor units hold up to about 9.22 × 10^18. Hungary's 1946 note was 10^22 fillér, so one banknote does not fit, and converting it is a simulation overflow. Zimbabwe's 100 trillion dollar note (10^16 cents) fits, but 923 of them do not. Totals of either fit easily in an `Accumulator`.
+- **Inflation.** Compounding a price is exact at every step until the true value passes the 64-bit range, and then it is a simulation overflow, never a wrap (tested on random prices and factors). Doubling from one minor unit fits 62 times.
+- **Conversion ratios.** A ratio is two 64-bit integers. Hungary's 1946 switch to the forint (1 forint = 4 × 10^29 pengő) cannot be written as one such ratio; it would need two steps or a wider ratio. Not tested, because the input amount cannot be stored in the first place.
+- **Rate factors (untested observation).** A per-period inflation factor in Q32 must be below about 2.1 billion. At Hungary's July 1946 peak (prices doubling about every 15 hours) the monthly factor was about 4 × 10^14 (about 48 doublings), so it fits only per phase on short steps, or as a per-year rate (about 400 per year) passed through `FixedMath.Exp` per phase.
+- **Redenomination is not total-preserving.** Converting balances one by one rounds each, so their new sum can differ from the converted old total by up to half a new unit per balance (tested). A double-entry ledger must post that residual somewhere (Pass 3).
+
+### Alternatives considered
+
+- **128-bit balances everywhere.** Rejected: the spec fixes 64-bit minor units for amounts, and 128-bit balances double memory for every stored amount. Only totals need the range.
+- **`BigInteger` totals.** Rejected: they allocate, have no upper limit to report as an error, and are slower.
+- **Letting `Int128`'s own checked addition throw.** Rejected: its plain `OverflowException` would not say which total overflowed or by how much.
+- **Adding a per-currency scale now.** Rejected: the spec leaves that decision to Pass 2, using these tests.
+
+### Consequences
+
+- Pass 2 and Pass 3 sum ledgers, statistics and exposures with `Accumulator`. `IntegratedHazard` already keeps its own 128-bit sum for the same reason.
+- The findings above are the evidence for the per-currency scale decision.
+
+Related: ADR-004, ADR-014, ADR-042 (registry), ENG-004.
+
+---
+
 ## Owner rulings not yet in the spec
 
 Rulings the owner gave that the spec does not yet state. They bind the code until a spec revision covers them; the spec then wins.

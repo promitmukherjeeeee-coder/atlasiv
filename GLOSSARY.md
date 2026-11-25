@@ -87,6 +87,13 @@ _Avoid_: Banker's rounding (same thing; use one name)
 **Stochastic rounding**:
 Rounding down or up at random, going up with probability equal to the fractional part, so the expected result equals the exact value. Used only where a rule says so.
 
+**Accumulator**:
+A running total of base-unit amounts held in a 128-bit integer, used for sums, aggregates and exposures. Read back as 64 bits only where a 64-bit value is needed.
+_Avoid_: Sum (too generic), aggregate (overloaded)
+
+**Exposure**:
+The value of a position: quantity × price, in minor units. Exposures are added up in an accumulator, because a single one can exceed the 64-bit range.
+
 **Simulation overflow**:
 A number leaving its representable range. It is an error that stops the commit, never a wrap or a clip.
 
