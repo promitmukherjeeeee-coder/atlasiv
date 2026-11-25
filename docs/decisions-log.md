@@ -360,3 +360,65 @@ Each helper is a method on `RandomDraws` and uses a stated number of draws, so a
 - Any change to a helper's algorithm or draw count changes replay hashes; the vectors make that visible.
 
 Related: ADR-006, ADR-012, ENG-004, ENG-005, ENG-006, ENG-008.
+
+---
+
+## ENG-010: Clock, calendar and boundary calculator
+
+- **Status:** Proposed (Pass 1, J3, 25 Nov 2026).
+- **Context:** Spec sections 2 and 3 (Confirmed) fix the clock (signed 64-bit seconds from 1 January 10,000 BCE 00:00, proleptic Gregorian), astronomical years inside and BCE/CE with no year zero on display, the Gregorian leap rule over the whole timeline, the eight steps and their phase rules, half-open turns and phases (clarification 2), and rate time as elapsed seconds ÷ 31,556,952. Issue #7 cites "ADR-039 §2" for the half-open rule; that was the repository's former record of the owner's 24 Nov rulings, now superseded by clarification 2 (ENG-001). The spec does not say how to compute dates, how to name or store the types, or how to format dates for display.
+
+### Decisions
+
+1. **Types** (namespace `Atlasiv.Core.Time`):
+   - `Instant`: one clock reading, a signed 64-bit count of seconds from the epoch. Converts to and from `CalendarDate` plus time of day.
+   - `CalendarDate`: astronomical year (64-bit), month and day. Impossible days (29 February 1900, 31 April) are refused.
+   - `DisplayYear` and `CalendarEra`: the BCE/CE year players read. 1 BCE = year 0, 10,000 BCE = year −9,999.
+   - `Calendar`: the leap rule, month lengths, and the internal day-counting core.
+   - `TurnStep` and `StepTable`: the eight steps, their lengths in months and their phase counts.
+   - `TurnDates`: the boundary calculator. Given a step and a valid turn start, it gives the turn's end, each phase as an interval, and the phase that contains any instant.
+   - `TimeInterval`: a half-open [start, end) stretch of time, with its exact seconds and its rate time.
+   - `RateYear.FromSeconds`: rate time as a Q32 number of rate years.
+2. **Day counting:** Howard Hinnant's `days_from_civil` and `civil_from_days` algorithms ("chrono-Compatible Low-Level Date Algorithms"). They count whole 400-year cycles of 146,097 days, use integers only, take constant time, and are exact for every year that fits in 64 bits. All arithmetic is checked, so a date too far out to fit throws rather than wraps. Instants before the epoch (negative clock readings) convert correctly too. Nothing in Pass 1 needs them, but forbidding them would be a new rule.
+3. **Turn starts:** every turn starts at 00:00. Steps of a year or longer start on any 1 January, the 6-month step on 1 January or 1 July, and the 1-month step on the 1st of any month. A 50-year turn may start in any year, not only in multiples of 50. Section 3 says only "every turn starts on 1 January", and section 4 says a slower switch "can wait up to one year". That would be false if long steps had to align to multiples of their length.
+4. **Phase dates:** for every step except 1 month, phase *k* starts (*k* − 1) × (months per turn ÷ phase count) months after the turn start: 30, 24, 12, 12, 6, 3 and 2 months. On the 50-year step this alternates 1 January and 1 July, as the spec requires. On the 1-month step, phases start on days 1, 7, 13, 19 and 25, and phase 5 runs to the 1st of the next month (4 to 7 days).
+5. **Only the step and start are stored** in `TurnDates`. The end and the phase dates are computed when asked, in a few integer operations. Nothing is cached or allocated, so the turn's data cannot disagree with its start.
+6. **Default values are real values.** A struct's default cannot be prevented in C#, so the types store month, day and year number counting from 0. The default `CalendarDate` is 1 January 1 BCE, the default `DisplayYear` is 1 BCE, the default `Instant` is the epoch, the default `TimeInterval` is empty at the epoch, and the default `TurnDates` is the first 50-year turn at the epoch. None of them is an impossible "day 0" (compare ENG-008's `DrawAddress.EnsureValid`, which needed a runtime check instead).
+7. **Name `TurnStep`, not `Step`:** the build's analyzers refuse a type named `Step`, which is a reserved word in Visual Basic (rule CA1716). The glossary term is still "step". Steps run from slowest (`FiftyYears` = 0) to fastest (`OneMonth` = 7), so "one step faster" is the next value up (for J4).
+8. **Rate time:** elapsed seconds ÷ 31,556,952, rounded half to even to the Q32 grid (2^-32 of a rate year, about 0.007 seconds). 365 days gives 0.99934 rate years (raw 4,292,115,685) and 366 days gives 1.00207 (raw 4,303,874,906), checked against exact fractions computed separately in Python. A negative elapsed time is an impossible input (`SimulationDomainException`), as in J1's hazard primitive.
+9. **Errors:** an impossible date, time of day, phase number or turn start given to a constructor is a programming mistake, so it throws `ArgumentOutOfRangeException` (ENG-004 decision 4). A clock reading that leaves the 64-bit range throws `SimulationOverflowException`, which stops the commit.
+10. **Display text** (display only, never used in computation): dates read "1 January 10,000 BCE" and instants "20 July 1969 CE, 20:17:40". Year numbers of five or more digits group thousands with commas ("10,000 BCE") and shorter ones do not ("1066 CE"), following the design documents' own style. All text uses the invariant culture.
+
+### Tests
+
+- Leap years at 1600, 1700, 1900 and 2000, plus BCE years (1 BCE and 401 BCE are leap; 101 BCE and 10,000 BCE are not). Every 400-year cycle has 146,097 days.
+- Epoch vectors: 1 January 1 CE is 315,569,520,000 s, exactly 10,000 rate years (25 whole Gregorian cycles). 1 January 2000 CE is 378,651,801,600 s.
+- The day-counting core matches .NET's `DateTime`, an independent proleptic Gregorian reference, on every day of six multi-year spans and on 2,000 random dates from 1 CE to 9999 CE. Tests may use `DateTime`; the simulation never does, because it cannot represent BCE years.
+- Hand-written phase dates for every step, across month ends, year ends, leap and common Februaries, and 1 BCE to 1 CE.
+- FsCheck properties, 2,000 cases each, over about ±2.7 billion years:
+  - instant to date and time and back;
+  - date to instant and back;
+  - date to BCE/CE year and back;
+  - consecutive day counts are consecutive dates;
+  - every second of a random turn lies in exactly one phase;
+  - phases tile their turn with no gaps or overlaps.
+
+### Alternatives considered
+
+- **`System.DateTime` or `DateOnly`.** Rejected: they cover only 1 CE to 9999 CE, and the timeline starts in 10,000 BCE.
+- **Loops over years and months.** Rejected: the time grows with the distance from the epoch. Hinnant's algorithms take constant time and are widely checked.
+- **A 32-bit year.** Rejected: the 64-bit clock reaches about ±292 billion years, which does not fit in 32 bits. A 64-bit year keeps every clock reading convertible to a date.
+- **Storing phase start dates in an array per turn.** Rejected: it allocates, and could go stale. Computing them takes a few integer operations.
+- **Suppressing CA1716 to keep the name `Step`.** Rejected: renaming is cheaper than an exception to the build rules.
+- **Turn starts aligned to multiples of the step (for example 50-year turns only in years divisible by 50).** Rejected: not in the spec, and it contradicts section 4's "wait up to one year".
+
+### Not built here
+
+- **Seasons in the header** (spec section 2: meteorological, by the hemisphere of the selected location, display only). This needs a selected location and a header, which arrive with the client. It never touches computation.
+
+### Consequences
+
+- J4 (step controller) decides switches with `TurnDates.IsValidStart` and `TurnStep` order. J5 (event queue) orders events by `Instant`. J6 (scheduler) runs phases from `TurnDates.Phase` and passes `TimeInterval.Seconds` to the hazard and rate primitives.
+- No values are left open: J3 adds no `// CALIBRATE` placeholders.
+
+Related: ADR-004, ENG-001, ENG-004, ENG-006, ENG-008.
