@@ -4,7 +4,7 @@ namespace Atlasiv.Core.Numerics;
 public static class RateYear
 {
     /// <summary>
-    /// Seconds in one rate year: 365.2425 days, the mean Gregorian year (ADR-039 ruling 10).
+    /// Seconds in one rate year: 365.2425 days, the mean Gregorian year (Pass 1 spec section 3).
     /// A 365-day year counts as about 0.99934 rate years.
     /// </summary>
     public const long Seconds = 31_556_952;

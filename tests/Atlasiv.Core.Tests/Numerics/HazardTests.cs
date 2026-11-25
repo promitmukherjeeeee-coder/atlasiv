@@ -11,7 +11,7 @@ namespace Atlasiv.Core.Tests.Numerics;
 
 /// <summary>
 /// The hazard primitive: probability within an interval = 1 - exp(-λΔt), with λ a per-year
-/// rate and Δt exact elapsed seconds (one rate year = 31,556,952 s, ADR-039 ruling 10).
+/// rate and Δt exact elapsed seconds (one rate year = 31,556,952 s, Pass 1 spec section 3).
 /// Varying rates are integrated exactly as the sum of λ·Δt over the pieces.
 /// Vectors are true values rounded half to even, computed with 70-digit decimal arithmetic.
 /// </summary>

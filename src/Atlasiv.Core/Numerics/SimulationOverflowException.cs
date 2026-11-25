@@ -10,7 +10,7 @@ namespace Atlasiv.Core.Numerics;
 /// <remarks>
 /// It derives from <see cref="OverflowException"/>, so a commit boundary that stops on
 /// <see cref="OverflowException"/> also stops on the plain checked-arithmetic overflows
-/// that the whole build raises (ADR-041).
+/// that the whole build raises (ENG-003).
 /// </remarks>
 public sealed class SimulationOverflowException : OverflowException
 {
