@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Atlasiv.Core.Numerics;
 
 namespace Atlasiv.Core.Time;
 
@@ -39,7 +40,7 @@ public enum TurnStep
 public static class StepTable
 {
     // One twelfth of the rate year, 31,556,952 / 12, which divides exactly.
-    private const long NominalMonthSeconds = Atlasiv.Core.Numerics.RateYear.Seconds / 12;
+    private const long NominalMonthSeconds = RateYear.Seconds / 12;
 
     // Indexed by step.
     private static readonly int[] TurnMonths = [600, 240, 120, 60, 24, 12, 6, 1];

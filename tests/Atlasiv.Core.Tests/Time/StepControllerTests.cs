@@ -18,7 +18,7 @@ public sealed class StepControllerTests
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.TenYears));
 
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         Assert.Equal(1, controller.TurnNumber);
         Assert.Equal(TurnStep.TenYears, controller.Turn.Step);
@@ -31,11 +31,11 @@ public sealed class StepControllerTests
     public void While_the_candidate_matches_turns_follow_each_other_on_the_same_step()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiftyYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         for (var i = 0; i < 30; i++)
         {
-            Assert.Null(controller.EndTurn());
+            Assert.Null(controller.AdvanceTurn());
         }
 
         Assert.Equal(31, controller.TurnNumber);
@@ -51,34 +51,24 @@ public sealed class StepControllerTests
         var undertaking = new ReferenceUndertaking(4_000_000);
         var controller = new StepController(edge, undertaking);
 
-        controller.EndTurn();
-        controller.EndTurn();
+        controller.AdvanceTurn();
+        controller.AdvanceTurn();
 
         Assert.Equal([Instant.Epoch, Date(-9998, 1, 1), Date(-9997, 1, 1)], edge.Readings);
         Assert.All(edge.Undertakings, u => Assert.Equal(undertaking, u));
     }
 
     [Fact]
-    public void The_uncalibrated_reference_undertaking_is_used_by_default()
-    {
-        var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.OneYear));
-
-        _ = new StepController(edge);
-
-        Assert.Equal([ReferenceUndertaking.Uncalibrated], edge.Undertakings);
-    }
-
-    [Fact]
     public void A_faster_candidate_switches_after_10_consecutive_turns_at_the_next_boundary()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiftyYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.FiftyYears, 25);   // past the 20-turn gap: now on turn 26
 
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 9));
         Assert.Equal(TurnStep.FiftyYears, controller.Turn.Step);
 
-        var announced = controller.EndTurn();             // the 10th: end of turn 35
+        var announced = controller.AdvanceTurn();             // the 10th: end of turn 35
 
         Assert.NotNull(announced);
         Assert.Equal(36, controller.TurnNumber);
@@ -91,7 +81,7 @@ public sealed class StepControllerTests
     public void A_faster_switch_is_announced_and_takes_effect_at_the_same_boundary()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiftyYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.FiftyYears, 25);
 
         var announced = Assert.Single(Run(controller, edge, TurnStep.TwentyYears, 10));
@@ -117,13 +107,13 @@ public sealed class StepControllerTests
     public void A_slower_candidate_switches_after_20_consecutive_turns()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiveYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.FiveYears, 25);   // now on turn 26
 
         Assert.Empty(Run(controller, edge, TurnStep.TenYears, 19));
         Assert.Equal(TurnStep.FiveYears, controller.Turn.Step);
 
-        var announced = controller.EndTurn();             // the 20th: end of turn 45
+        var announced = controller.AdvanceTurn();             // the 20th: end of turn 45
 
         Assert.NotNull(announced);
         Assert.Equal(46, controller.TurnNumber);
@@ -135,7 +125,7 @@ public sealed class StepControllerTests
     public void A_slower_switch_waits_for_1_January_or_1_July_and_previews_its_first_turn()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.OneMonth));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         // Turn 1 is January 10,000 BCE; turns 1 to 20 each see a slower candidate, so the count
         // and the 20-turn gap both complete at the end of turn 20 (August 9,999 BCE).
@@ -162,7 +152,7 @@ public sealed class StepControllerTests
         Assert.Empty(Run(controller, edge, TurnStep.SixMonths, 3));
         Assert.Equal(TurnDates.Starting(TurnStep.OneMonth, Date(-9998, 12, 1)), controller.Turn);
 
-        Assert.Null(controller.EndTurn());
+        Assert.Null(controller.AdvanceTurn());
         Assert.Equal(25, controller.TurnNumber);
         Assert.Equal(announced.FirstTurn, controller.Turn);
         Assert.Null(controller.PendingSwitch);
@@ -172,7 +162,7 @@ public sealed class StepControllerTests
     public void A_6_month_to_1_year_switch_waits_one_turn_for_1_January()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.SixMonths));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.SixMonths, 1);     // now on turn 2, July 10,000 BCE
 
         // Turns 2 to 21 see a slower candidate; turn 22 would start on 1 July 9,990 BCE.
@@ -182,7 +172,7 @@ public sealed class StepControllerTests
         Assert.Equal(Date(-9988, 1, 1), announced.EffectiveAt);
         Assert.Equal(23, announced.EffectiveTurn);
         Assert.Equal(TurnStep.SixMonths, controller.Turn.Step);
-        controller.EndTurn();
+        controller.AdvanceTurn();
         Assert.Equal(TurnStep.OneYear, controller.Turn.Step);
     }
 
@@ -190,7 +180,7 @@ public sealed class StepControllerTests
     public void An_announced_switch_is_committed_even_if_the_candidate_drifts_back()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.OneMonth));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Assert.Single(Run(controller, edge, TurnStep.SixMonths, 20));
 
         Assert.Empty(Run(controller, edge, TurnStep.OneMonth, 4));   // turns 21 to 24
@@ -203,13 +193,13 @@ public sealed class StepControllerTests
     public void The_gap_counts_from_the_turn_the_switch_takes_effect()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.OneMonth));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.SixMonths, 24);     // announced after turn 20, effective on turn 25
 
         // A faster candidate from turn 25 completes its count after turn 34, but the step may
         // not change again until turn 45: 20 turns after the effective turn, not the announcement.
         Assert.Empty(Run(controller, edge, TurnStep.OneMonth, 19));
-        var announced = controller.EndTurn();
+        var announced = controller.AdvanceTurn();
 
         Assert.NotNull(announced);
         Assert.Equal(45, announced.EffectiveTurn);
@@ -221,49 +211,49 @@ public sealed class StepControllerTests
     public void A_candidate_equal_to_the_current_step_resets_a_faster_count()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.TenYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.TenYears, 25);
 
         Assert.Empty(Run(controller, edge, TurnStep.FiveYears, 9));
         Assert.Empty(Run(controller, edge, TurnStep.TenYears, 1));
         Assert.Empty(Run(controller, edge, TurnStep.FiveYears, 9));
 
-        Assert.Equal(TurnStep.FiveYears, controller.EndTurn()?.NewStep);
+        Assert.Equal(TurnStep.FiveYears, controller.AdvanceTurn()?.NewStep);
     }
 
     [Fact]
     public void A_candidate_equal_to_the_current_step_resets_a_slower_count()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.TenYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.TenYears, 25);
 
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 19));
         Assert.Empty(Run(controller, edge, TurnStep.TenYears, 1));
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 19));
 
-        Assert.Equal(TurnStep.TwentyYears, controller.EndTurn()?.NewStep);
+        Assert.Equal(TurnStep.TwentyYears, controller.AdvanceTurn()?.NewStep);
     }
 
     [Fact]
     public void A_change_of_direction_resets_the_count()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.TenYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.TenYears, 25);
 
         Assert.Empty(Run(controller, edge, TurnStep.FiveYears, 9));
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 1));
         Assert.Empty(Run(controller, edge, TurnStep.FiveYears, 9));
 
-        Assert.Equal(TurnStep.FiveYears, controller.EndTurn()?.NewStep);
+        Assert.Equal(TurnStep.FiveYears, controller.AdvanceTurn()?.NewStep);
     }
 
     [Fact]
     public void The_count_follows_direction_not_the_exact_candidate_and_a_switch_moves_one_step()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.TenYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
         Run(controller, edge, TurnStep.TenYears, 25);
 
         // Ten turns of faster candidates that keep changing: 5 years, 1 year, 5 years, ...
@@ -282,11 +272,11 @@ public sealed class StepControllerTests
     public void A_count_completed_inside_the_gap_fires_at_the_first_allowed_turn()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiftyYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         // Faster from the end of turn 1: the count completes after turn 10, the gap after turn 20.
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 19));
-        var announced = controller.EndTurn();
+        var announced = controller.AdvanceTurn();
 
         Assert.Equal(21, announced?.EffectiveTurn);
         Assert.Equal(TurnStep.TwentyYears, controller.Turn.Step);
@@ -296,7 +286,7 @@ public sealed class StepControllerTests
     public void A_count_completed_inside_the_gap_does_not_fire_if_it_no_longer_holds()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiftyYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 12));   // count 12 after turn 12
         Assert.Empty(Run(controller, edge, TurnStep.FiftyYears, 1));     // reset after turn 13
@@ -304,14 +294,14 @@ public sealed class StepControllerTests
         // Counting again from turn 14: only 7 by turn 20, so the first allowed turn passes;
         // the 10th is turn 23, so the switch takes effect on turn 24.
         Assert.Empty(Run(controller, edge, TurnStep.TwentyYears, 9));
-        Assert.Equal(24, controller.EndTurn()?.EffectiveTurn);
+        Assert.Equal(24, controller.AdvanceTurn()?.EffectiveTurn);
     }
 
     [Fact]
     public void A_fast_leading_edge_brings_the_step_down_one_step_every_20_turns()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.FiftyYears));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         var announcements = Run(controller, edge, TurnStep.OneMonth, 150);
 
@@ -326,7 +316,7 @@ public sealed class StepControllerTests
     public void After_a_collapse_the_step_slows_one_step_at_a_time()
     {
         var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.OneMonth));
-        var controller = new StepController(edge);
+        var controller = Start(edge);
 
         var announcements = Run(controller, edge, TurnStep.FiftyYears, 150);
 
@@ -340,6 +330,24 @@ public sealed class StepControllerTests
         Assert.Equal([false, true, true, true, true, true, true], announcements.ConvertAll(a => a.AnnouncedAt == a.EffectiveAt));
     }
 
+    [Fact]
+    public void A_faster_switch_on_a_1_July_boundary_takes_effect_at_once()
+    {
+        var edge = new ScriptedLeadingEdge(TwoTurnsOf(TurnStep.SixMonths));
+        var controller = Start(edge);
+        Run(controller, edge, TurnStep.SixMonths, 11);   // now on turn 12
+
+        // Turns 12 to 21 see a faster candidate; turn 22 starts on 1 July 9,990 BCE (126 months in).
+        var announced = Assert.Single(Run(controller, edge, TurnStep.OneMonth, 10));
+
+        Assert.Equal(Date(-9989, 7, 1), announced.AnnouncedAt);
+        Assert.Equal(Date(-9989, 7, 1), announced.EffectiveAt);
+        Assert.Equal(22, announced.EffectiveTurn);
+        Assert.Equal(TurnDates.Starting(TurnStep.OneMonth, Date(-9989, 7, 1)), controller.Turn);
+    }
+
+    private static StepController Start(ScriptedLeadingEdge edge) => new(edge, ReferenceUndertaking.Uncalibrated);
+
     /// <summary>Sets the candidate to <paramref name="candidate"/> and ends <paramref name="turns"/> turns, returning every announcement.</summary>
     private static List<EraTransition> Run(StepController controller, ScriptedLeadingEdge edge, TurnStep candidate, int turns)
     {
@@ -347,7 +355,7 @@ public sealed class StepControllerTests
         var announcements = new List<EraTransition>();
         for (var i = 0; i < turns; i++)
         {
-            if (controller.EndTurn() is { } announced)
+            if (controller.AdvanceTurn() is { } announced)
             {
                 announcements.Add(announced);
             }

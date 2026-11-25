@@ -44,13 +44,10 @@ public sealed class StepController
     private int _direction;
     private int _count;
 
-    /// <summary>Starts at the epoch with the uncalibrated reference undertaking.</summary>
-    public StepController(ILeadingEdge leadingEdge)
-        : this(leadingEdge, ReferenceUndertaking.Uncalibrated)
-    {
-    }
-
-    /// <summary>Starts at the epoch: turn 1 runs on the candidate step at once (clarification 4).</summary>
+    /// <summary>
+    /// Starts at the epoch: turn 1 runs on the candidate step at once (clarification 4). Until
+    /// calibration, callers pass <see cref="ReferenceUndertaking.Uncalibrated"/> explicitly.
+    /// </summary>
     public StepController(ILeadingEdge leadingEdge, ReferenceUndertaking undertaking)
     {
         ArgumentNullException.ThrowIfNull(leadingEdge);
@@ -70,11 +67,12 @@ public sealed class StepController
     public EraTransition? PendingSwitch { get; private set; }
 
     /// <summary>
-    /// Ends the current turn and moves to the next: reads the leading edge at the boundary,
-    /// updates the count, decides any switch, and starts the next turn on the step it runs on.
+    /// Moves from the current turn to the next, once the current turn's turn-end stages have run:
+    /// reads the leading edge at the boundary, updates the count, decides any switch, and starts
+    /// the next turn on the step it runs on.
     /// </summary>
     /// <returns>The era-transition event announced at this boundary, if any.</returns>
-    public EraTransition? EndTurn()
+    public EraTransition? AdvanceTurn()
     {
         var boundary = Turn.End;
         var nextTurn = TurnNumber + 1;

@@ -37,53 +37,49 @@ public sealed class CandidateStepTests
     public void A_strategic_time_of_exactly_two_turns_picks_that_step(TurnStep step) =>
         Assert.Equal(step, CandidateStep.For(2 * StepTable.NominalSeconds(step)));
 
-    // Last strategic time that still picks the faster neighbour; one second more picks the slower.
-    [Theory]
-    [InlineData(TurnStep.FiftyYears, TurnStep.TwentyYears, 1_995_836_886L)]
-    [InlineData(TurnStep.TwentyYears, TurnStep.TenYears, 892_565_390L)]
-    [InlineData(TurnStep.TenYears, TurnStep.FiveYears, 446_282_695L)]
-    [InlineData(TurnStep.FiveYears, TurnStep.TwoYears, 199_583_688L)]
-    [InlineData(TurnStep.TwoYears, TurnStep.OneYear, 89_256_539L)]
-    [InlineData(TurnStep.OneYear, TurnStep.SixMonths, 44_628_269L)]
-    [InlineData(TurnStep.SixMonths, TurnStep.OneMonth, 12_883_071L)]
-    public void The_switch_point_between_neighbours_is_their_geometric_mean(TurnStep slower, TurnStep faster, long lastFaster)
+    /// <summary>
+    /// Each pair of neighbouring steps with, computed separately in Python: the last whole-second
+    /// strategic time that still picks the faster step, isqrt(4 × L_slower × L_faster), and the
+    /// exact tie, 4 × L_slower × L_faster, where S² meets the product ((S / 2)² = L_slower × L_faster).
+    /// </summary>
+    public static TheoryData<TurnStep, TurnStep, long, long> Neighbours => new()
     {
+        { TurnStep.FiftyYears, TurnStep.TwentyYears, 1_995_836_886L, 3_983_364_878_121_216_000L },
+        { TurnStep.TwentyYears, TurnStep.TenYears, 892_565_390L, 796_672_975_624_243_200L },
+        { TurnStep.TenYears, TurnStep.FiveYears, 446_282_695L, 199_168_243_906_060_800L },
+        { TurnStep.FiveYears, TurnStep.TwoYears, 199_583_688L, 39_833_648_781_212_160L },
+        { TurnStep.TwoYears, TurnStep.OneYear, 89_256_539L, 7_966_729_756_242_432L },
+        { TurnStep.OneYear, TurnStep.SixMonths, 44_628_269L, 1_991_682_439_060_608L },
+        { TurnStep.SixMonths, TurnStep.OneMonth, 12_883_071L, 165_973_536_588_384L },
+    };
+
+    [Theory]
+    [MemberData(nameof(Neighbours))]
+    public void The_switch_point_between_neighbours_is_their_geometric_mean(TurnStep slower, TurnStep faster, long lastFaster, long tie)
+    {
+        _ = tie;
         Assert.Equal(faster, CandidateStep.For(lastFaster));
         Assert.Equal(slower, CandidateStep.For(lastFaster + 1));
     }
 
-    // The squared strategic time S² is compared with 4 × L_slower × L_faster (that is, (S / 2)²
-    // with L_slower × L_faster), so an exact tie is S² = 4 × L_slower × L_faster.
     [Theory]
-    [InlineData(TurnStep.FiftyYears, TurnStep.TwentyYears)]
-    [InlineData(TurnStep.TwentyYears, TurnStep.TenYears)]
-    [InlineData(TurnStep.TenYears, TurnStep.FiveYears)]
-    [InlineData(TurnStep.FiveYears, TurnStep.TwoYears)]
-    [InlineData(TurnStep.TwoYears, TurnStep.OneYear)]
-    [InlineData(TurnStep.OneYear, TurnStep.SixMonths)]
-    [InlineData(TurnStep.SixMonths, TurnStep.OneMonth)]
-    public void An_exact_tie_goes_to_the_slower_step(TurnStep slower, TurnStep faster)
+    [MemberData(nameof(Neighbours))]
+    public void An_exact_tie_goes_to_the_slower_step(TurnStep slower, TurnStep faster, long lastFaster, long tie)
     {
-        var tie = 4 * (Int128)StepTable.NominalSeconds(slower) * StepTable.NominalSeconds(faster);
+        _ = lastFaster;
         Assert.Equal(slower, CandidateStep.ForSquaredStrategicTime(tie));
         Assert.Equal(faster, CandidateStep.ForSquaredStrategicTime(tie - 1));
     }
 
     // No two neighbours' nominal lengths multiply to a perfect square (their month counts multiply
     // to 144,000, 28,800, 7,200, 1,440, 288, 72 and 6), so a tie has no whole-second strategic time:
-    // the last faster value r and the first slower value r + 1 straddle it strictly. This is why the
-    // tie rule above can only be reached through the squared strategic time.
+    // the last faster value and the next second straddle it strictly. This is why the tie rule
+    // above can only be reached through the squared strategic time.
     [Theory]
-    [InlineData(TurnStep.FiftyYears, TurnStep.TwentyYears, 1_995_836_886L)]
-    [InlineData(TurnStep.TwentyYears, TurnStep.TenYears, 892_565_390L)]
-    [InlineData(TurnStep.TenYears, TurnStep.FiveYears, 446_282_695L)]
-    [InlineData(TurnStep.FiveYears, TurnStep.TwoYears, 199_583_688L)]
-    [InlineData(TurnStep.TwoYears, TurnStep.OneYear, 89_256_539L)]
-    [InlineData(TurnStep.OneYear, TurnStep.SixMonths, 44_628_269L)]
-    [InlineData(TurnStep.SixMonths, TurnStep.OneMonth, 12_883_071L)]
-    public void An_exact_tie_cannot_arise_from_whole_seconds(TurnStep slower, TurnStep faster, long lastFaster)
+    [MemberData(nameof(Neighbours))]
+    public void An_exact_tie_cannot_arise_from_whole_seconds(TurnStep slower, TurnStep faster, long lastFaster, long tie)
     {
-        var tie = 4 * (Int128)StepTable.NominalSeconds(slower) * StepTable.NominalSeconds(faster);
+        _ = (slower, faster);
         Assert.True((Int128)lastFaster * lastFaster < tie);
         Assert.True((Int128)(lastFaster + 1) * (lastFaster + 1) > tie);
     }

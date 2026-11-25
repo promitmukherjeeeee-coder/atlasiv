@@ -11,7 +11,8 @@ namespace Atlasiv.Core.Time;
 /// <remarks>
 /// The preview lists the old and new step, the date the switch takes effect, the new phase
 /// count and the first new turn's phase dates. Later passes add game consequences. Pass 1 has
-/// no event queue yet: the scheduler (J6) puts this on the queue (J5).
+/// no event queue yet: the scheduler (J6) puts this on the queue (J5) with the informational
+/// interruption class.
 /// </remarks>
 /// <param name="OldStep">The step before the switch.</param>
 /// <param name="AnnouncedAt">The turn boundary at which the switch was decided and announced.</param>
