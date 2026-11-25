@@ -38,6 +38,9 @@ public enum TurnStep
 /// <summary>The step table (Pass 1 spec section 3).</summary>
 public static class StepTable
 {
+    // One twelfth of the rate year, 31,556,952 / 12, which divides exactly.
+    private const long NominalMonthSeconds = Atlasiv.Core.Numerics.RateYear.Seconds / 12;
+
     // Indexed by step.
     private static readonly int[] TurnMonths = [600, 240, 120, 60, 24, 12, 6, 1];
     private static readonly int[] Phases = [20, 10, 10, 5, 4, 4, 3, 5];
@@ -49,6 +52,14 @@ public static class StepTable
     /// <summary>The turn length in calendar months.</summary>
     /// <exception cref="ArgumentOutOfRangeException">The step is not one of the eight.</exception>
     public static int MonthsPerTurn(TurnStep step) => TurnMonths[Index(step)];
+
+    /// <summary>
+    /// The nominal turn length in whole seconds: its months × one twelfth of the rate year
+    /// (2,629,746 s, exact). Used only to compare steps (spec clarification 7); real turn
+    /// boundaries are calendar dates (<see cref="TurnDates"/>).
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The step is not one of the eight.</exception>
+    public static long NominalSeconds(TurnStep step) => MonthsPerTurn(step) * NominalMonthSeconds;
 
     /// <summary>The number of phases in each turn.</summary>
     /// <exception cref="ArgumentOutOfRangeException">The step is not one of the eight.</exception>

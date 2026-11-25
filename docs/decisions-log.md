@@ -420,3 +420,52 @@ Related: ADR-006, ADR-012, ENG-004, ENG-005, ENG-006, ENG-008.
 - No values are left open: J3 adds no `// CALIBRATE` placeholders.
 
 Related: ADR-004, ENG-001, ENG-004, ENG-006, ENG-008.
+
+---
+
+## ENG-011: Step controller
+
+- **Status:** Proposed (Pass 1, J4, 25 Nov 2026). Decision 5 is an owner ruling given during J4 (25 Nov 2026).
+- **Context:** Spec section 4 (Confirmed) and clarifications 4 to 7, 10 and 16 fix the rules: the leading edge is read through an interface; the candidate is the step closest on a log scale to half the strategic time; switches need 10 consecutive turns (faster) or 20 (slower), at least 20 turns apart, one step at a time; faster switches align at once and slower ones wait for 1 January or 1 July; an era-transition event with a preview is issued when a switch is decided, and the switch is then committed. Issue #8 cites "ADR-039 §3, §5, §6, §7 and §11"; that was the repository's former record of the owner's 24 Nov rulings, now superseded by clarifications 4 to 7, 10 and 16 (ENG-001). The spec does not say when the leading edge is read, how the count behaves while a switch waits, or which turn the 20-turn gap is measured to.
+
+### Decisions
+
+1. **Types** (namespace `Atlasiv.Core.Time`):
+   - `CandidateStep.For(strategicSeconds)`: the candidate step for a strategic time in whole seconds.
+   - `StepTable.NominalSeconds(step)`: a step's nominal length in whole seconds.
+   - `ILeadingEdge`: one method, the leading edge's strategic time for a reference undertaking as of a turn boundary. Tests supply a scripted one.
+   - `ReferenceUndertaking`: the undertaking the leading edge is timed on (a distance in metres), with an uncalibrated placeholder.
+   - `StepController`: owns the turn number and the current turn's dates. `EndTurn()` closes the current turn, reads the leading edge, decides any switch and starts the next turn.
+   - `EraTransition`: the era-transition event and its preview.
+2. **Nominal lengths:** a step's months × 2,629,746 s, one twelfth of the 31,556,952-second rate year, which divides exactly (50 years = 1,577,847,600 s; 1 month = 2,629,746 s). These are only for comparing steps. Real turns still follow calendar dates.
+3. **Candidate comparison:** with strategic time S, target T = S / 2 is closer to the slower of two neighbours when T² ≥ L_slower × L_faster. Both sides are multiplied by 4, so S² is compared with 4 × L_slower × L_faster in 128-bit integers. There is no logarithm and no rounding of S / 2. Scanning slowest first, the first neighbour pair whose midpoint S reaches picks the slower step; if none does, the candidate is 1 month. Ties go to the slower step (≥), and targets beyond the table clamp to 50 years or 1 month. A negative strategic time is an impossible input (`SimulationDomainException`); zero is allowed and gives 1 month.
+4. **Exact ties cannot occur with whole seconds.** No two neighbours' nominal lengths multiply to a perfect square: their month counts multiply to 144,000, 28,800, 7,200, 1,440, 288, 72 and 6. The tie rule is still in the code. It is tested through an internal entry point that takes S² directly, and a separate test checks that the last whole second on each side straddles the tie strictly.
+5. **The 20-turn gap is measured to the announcement (owner ruling, 25 Nov 2026).** A switch may be decided at a turn boundary only if the turn about to start is at least 20 turns after the turn the current step took effect (turn 1 at the epoch). A slower switch then waits for its alignment, so the real gap between two switches taking effect is 20 to 25 turns. A count that completes earlier fires at the first boundary the gap allows, if it still holds there.
+6. **When the leading edge is read:** once at the epoch to pick turn 1's step, then once at every turn boundary, at the instant the next turn starts. Each reading is one turn's observation for the count. It is not read while an announced switch waits for alignment, because the switch is committed and the count restarts when the new step takes effect. Counting during the wait would give the same decisions: no switch can be decided in the 20 turns after one takes effect, and 20 observations of the new step are enough for both thresholds, so the result never depends on what happened before.
+7. **The count** is a direction (faster, slower or neither) and a number of consecutive turns. It resets to zero when the candidate equals the current step, restarts at 1 when the direction changes, and is cleared when a switch is announced. A switch is always one step in the count's direction, whatever the candidate.
+8. **Alignment:** the effective boundary is found by walking the old step's turns forward until a boundary is a valid start for the new step (`TurnDates.IsValidStart`). A faster step accepts every boundary of the next slower step, so a faster switch never waits. A slower switch waits at most 5 turns (1 month to 6 months, from an August boundary to January). Turn numbers keep counting through the wait and across the switch.
+9. **The era-transition event** holds the old step, the boundary where it was announced, the effective turn number and the first new turn's dates. The new step, effective date, phase count and phase dates are read from those dates, so they cannot disagree. `EndTurn()` returns it at the boundary where the switch is decided. `PendingSwitch` holds it until it takes effect. Pass 1 has no event queue yet, so J6 puts it on J5's queue as an informational event.
+10. **Placeholders:** `ReferenceUndertaking.PlaceholderDistanceMetres = 0` and `ReferenceUndertaking.Uncalibrated`, both marked `// CALIBRATE`. The spec leaves the undertaking and its distance to the data phase (section 14, decision 2). 0 means "not set", so a real transport system given the placeholder would produce an obviously wrong answer. The controller passes the undertaking to the leading edge unchanged; the scripted leading edge in Pass 1 ignores it.
+11. **J3 fix:** `TurnDates` now has its own `ToString()` ("OneMonth turn from 1 September 9999 BCE"). The record's generated version printed every property, including `Next` (another turn), so it recursed until the stack overflowed. Any failing assertion that printed a turn or an era-transition event crashed the whole test run instead of reporting the failure. A regression test covers it.
+
+### Tests
+
+- Candidate: each step's nominal length; a strategic time of exactly two turns of each step picks that step; for each neighbour pair, the last whole second that picks the faster step and the next one that picks the slower (boundary values computed separately in Python as isqrt(4 × L_slower × L_faster)); exact ties go to the slower step; clamping at both ends; a negative strategic time is an error.
+- Controller, through a scripted leading edge: turn 1 on the candidate at the epoch; readings at each boundary for the given undertaking; a faster switch after 10 turns but not 9, and a slower one after 20 but not 19; a 1-month to 6-month switch announced on 1 September and effective on 1 January, with the hand-written preview and the four waiting turns; 6 months to 1 year waiting one turn; a committed switch going ahead after the candidate drifts back; the gap counted from the effective turn (the next switch is turn 45, not 41); resets on an equal candidate (both directions) and on a change of direction; direction-only counting with a switch of one step; a count completed inside the gap that fires at turn 21, and one that no longer holds and fires later; all seven steps from 50 years down to 1 month and back up, one step every 20 turns, with turn numbers never reset.
+- Mutation check: deliberately breaking the direction reset, the gap, the slower threshold or the one-step rule each makes tests fail. Removing the reset on an equal candidate changes nothing, because the direction change already resets the count.
+
+### Alternatives considered
+
+- **Logarithms or a log table.** Rejected: clarification 7 asks for exact integer comparison, and hard rule 4 forbids library math.
+- **Calendar-exact turn lengths for the comparison.** Rejected: they vary with leap days and month lengths, so the candidate would depend on the date. Clarification 7 says nominal lengths.
+- **Gap measured to the effective turn.** Offered to the owner, who chose the announcement (decision 5).
+- **Counting the exact candidate instead of direction.** Rejected by clarification 5.
+- **An immutable state value with a pure `Next` function instead of a class.** Not needed yet. J8 decides how the controller's state (turn number, current turn, last switch turn, count and pending switch) is serialized and restored.
+
+### Consequences
+
+- J6's scheduler calls `EndTurn()` once per turn, after the turn-end stages, and queues any returned `EraTransition` as an informational event.
+- J8 must serialize and restore the controller's state for replay. J9's 1,000-turn scenario drives it with a scripted leading edge.
+- Placeholders left: the reference undertaking and its distance (decision 10).
+
+Related: ENG-001, ENG-004, ENG-010.
