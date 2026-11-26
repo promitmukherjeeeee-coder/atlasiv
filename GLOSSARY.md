@@ -44,6 +44,17 @@ _Avoid_: Subtick, step
 How much calendar time passes between a system's runs. A system runs only in its own stage, and only when its natural period is due.
 _Avoid_: Frequency, tick rate
 
+**Due**:
+When a system next runs: at the first opportunity in its stage (a phase, or a turn end) that reaches a boundary of its natural period it has not yet passed. Boundaries are calendar dates counted from the epoch, so a yearly system is due on reaching each 1 January. A run covers all the time since the system's last run, in one pass.
+_Avoid_: Scheduled, elapsed (due never counts time since the last run)
+
+**Simulation run**:
+The scheduler resolving phases and turn ends in order from the epoch, given a world seed, a leading edge, the registered systems and the input log. What it did is its timeline.
+
+**Timeline**:
+The record of a simulation run: for each phase and turn end, its turn, slot, step and dates, the systems that ran and what they covered, the events resolved in order, any step switch decided, and the state hash.
+_Avoid_: Log (the input log is the orders that go in; the timeline is what came out)
+
 **Leading edge**:
 The fastest transport capability that is usable at meaningful capacity by any entity holding at least 0.5% of world population.
 

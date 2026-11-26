@@ -521,3 +521,116 @@ Related: ENG-001, ENG-004, ENG-010.
 - No values are left open: J5 adds no `// CALIBRATE` placeholders.
 
 Related: ENG-001, ENG-008, ENG-010, ENG-011.
+
+---
+
+## ENG-013: Scheduler, stage runners and the simulation run
+
+- **Status:** Proposed (Pass 1, J6a, 26 Nov 2026). Decisions 2 and 3 are owner rulings given during J6a (26 Nov 2026).
+- **Context:** Spec section 6 (Confirmed) fixes the 11 phase stages and the 10 turn-end stages and their order. It says every system registers with a stage, a natural period and an update cadence, and runs only in its stage and only when due. It also says simultaneous orders resolve against the same snapshot, never by internal list order. Clarification 8 anchors "due" to the calendar and makes each run cover all the time since the last one. Section 3 runs the ending turn's turn-end stages before the next turn's first event. ENG-011 and ENG-012 left four things to J6: call the step controller, queue era-transition events, give each system its own event-ID sequence per slot, and timestamp turn-end events at the turn's end. Issue #10 cites "ADR-039 §1, §2 and §8"; that was the repository's former record of the owner's 24 Nov rulings, now superseded by section 6 and clarifications 2 and 8 (ENG-001). The spec does not say what cadence means for a Pass 1 system, which phase a phase-stage system is due in, how system runs and events interleave inside a phase, or where the era-transition event goes in the queue.
+
+### Decisions
+
+1. **Types** (namespace `Atlasiv.Core.Scheduling` unless stated):
+   - `NaturalPeriod`: one of the legal step or phase lengths, made only by `TurnOf(step)` or `PhaseOf(step)`. Equal lengths are equal periods: the 10-year and 5-year steps' phases and the 1-year turn are all "12 months".
+   - `SystemRegistration`: (system ID, stage, natural period). System ID 0 is reserved for the clock.
+   - `ISimulationSystem`: `Registration`, `Run(context, covered)`, and `Resolve(event, context)` for the events it scheduled.
+   - `SystemContext`: where the run is (turn, slot, step, turn and slot dates, the instant and stage being resolved), the phase's orders, `Draws(entity)` and `Schedule(...)`.
+   - `SimulationSetup`: world seed, leading edge, reference undertaking, systems and input log.
+   - `SimulationRun`: the scheduler. `RunTurns(n, stopFilter)` runs until n more turn ends complete, or until it stops.
+   - `SimulationTimeline` and `TimelineEntry`: one entry per phase and per turn end. Each holds the turn, slot, step and dates, the `SystemRun`s (stage, system, covered interval), the resolved events, any `EraTransition` decided, and a `StateHash` slot that stays empty until J8.
+   - `EraTransitionAnnounced`: the era-transition event's payload. `Events.EventPayload`: the base record for every event payload.
+   - `Orders.Order`, `Orders.OrderPayload`, `Orders.IStopFilter` and `Replay.InputLog`: the parts of the order model and input log the run needs.
+2. **Cadence waits for Pass 2 (owner ruling).** The docs define cadence only as per-entity level of detail (Vision A2: active entities every phase, quieter ones every 2 to 4 phases, dormant ones once per turn at an offset taken from the entity ID). Pass 1 has no entities, so a registration holds only its stage and natural period. Nothing in Pass 1 depends on cadence.
+3. **When a system is due (owner ruling for phase stages).** A period's boundaries are calendar instants counted from the epoch: 00:00 on the 1st of each month whose distance in months from 1 January 10,000 BCE is a multiple of the period. For the 1-month step's phase, they are 00:00 on days 1, 7, 13, 19 and 25. Each opportunity has an end: the phase's end in a phase stage, the turn's end in a turn-end stage. A system is due when a boundary falls after the end of the time it last covered (the epoch, before its first run) and no later than the opportunity's end. It then covers [last covered end, opportunity end) in one run. So a yearly phase-stage system on 1-month turns runs in the 25 to 31 December phase and covers exactly 1 January to 1 January. A turn-end system works the same way at each turn end.
+4. **Inside a phase.** Phase stages 1 to 11 run in order at the phase's start. In each stage the due systems run in ascending ID order. Then every event queued for that instant, in that stage or an earlier one, resolves. After stage 11, every event timestamped later in the phase resolves in event-key order. A system's run therefore comes before the events of its own stage at the same instant. Events timestamped later in the phase resolve after every stage has run at the phase's start, because the event key orders by timestamp first.
+5. **The turn end** runs turn-end stages 1 to 10 the same way at the turn's end instant. Only then does `StepController.AdvanceTurn()` read the leading edge and start the next turn, so the old turn's turn end always finishes before any event of the new turn.
+6. **Scheduling rules.**
+   - An event is resolved by the system that created it.
+   - A turn-end-stage event must be timestamped at the current turn's end (ENG-012, consequence 2).
+   - No event may be scheduled before the point the run has reached. While systems run, the new event's (timestamp, stage) must not be earlier than (now, current stage). While an event resolves, the new event's key must be later than that event's key.
+   - Each system has one `EventIdSequence` per turn and slot, made on first use and shared by its run and its event resolutions there.
+7. **The era-transition event** is created by the clock (system 0) after the turn end, at the boundary where the switch is decided. It is informational, timestamped at that boundary, in phase stage 4 (scheduled events and communications), with priority 0 and ID (0, old turn, turn end, n). It therefore resolves in the first phase of the turn that starts there; for a slower switch, that is before the switch takes effect. The turn end's timeline entry also records the `EraTransition`.
+8. **Orders and the snapshot.** The input log returns a phase's orders in one canonical order (issuer, then sequence number), whatever order they were added in. It refuses a repeated (issuer, sequence) within one phase. Every system running in a phase sees all of that phase's orders at once; turn-end stages see none. Pass 1 has no state store, so "the same snapshot" means one complete batch in a fixed order, never one order at a time. A system that settles a contest by list position would still have a bug, and the scheduler cannot detect it.
+9. **Stop filter and continuing.** `RunTurns` takes an optional `IStopFilter`. When the filter stops on a resolved event, the run finishes the current phase or turn end and stops at that boundary. The next call carries on from there. Running in several calls, or stopping and continuing, gives exactly the same timeline as one uninterrupted call. J7 builds Advance Until's stop list and consistency checks on this hook.
+10. **Draws.** `SystemContext.Draws(entity)` gives the address (seed, turn, slot, substep 0, system, entity). A system's run and its event resolutions in one slot share these addresses, so a system that draws in both must use different draw indices or entity IDs. J6b brings substeps.
+11. **The run's state** lives in the `SimulationRun` object: the step controller, the queue, each system's covered end and next boundary, and the next phase. Nothing is ever iterated from a hash container. Systems are kept in arrays in ascending ID order, and the input log's dictionary is only looked up.
+
+### Tests
+
+- **Timeline:**
+  - each turn is its phases, then its turn end;
+  - 1-month phase dates, including a 4-day February phase;
+  - the 50-year step's alternation of 1 January and 1 July;
+  - the turn end's span and instant;
+  - phases that tile time with no gaps;
+  - a 52-turn run from 1 year to 6 months to 1 month: continuous turn numbers, each turn as phases 1 to N then its turn end, a constant step within each turn, and a 5-day leap-year February phase in 9,961 BCE.
+- **Scheduler:**
+  - stage order 1 to 11 and 1 to 10, with system IDs running against it;
+  - ascending ID order within a stage;
+  - a system runs only in its own stage;
+  - a yearly turn-end system runs every 12th turn on the 1-month step and once per turn on the 50-year step, each time covering the full gap;
+  - a monthly system runs once per 10-year turn;
+  - 5-year and 30-month periods fall on boundaries counted from the epoch;
+  - due stays anchored to 1 January across a faster switch (1 year to 6 months), and to quarters across a slower one with an alignment wait;
+  - runs cover time with no gap or overlap;
+  - the owner's phase-stage rule: a yearly system runs in the 25 to 31 December phase and covers the calendar year;
+  - every-phase systems on all eight steps;
+  - a 6-month phase-stage system covering two phases;
+  - duplicate IDs, ID 0, and a missing stage or period are refused.
+- **Events:**
+  - an event resolves in the phase that contains it, and its creator resolves it;
+  - on a phase boundary, it belongs to the phase that starts there;
+  - on a turn boundary, it resolves after the old turn end, in the new turn's phase 1;
+  - an earlier-stage event at the phase's start resolves before later stages run;
+  - the full key order holds;
+  - follow-up events resolve in the same phase;
+  - turn-end-stage events resolve between turn-end stages;
+  - refused: a turn-end event away from the turn end, and scheduling in the past or in an earlier stage;
+  - far-future events wait in the queue;
+  - ID fields are correct, and run and resolution share one sequence per slot.
+- **Orders:**
+  - each system in a phase sees exactly that phase's orders, and turn ends see none;
+  - FsCheck: the same orders logged in two shuffled orders give identical runs;
+  - a contest with tied top bids is decided the same way whichever claim is logged first;
+  - a repeated (issuer, sequence) is refused.
+- **Era transitions:** faster and slower switches are recorded at the turn end and announced in phase 1 of the next turn, with the hand-written key and preview.
+- **Stop and continue:**
+  - a decision-critical event stops the run at the end of its phase, or after the whole turn end;
+  - informational events, and a run with no filter, do not stop;
+  - stopping and continuing, or splitting the run into several calls, gives the same timeline as one call.
+- **Mutation check.** Each of these deliberate bugs fails at least one test:
+  - due tested with `>=` instead of `>`;
+  - phase due measured at the phase's start;
+  - systems not sorted by ID;
+  - no event resolution between stages;
+  - no event resolution at the turn end;
+  - orders kept in logged order;
+  - coverage not advanced after a run;
+  - each boundary one period early;
+  - the era event put in another stage;
+  - the stop filter ignored.
+
+### Alternatives considered
+
+- **A phase-stage system runs in the phase that starts on or contains the boundary** (1 to 7 January). Offered to the owner, who chose decision 3. It would leave run spans offset from the calendar (7 January to 7 January), and across step switches they could become irregular lengths.
+- **Cadence as a per-entity tier hook now, or as a second name for the period.** Offered to the owner, who chose to defer it (decision 2).
+- **All systems in a phase first, then all its events.** Rejected. An event at the phase's start in stage 3 would resolve after stage 8's systems, against the stage order the event key encodes.
+- **"Due" as time since the last run.** Rejected by clarification 8. It would drift against the calendar across step switches.
+- **The era-transition event in turn-end stage 10.** Rejected. The switch is decided only after the turn end, at the new turn's start, and the event is an announcement, which is what phase stage 4 is for.
+- **Orders delivered to stage 2 systems only.** Rejected for Pass 1. Later stages (movement, battles) also act on orders, and there is no validation and routing layer yet.
+
+### Consequences
+
+- **A disagreement with the spec, for the owner.** Clarification 8 says natural periods are restricted to legal lengths "so every elapsed interval has a cached propagator". That holds when the period is a whole number of the current step's turns, or shorter than one turn. Otherwise it does not:
+  - a 5-year system on the 2-year step runs at years 6 and 10, covering 6 years and then 4;
+  - a 30-month system on the 1-year step covers 3 years and then 2.
+
+  None of those spans is a legal length. The code follows the confirmed due rule. J6b's propagator cache must handle such intervals (for example by composing legal lengths, or by computing on a miss), or the owner may restrict which periods are allowed with which steps.
+- J6b adds the substep driver, the solver interface and the propagator cache to the run.
+- J7 builds Advance Until on `IStopFilter`.
+- J8 fills `StateHash` and serializes the run's state: decision 11, plus the controller (ENG-011) and the queue in key order (ENG-012). J8 also extends `InputLog` with the campaign manifest.
+- A system that is not due in a phase does not see that phase's orders. Real order routing comes with real systems.
+- No values are left open: J6a adds no `// CALIBRATE` placeholders. The run still uses J4's `ReferenceUndertaking` placeholder, which every caller must name.
+
+Related: ENG-001, ENG-008, ENG-010, ENG-011, ENG-012.
