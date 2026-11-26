@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Atlasiv.Core.Numerics;
 using Atlasiv.Core.Time;
 
@@ -55,10 +56,9 @@ public sealed class EventIdSequence
     {
         if (_exhausted)
         {
-            throw new SimulationOverflowException(
-                "EventIdSequence: system " + SystemId.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                + " has used every 64-bit sequence number in turn "
-                + Turn.ToString(System.Globalization.CultureInfo.InvariantCulture) + ", " + Slot + ".");
+            throw new SimulationOverflowException(string.Create(
+                CultureInfo.InvariantCulture,
+                $"EventIdSequence: system {SystemId} has used every 64-bit sequence number in turn {Turn}, {Slot}."));
         }
 
         var id = new StableEventId(SystemId, Turn, Slot, _next);

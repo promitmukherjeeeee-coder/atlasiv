@@ -55,14 +55,15 @@ _Avoid_: Target step
 The announced event, with a preview, that marks a change of step.
 _Avoid_: Era change (eras are descriptive and never change the step)
 
-**Slot**:
-Where in a turn something happens: one of its phases, or the turn end, which has its own slot after the last phase. Used in random-draw keys and stable event IDs. Not a stage.
+**Turn slot**:
+Where in a turn something happens: phase 1 to N, or the turn end, which has its own fixed slot after every phase. Used in draw addresses and stable event IDs.
+_Avoid_: Draw slot (its former name), stage (a stage is a resolution slot; a turn slot is a phase or the turn end)
 
 **Event queue**:
 The single queue that resolves events in order of timestamp, stage, event priority and stable event ID. Events at the same instant resolve turn-end stages first, then phase stages; a lower priority number resolves first.
 
 **Stable event ID**:
-An event's unique identity: the system that created it, the turn, the slot, and that system's sequence number within the slot. It breaks every remaining tie in the event queue.
+An event's unique identity: the system that created it, the turn, the turn slot, and that system's sequence number within that turn slot. It breaks every remaining tie in the event queue.
 _Avoid_: Event index, event number
 
 ## Orders
@@ -121,12 +122,8 @@ The 64-bit number, recorded in the campaign manifest, from which every random dr
 _Avoid_: Random seed (there is only one)
 
 **Draw address**:
-The (world seed, turn, draw slot, substep, system, entity) that names one random stream. Each draw is a pure function of its address and its draw index, never of iteration order.
+The (world seed, turn, turn slot, substep, system, entity) that names one random stream. Each draw is a pure function of its address and its draw index, never of iteration order.
 _Avoid_: RNG state, generator (there is no per-system state)
-
-**Draw slot**:
-Where in a turn a draw is made: phase 1 to N, or the turn end, which has its own fixed slot after every phase.
-_Avoid_: Stage (a stage is a resolution slot; a draw slot is a phase or the turn end)
 
 **Draw index**:
 The position of a draw within one address's stream, counting from 0.

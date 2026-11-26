@@ -513,7 +513,9 @@ Related: ENG-001, ENG-004, ENG-010.
 
 ### Consequences
 
-- J6's scheduler resolves events from this queue within each phase and turn end, gives each system its own `EventIdSequence` per slot, and queues `EraTransition` as an informational event.
+- J6's scheduler resolves events from this queue within each phase and turn end, gives each system its own `EventIdSequence` per slot (and never two for the same system, turn and slot), and queues `EraTransition` as an informational event.
+- Decision 3 assumes turn-end-stage events carry the turn's end instant as their timestamp, so they meet phase-stage events only on a boundary. J6 must timestamp them that way, or bring the stage order back to the owner. The key applies the stage order at every instant.
+- The queue has no size budget. The doctrine's "Budgets and scalability" rule (docs/06) asks for per-subsystem queue-size budgets, but the spec sets none for Pass 1; the J10 benchmarks are where one would be proposed.
 - J8 must serialize the queued events in key order (the heap's internal order is not canonical) and restore them.
 - Pass 2 replaces `StableEventId` with the permanent event identity, keeping the same ordering guarantee.
 - No values are left open: J5 adds no `// CALIBRATE` placeholders.
