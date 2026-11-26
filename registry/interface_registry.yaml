@@ -1,12 +1,12 @@
 registry: ATLASIV Interface Architecture Registry
-version: 0.1.0-draft
-date: '2026-11-24'
-status: Draft. Authoritative once committed to the repository (Pass 2). Chart v3.4 is generated from this file.
+version: 0.2.0-draft
+date: '2026-11-26'
+status: Draft. Authoritative once committed to the repository (Pass 2). Chart v3.5 is generated from this file.
 counts:
   levels: 4
   category_groups: 8
   workspaces: 28
-  showcase_views: 10
+  showcase_views: 11
   dossier_types: 7
   analysis_types: 6
   global_systems: 5
@@ -103,20 +103,34 @@ workspaces:
   - Province and region
   - Settlement and land use
   - Exploration and navigation
-  showcase_views: []
+  - Urban Development and City Administration (V1) (added 26 Nov 2026)
+  showcase_views:
+  - WS-A1/V1
   linked_mechanics:
   - P5
   - P6
   - P8
-  - P10
+  - P32
+  - P33
+  - P34
+  - P35
+  - R31
+  - R32
+  - I19
+  - I20
+  - A17
+  - U12
   - N13
   - D14
-  - W1
   owner_systems_read:
+  - OS-AI
   - OS-DIPLO
   - OS-INFO
+  - OS-LEDGER
+  - OS-POLITY
+  - OS-PROD
   - OS-SETTLE
-  - OS-TERRAIN
+  - OS-UI
   actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
   access_conditions: GS-03 information access; A14 access modes
   validation_tests: to specify in Pass 10
@@ -183,7 +197,9 @@ workspaces:
   - P25
   - P26
   - P31
+  - P37
   owner_systems_read:
+  - OS-INFO
   - OS-POP
   actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
   access_conditions: GS-03 information access; A14 access modes
@@ -227,6 +243,7 @@ workspaces:
   - N12
   - I1
   - I10
+  - P38
   owner_systems_read:
   - OS-INST
   - OS-POLITY
@@ -271,6 +288,7 @@ workspaces:
   - S1
   - S14
   - S30
+  - S34
   owner_systems_read:
   - OS-POLITY
   actions: 'to specify with each linked mechanic (U7: inspect, plan, issue, resolve)'
@@ -682,6 +700,7 @@ workspaces:
   - X16
   - X20
   - X26
+  - X29
   owner_systems_read:
   - OS-EVENT
   - OS-OBS
@@ -708,6 +727,9 @@ workspaces:
   access_conditions: GS-03 information access; A14 access modes
   validation_tests: to specify in Pass 10
 showcase_views:
+- id: WS-A1/V1
+  name: Urban Development and City Administration (The Living City)
+  note: Added 26 Nov 2026
 - id: WS-A2/V1
   name: FTL Grand Project and Consortium
   note: Endgame
@@ -747,6 +769,7 @@ dossier_types:
   covers:
   - Settlements, regions
   - Territory, sites
+  - Sector, district and site modules
   universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
     events, actions
 - id: DS-03
@@ -769,7 +792,7 @@ dossier_types:
   covers:
   - Facilities, networks
   - Fleets, armies
-  - Physical copies of works
+  - Landmarks, physical copies of works
   universal_sections: identity, classification, location, ownership, lineage, condition, relationships, statistics,
     events, actions
 - id: DS-06
@@ -854,6 +877,9 @@ cross_links: []
 data_ownership: 'Referenced, not defined here (ADR-018): see state_ownership.yaml, the seed of engineering document
   B.'
 chart_corrections_v3_4:
+- WS-A1/V1 The Living City added (v3.5, 26 Nov 2026); showcase views 10 to 11
+- P8 typed adjacency linked to WS-A1; X29 Wonders of the World linked to WS-H2 (26 Nov 2026)
+- P37 censuses linked to WS-B1, P38 administrative units to WS-C1, S34 divided polity to WS-C3 (26 Nov 2026)
 - F2 label (chart showed P2)
 - Showcase views 8 to 10 (WS-E2/V2, WS-H2/V1)
 - DS-07 Knowledge Artifact added; ID format DS-01 to DS-07

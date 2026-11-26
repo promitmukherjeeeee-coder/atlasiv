@@ -192,7 +192,7 @@ The cost is controlled by limiting the full web to notable actors and using aggr
 - **Customary law and honor codes.** Vendetta, blood price, hospitality, oaths.
 - **City identity.** Cities develop an industrial, mercantile, scholarly, religious or military character.
 - **Folk heroes and outlaws.** Banditry can produce legendary figures who shift faction moods.
-- **Wonders and monuments.** Special projects that lift prestige, heritage and cultural pull.
+- **Wonders and monuments.** Great works are special projects that lift prestige, heritage and cultural pull; at each era's end seven are designated Wonders of the World and enter the historiography (X29).
 - **Corporate dynasties.** Founding families inherit and fight over firms.
 - **Climate refugees and social displacement.** Large-scale movement stressing hosts.
 - **Public health stories.** Plagues, reformers, quarantines, contested policies.
@@ -447,3 +447,39 @@ These are candidate formulations for engineering evaluation (Computational Doctr
 - **Historical memory.** Per-group belief over claims, updated by accessible accounts, education and propaganda, decaying without transmission; feeds legitimacy and grievance only through X24.
 
 Causal chain, in words: events produce objective records; observation produces artifacts; artifacts move through acquisition and transmission; absorption turns access into understanding; research and synthesis produce new artifacts; capability needs understanding plus a real dependency stack; deployment changes the economy and military; those changes produce new events.
+
+## 13. The Living City (added 26 Nov 2026)
+
+Worked examples for Final Master Vision 9.20 and Mechanics section T. Every name, place and number here is synthetic and illustrative; all rates, thresholds and costs are calibration parameters.
+
+### 13.1 From camp to province
+
+A river-terrace village grows on surplus, storage and water (P5). It is promoted to town when its population, specialisation and services cross the town thresholds. Its functional catchment now meets the province eligibility rule (P32): a new province is carved from the natural zone, with recorded ancestry, a dated boundary version and an event. Nothing is duplicated: the people, stocks and territory already counted in the zone move into the child province. A neighbouring village that keeps growing does not get a province until it, too, is promoted and its catchment stands apart.
+
+### 13.2 A second city
+
+The region's city and a fast-growing port town lie 120 km apart along a coast. The port's catchment is distinct and its provinces are contiguous, so the ruler can, with authority and administrative capacity, reorganise the region into two. The port becomes the city of the new region and the city cost escalation applies. A ruler who tries the same with a suburb two kilometres from the capital fails the eligibility test: the suburb's catchment is the capital's, so it stays a large town or a metropolitan district (test RC-01).
+
+### 13.3 Industrial growth with a workers' colony (synthetic Velmora, 1887)
+
+The Velmora Engineering Company holds industrial development rights in the Eastern Engineering District (I19). Its proposal (I20): add company-funded, rent-free housing for eligible employees and request a municipal utility extension; the Technical Academy is a potential, not agreed, training partner. Ground areas: industry 55, housing 20, commerce 10, training and services 5, internal reserve 10 per cent, proposed 55, 25, 10, 7, 3. Housing 1,200 places with 1,140 occupied; the proposal adds 240 places, 1,440 in total, but only if construction finishes and the housing is commissioned. Rent-free means zero rent for eligible occupants; the company's books carry construction, finance, upkeep and utilities (P36). The municipality can fund the utility extension, negotiate cost-sharing, ask for revisions or prioritise other work. None of this guarantees occupancy or productivity.
+
+### 13.4 An academy's land grant
+
+The government grants the Technical Academy a campus district and an endowment under its charter. The grant gives development and use rights, not sovereignty or direct control (I19). The academy then decides on its own, within its charter and funds, to commission laboratories, a library, housing and workshops through the shared construction lifecycle (R31), to invite a publisher under a valid contract, and later to seek adjacent land. The player can influence it only through rights, sponsorship, incentives and contracts.
+
+### 13.5 Competing proposals
+
+The southwestern reserve has good rail access. A railway company proposes freight sidings; a merchant association proposes warehouses; the municipality wants housing. All three are evaluated against the same planning snapshot through the existing allocation process; the land cannot be granted exclusively twice; ties break deterministically. The losing proposals build nothing, but their sponsors can revise, wait, or pursue another site.
+
+### 13.6 A landmark that rises and falls
+
+A local station becomes a freight terminal, then an integrated junction, and after decades of heavy traffic the Grand Junction Terminal (R32). Its benefits come from real freight and passenger handling, connectivity and catchment. When a rival line and a port closure cut traffic, the terminal runs below capacity, costs exceed revenue and parts are mothballed; the building and its history survive and can be reused.
+
+### 13.7 Three ways to play the same city
+
+- **Direct.** The player chooses sites, profiles and projects in WS-A1/V1, watching blockers and trade-offs.
+- **Guided.** The player sets an ambition (city of knowledge), budget and constraints; the municipal administration proposes projects for approval.
+- **Autonomous.** A standing development order with priorities, spending limits, expiry and exception policy runs the city; the player sees reports and only significant exceptions (A17).
+
+Independent institutions in all three modes still decide for themselves.

@@ -53,11 +53,12 @@ owner_systems:
   name: Conservation and ownership ledgers
   layer: 0
   owns: Stock-identity ledgers for people, resources and money; ownership shares; copies of knowledge carriers
-  mechanic_count: 3
+  mechanic_count: 4
   mechanics:
   - R26
   - R29
   - A11
+  - I19
   notes: Every transfer posts here; balances must close every update.
 - id: OS-EVENT
   name: Objective event store
@@ -168,7 +169,7 @@ owner_systems:
   name: Settlements and land use
   layer: 2
   owns: Settlements, districts, buildings, adjacency, land use, urban land and waste systems
-  mechanic_count: 8
+  mechanic_count: 13
   mechanics:
   - P5
   - P6
@@ -178,12 +179,17 @@ owner_systems:
   - P14
   - P21
   - P29
+  - P33
+  - P34
+  - P35
+  - P36
+  - R33
 - id: OS-PROD
   name: Production, energy and capability
   layer: 2
   owns: Extraction, agriculture, processing, man-made resources, energy and grids, capital stock, industrial base,
     operational capability and deployment states (K50, K51)
-  mechanic_count: 28
+  mechanic_count: 30
   mechanics:
   - W15
   - R1
@@ -213,6 +219,8 @@ owner_systems:
   - R30
   - K50
   - K51
+  - R31
+  - R32
   notes: Capability lives here, separate from knowledge (AX-2).
 - id: OS-TRANSPORT
   name: Transport and networks
@@ -295,7 +303,7 @@ owner_systems:
   layer: 3
   owns: Per-actor observations, knowledge deltas from truth, credibility and belief, intelligence estimates, map
     knowledge
-  mechanic_count: 7
+  mechanic_count: 8
   mechanics:
   - D1
   - N13
@@ -304,6 +312,7 @@ owner_systems:
   - D21
   - K63
   - K64
+  - P37
   notes: ADR-015, AX-3, AX-8.
 - id: OS-CULTURE
   name: Culture, religion and opinion
@@ -328,7 +337,7 @@ owner_systems:
   layer: 3
   owns: Political authority, Governance Ledger, legitimacy, factions, administration and reach, law and courts,
     public finance, unrest
-  mechanic_count: 38
+  mechanic_count: 42
   mechanics:
   - K6
   - E11
@@ -358,6 +367,7 @@ owner_systems:
   - S31
   - S32
   - S33
+  - S34
   - L1
   - L2
   - L3
@@ -368,6 +378,9 @@ owner_systems:
   - L8
   - L9
   - L10
+  - P32
+  - P38
+  - I20
   notes: Living Constitutional Order (L1 to L10).
 - id: OS-INST
   name: Institutions
@@ -562,7 +575,7 @@ owner_systems:
   name: Decision making
   layer: cross-cutting
   owns: AI plans, objectives and personalities; control assignment (country switching)
-  mechanic_count: 7
+  mechanic_count: 8
   mechanics:
   - T7
   - D12
@@ -571,13 +584,14 @@ owner_systems:
   - A13
   - D23
   - A16
+  - A17
   notes: Reads only OS-INFO for its actor; writes only orders into OS-TIME.
 - id: OS-OBS
   name: Observation, history and analysis
   layer: 5
   owns: 'Derived records only: chronicle, histories and publications metadata, scoring samples, lineage and career
     records, forecasts, replays, access modes'
-  mechanic_count: 23
+  mechanic_count: 24
   mechanics:
   - X1
   - X2
@@ -601,13 +615,14 @@ owner_systems:
   - X25
   - X26
   - X27
+  - X29
   - A14
   notes: Never writes authoritative state (AX-7).
 - id: OS-UI
   name: Interface
   layer: 5
   owns: Nothing authoritative; navigation state is presentation state
-  mechanic_count: 11
+  mechanic_count: 14
   mechanics:
   - U1
   - U2
@@ -620,4 +635,7 @@ owner_systems:
   - U9
   - U10
   - U11
+  - U12
+  - U13
+  - U14
   notes: Issues orders through OS-TIME only.

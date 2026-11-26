@@ -250,11 +250,20 @@ flows_from_declared_mechanic_links:
 - from: OS-AI
   to: OS-MIL
   link_count: 1
+- from: OS-AI
+  to: OS-TIME
+  link_count: 1
+- from: OS-AI
+  to: OS-UI
+  link_count: 1
 - from: OS-CHAR
   to: OS-KNOW
   link_count: 1
 - from: OS-CHAR
   to: OS-OBS
+  link_count: 1
+- from: OS-CHAR
+  to: OS-POLITY
   link_count: 1
 - from: OS-CULTURE
   to: OS-DIPLO
@@ -271,6 +280,9 @@ flows_from_declared_mechanic_links:
 - from: OS-CULTURE
   to: OS-OBS
   link_count: 1
+- from: OS-CULTURE
+  to: OS-PROD
+  link_count: 1
 - from: OS-DIPLO
   to: OS-INST
   link_count: 2
@@ -279,6 +291,9 @@ flows_from_declared_mechanic_links:
   link_count: 1
 - from: OS-DIPLO
   to: OS-MIL
+  link_count: 1
+- from: OS-DIPLO
+  to: OS-POLITY
   link_count: 1
 - from: OS-EVENT
   to: OS-OBS
@@ -297,13 +312,22 @@ flows_from_declared_mechanic_links:
   link_count: 1
 - from: OS-INFO
   to: OS-OBS
-  link_count: 1
+  link_count: 2
 - from: OS-INST
   to: OS-AI
   link_count: 1
 - from: OS-INST
   to: OS-KNOW
   link_count: 13
+- from: OS-INST
+  to: OS-LEDGER
+  link_count: 2
+- from: OS-INST
+  to: OS-POLITY
+  link_count: 3
+- from: OS-INST
+  to: OS-SETTLE
+  link_count: 1
 - from: OS-KNOW
   to: OS-INFO
   link_count: 3
@@ -316,6 +340,9 @@ flows_from_declared_mechanic_links:
 - from: OS-LEDGER
   to: OS-MARKET
   link_count: 1
+- from: OS-LEDGER
+  to: OS-POLITY
+  link_count: 2
 - from: OS-MARKET
   to: OS-INST
   link_count: 2
@@ -323,11 +350,14 @@ flows_from_declared_mechanic_links:
   to: OS-KNOW
   link_count: 3
 - from: OS-MARKET
+  to: OS-SETTLE
+  link_count: 2
+- from: OS-MARKET
   to: OS-UI
   link_count: 1
 - from: OS-MIL
   to: OS-AI
-  link_count: 1
+  link_count: 2
 - from: OS-POLITY
   to: OS-INST
   link_count: 1
@@ -335,10 +365,22 @@ flows_from_declared_mechanic_links:
   to: OS-KNOW
   link_count: 1
 - from: OS-POLITY
+  to: OS-LEDGER
+  link_count: 1
+- from: OS-POLITY
   to: OS-MARKET
   link_count: 1
 - from: OS-POLITY
   to: OS-MIL
+  link_count: 1
+- from: OS-POLITY
+  to: OS-SETTLE
+  link_count: 2
+- from: OS-POLITY
+  to: OS-TRANSPORT
+  link_count: 1
+- from: OS-POP
+  to: OS-INFO
   link_count: 1
 - from: OS-POP
   to: OS-KNOW
@@ -347,11 +389,35 @@ flows_from_declared_mechanic_links:
   to: OS-KNOW
   link_count: 1
 - from: OS-PROD
+  to: OS-OBS
+  link_count: 1
+- from: OS-PROD
   to: OS-PROJ
+  link_count: 3
+- from: OS-PROD
+  to: OS-SETTLE
+  link_count: 2
+- from: OS-PROJ
+  to: OS-INFO
+  link_count: 1
+- from: OS-PROJ
+  to: OS-PROD
+  link_count: 3
+- from: OS-SETTLE
+  to: OS-MARKET
+  link_count: 1
+- from: OS-SETTLE
+  to: OS-POLITY
+  link_count: 2
+- from: OS-SETTLE
+  to: OS-PROD
+  link_count: 1
+- from: OS-SETTLE
+  to: OS-TRANSPORT
   link_count: 1
 - from: OS-TIME
   to: OS-AI
-  link_count: 3
+  link_count: 5
 - from: OS-TIME
   to: OS-INFO
   link_count: 1
@@ -373,6 +439,7 @@ strongly_connected_components:
   - OS-INFO
   - OS-INST
   - OS-KNOW
+  - OS-LEDGER
   - OS-MARKET
   - OS-MIL
   - OS-POLITY
@@ -382,6 +449,7 @@ strongly_connected_components:
   - OS-SETTLE
   - OS-TERRAIN
   - OS-TIME
+  - OS-TRANSPORT
 coupled_core_excluding_lagged_edges:
 - - OS-CLIMATE
   - OS-CULTURE
@@ -392,6 +460,7 @@ coupled_core_excluding_lagged_edges:
   - OS-INFO
   - OS-INST
   - OS-KNOW
+  - OS-LEDGER
   - OS-MARKET
   - OS-MIL
   - OS-POLITY
@@ -400,5 +469,6 @@ coupled_core_excluding_lagged_edges:
   - OS-PROJ
   - OS-SETTLE
   - OS-TERRAIN
+  - OS-TRANSPORT
 scc_note: Systems in one component form feedback loops. Pass 3 must give each loop an explicit solver contract or
   a phase-lagged update with saturation and damping (Computational Doctrine; Pass 1 spec section 10).

@@ -82,6 +82,7 @@ Every job follows the same loop:
 ## J7 Standing orders and Advance Until
 
 - The standing-order model and its state machine: active, paused, partial, failed, completed. No refunds of committed costs.
+- Standing-order fields include expiry (spec section 7, clarification 16), used later by development orders.
 - Advance Until with the default stop list and customisable filters that can never disable consistency checks.
 - Hooks only. Real triggers arrive with their systems.
 - Done when state-machine and stop-filter tests pass.
