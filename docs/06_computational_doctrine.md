@@ -429,7 +429,7 @@ New mechanics: K40 to K62 (23), X16 to X27 (12), A14 to A15 (2), U11 (1): 38 ent
 
 ### 20.6 Unresolved questions and unavailable sources
 
-- Addressed 24 Nov 2026 (draft 0.1.0 files, to be committed in Pass 2): interface\_registry.yaml (the machine-readable Interface Architecture Registry), mechanic\_registry.yaml (all 411 mechanics with owner, layer and declared links, updated 25 Nov 2026), state\_ownership.yaml (28 owner systems, the seed of document B) and system\_dependency\_map.yaml (system-level draft of document D). Plugin and open-source requirements: none, confirmed by the owner. Still open by design: variable-level inputs and outputs, which need each mechanic's 21-field specification (Pass 2b).
+- Addressed 24 Nov 2026 (draft 0.1.0 files, to be committed in Pass 2): interface\_registry.yaml (the machine-readable Interface Architecture Registry), mechanic\_registry.yaml (all 429 mechanics with owner, layer and declared links, updated 26 Nov 2026), state\_ownership.yaml (28 owner systems, the seed of document B) and system\_dependency\_map.yaml (system-level draft of document D). Plugin and open-source requirements: none, confirmed by the owner. Still open by design: variable-level inputs and outputs, which need each mechanic's 21-field specification (Pass 2b).
 - Owner decisions, all resolved 24 Nov 2026: no modding, plugins or extension API (ADR-032); BCE/CE; the FTL horizon value (X28, ADR-036); interface chart redrawn as v3.4 from the registry.
 - Engineering questions: event-store compaction over 10,000 turns; claim granularity in the digital era; how often synthesis runs; the offline renderer's quality bar for human evaluation.
 
@@ -447,7 +447,7 @@ Owner review of earlier simplifications. Governing principle: an abstraction is 
 | --- | --- | --- | --- |
 | City costs | Geometric rule | Derived from land, infrastructure, labour, administration and resources; any residual factor labelled | Vision 5, P6 |
 | One city per region | Rule only | Tied to fixed geographic region; administrative subdivision exploit test | Vision 5, P5 |
-| Adjacency | Fixed +3 and +1 | Accessibility, infrastructure and service capacity; old values as calibration reference | Vision 5, P8 |
+| Adjacency | Fixed +3 and +1 | Accessibility, infrastructure and service capacity; old values as calibration reference (superseded 26 Nov 2026: fixed typed adjacency restored beside network benefits, see 22.1) | Vision 5, P8 |
 | Unlock wording | K1 fixed; R3 and Deep Dives 1.3 still "unlock" | Accessibility versus operational capability | R3, Deep Dives 1.3 |
 | Transformations | Projects grant forms and names | Projects enable institutional changes; forms and names derived | Vision 6, Mechanics M |
 | Cadence | Set by player proximity | Set only by simulation state; observer and country switching cannot change outcomes | Vision 8 and 9.9, A2, Pass 1 section 11 |
@@ -468,9 +468,9 @@ Owner review of earlier simplifications. Governing principle: an abstraction is 
 
 None has been run.
 
-1. RC-01: subdividing a region administratively never raises city capacity or lowers city costs.
+1. RC-01: reorganising a region creates a new city slot only when the new region meets the eligibility rule (ADR-045), never lowers city costs, and duplicates nothing (reworded 26 Nov 2026).
 2. RC-02: city and town costs trace to land, infrastructure, labour, administration and resource inputs in the Causal Inspector; any residual factor is labelled.
-3. RC-03: improvement benefit falls when accessibility, infrastructure or service capacity falls, with no fixed adjacency bonus.
+3. RC-03: network benefit falls when accessibility, infrastructure or service capacity falls; a fixed adjacency bonus applies once per type while its qualifying neighbour exists and operates, and never compounds (revised 26 Nov 2026).
 4. RC-04: a project completion changes institutions; the form label follows from the resulting configuration.
 5. RC-05: identical runs differing only in the observed entity, the selected entity or the player's controlled country (with identical orders) give identical hashes.
 6. RC-06: a stiff test system exceeds the substep budget deterministically and logs it; results are identical across machines.
@@ -482,3 +482,83 @@ None has been run.
 12. RC-12: a campaign with mandates and delegation runs a full era without compulsory per-phase management, and a player can still intervene in any domain.
 
 Counts after this section: mechanics add E36, E37, E38 and A16 (4); axioms 9; ADRs now 44; acceptance tests add 12.
+
+## 22. The Living City and cartography: engineering (added 26 Nov 2026)
+
+Scope: Final Master Vision 9.20, Mechanics section T, ADR-045 to ADR-052. Nothing here is implemented or tested; every threshold, weight, rate, cost and limit is a calibration parameter.
+
+### 22.1 Coverage of the amendment
+
+| Area | Before | Now | Conflict and resolution |
+| --- | --- | --- | --- |
+| Zones, provinces, regions | Existing (Vision 5, 9.2) | Settlement-driven subdivision rule made explicit (P32) | None |
+| One city per region | Two texts disagreed: Vision 9.2 allowed formal subdivision, the 25 Nov line banned subdivision from creating cities | Lawful reorganisation allowed under eligibility and cost escalation | Resolved in favour of the owner's 26 Nov direction; RC-01 reworded |
+| Adjacency (P8) | Replaced on 25 Nov by accessibility, +3 and +1 as calibration reference | Fixed typed adjacency (P8) for contiguous neighbours plus network and distance benefits (R33); one channel per pair | Owner ruling 26 Nov: adjacency is fixed and typed, several types per district, non-stacking and non-compounding; supersedes the 25 Nov replacement |
+| City cost escalation | Derived, residual factor labelled (25 Nov) | Unchanged | None |
+| Districts and buildings (P7) | One line | P35, R32 | None |
+| Urban land (P29) | Partial | P34 | None |
+| Construction (R8, R28) | Partial | R31 shared lifecycle | None |
+| Rights and grants | Partial (I4, R29) | I19 | None |
+| Proposals and partnerships | New | I20 | None |
+| Delegation | A16, M42 | A17, standing-order expiry field | Pass 1 J7 gains one field |
+| Wonders (X3, N8) | Wonders | Great works with declared basis; seven per era designated wonders (X29) | Owner ruling 26 Nov: great works are built, wonders are chosen. Fixed era windows only time a descriptive designation, so eras still never act as causes |
+| Semantic zoom, layers (U4, U5) | Existing | U13, U14 | None |
+| Interface | 10 showcase views | WS-A1/V1 added, 11 | ID free; no new level, menu, workspace or dossier type |
+| Master Map Showcase Production Directive, B04 directive, World State and Data Schema, later pass specs | Not in the documents | Only the parts quoted in the amendment are used | Flagged as unavailable sources |
+
+### 22.2 Multiscale urban model
+
+Settlement and district aggregates hold cohorts, land-use and floor-space accounts; significant facilities, active projects and rights relations are individual records; transport and utility networks are hierarchical graphs; ordinary buildings and minor streets are aggregated morphology. A feature is promoted to an individual record only when a functional dependency requires it, with conservation on promotion and demotion. Work scales with settlements, active projects, rights relations and network edges, never with all actors times all sites times all assets: candidate search is confined to eligible sites, evaluation uses dirty sets and event-driven invalidation, geometry is versioned, and UI read models are cached and lazy.
+
+### 22.3 Stock-flow identities
+
+- Land: every unit of land is in exactly one physical use; conversion moves area between uses; reserves stay in their prior use.
+- Floor area: built floor area changes only through construction, damage and demolition; floor allocation by use never exceeds built floor area; vertical mixed use never multiplies land.
+- Projects: materials, labour, equipment and finance are reserved once, consumed once and released on cancellation according to committed-cost rules; partial completion is capital formation in progress.
+- Housing: places and occupants are separate; occupancy can exceed places (overcrowding) and is reported as such.
+- Networks and services: reserved capacity, committed use and delivered service are separate; delivered service never exceeds operating capacity.
+- Rights: overlapping exclusive rights over the same scope are invalid; nonexclusive rights must be compatible.
+
+### 22.4 Allocation and solvers (proposed)
+
+Site ranking and competing proposals use a bounded deterministic utility evaluation on one planning snapshot, with candidates compared (scored ranking with stable tie-breaks, sequential auction, constrained assignment) before one is chosen in Pass 5. Coupled loops (housing and migration, construction and credit, transport and land value) follow the Pass 2b rule: find strongly connected components, then use a bounded solver or a justified one-phase lag. No double-benefit loops.
+
+### 22.5 Cartography and rendering
+
+One canonical geometry for simulation; the display transform is presentation only and invertible for picking. Candidates (modified Web Mercator-like, equal-area, interrupted or warped) are compared on invertibility, seam and pole behaviour, shape and area distortion, topology, picking, labels, tiling and GPU memory, then one is recorded in ADR-050. The 43,200 by 25,200 canvas is logical: tiles, atlases, instancing, culling and level of detail keep resident memory bounded; nothing requires the full canvas as one raster. Concept art is never geometry; real palaeogeographic datasets need licences, provenance and confidence.
+
+### 22.6 Acceptance tests UR-01 to UR-12
+
+None has been run. Seeds and expected outcomes are set when each test is written.
+
+1. UR-01: promotion and subdivision respect topology, ancestry, one city per administrative region, cost escalation and conservation; footprint growth alone never changes sovereignty.
+2. UR-02: deterministic site suitability, competing directions, organic versus planned growth, infeasible sites excluded, conditional approval, reserves stay in prior use.
+3. UR-03: one district holds industry, housing, commerce and services; actual and designated use separate; ground and floor areas reconcile; split and merge duplicate nothing.
+4. UR-04: companies, academies and public bodies share construction rules; grants limited to their scope; lease, concession, renewal, revocation and transfer; no control or knowledge leakage through sponsorship; competing exclusive proposals cannot both reserve a site.
+5. UR-05: rent-free employee housing is paid for by the provider; capacity and occupancy separate; migration and overcrowding still possible; closure propagates only through real dependencies.
+6. UR-06: construction accounting, partial and cancelled projects, no double reservation, completion versus commissioning, shared infrastructure allocation, landmark progression can fail.
+7. UR-07: institutional plans and joint proposals obey governance and information; delegation cannot bypass authority; AI uses the same rules reproducibly; profiles force no outcome.
+8. UR-08: cascades (industrial growth to housing and services, academy grant to campus, utility bottleneck, flood and pollution, company failure, shared rail and port capacity) without duplicate effects, in early-village, industrial-metropolis and late-game benchmark worlds.
+9. UR-09: zoom, filters, panning, selection, historical view, forecasts and dossiers never change hashes; proposed footprints are not assets; rights layers are not borders; hidden assets stay hidden; colour-independent encoding; projection topology, seam, pole and inverse-picking tests; tile and LOD performance; 28 workspaces preserved.
+10. UR-10: playability: a new player develops a village, picks profiles and commissions a landmark; an experienced player designs a city; an empire-scale player delegates many settlements with few exceptions; an autonomous institution surprises the player; measured on decision clarity, clicks, workload, interest, performance and failure explanations. Gate 2's fun criterion is unchanged; urban playtests join Gate 3 and Gate 4.
+11. UR-11: adjacency: a district with qualifying neighbours of three types earns three bonuses at their fixed values; two neighbours of one type earn that type once; no bonus multiplies another; removing or closing the neighbour removes its bonus; a contiguous pair never also earns the network benefit for the same relation.
+12. UR-12: wonders: each era's designation is deterministic and identical on replay and across machines; candidates are great works completed in that era's window; a shortfall is completed from signature landmarks or left short, never padded; the designation changes no simulated quantity; at most 28 per campaign.
+
+Counts after this section: mechanics add 14 (P32 to P36, R31 to R33, I19, I20, A17, U12 to U14); ADRs now 52; showcase views 11; acceptance tests add 10. Later on 26 Nov: P8 revised to fixed typed adjacency, X29 Wonders of the World, ADR-053 and tests UR-11 and UR-12 (mechanics 426, ADRs 53).
+
+### 22.7 Census knowledge, administrative units and divided polities (added 26 Nov 2026)
+
+- **Census estimator.** A count is a record in OS-INFO: unit, date, method, coverage, estimate and interval. The estimate is drawn from the true population with coverage and method error on its own seeded random stream keyed by the count's identity, so replays are identical; it never writes population. Its accuracy decays with births, deaths and migration since the count. Error model proposed.
+- **Administrative units.** A unit is a jurisdiction relation (I19 administration) over geographic units at any level of the nesting, with dated versions and ancestry like provinces. Units do not partition land for conservation; physical accounts stay with zones, provinces, sectors and districts.
+- **Divided polity.** OS-POLITY holds one polity record with its claimant factions and a per-domain, per-place controller relation. Every asset keeps one owner; control, administration and taxation relations say which faction may order it, and simultaneous conflicting orders resolve by the existing deterministic contest rules. Common components have no faction controller, so their effects reach every faction through ordinary dependencies, never duplicated. Choosing or switching the player's faction changes no outcome (Pass 1 section 11).
+- **District capacity.** The number of districts and building capacity are derived from the R33 capacity dimensions; no slot ledger exists to conserve or display.
+
+Tests:
+
+1. GV-01: no census or register equals the truth by construction; stated intervals contain the truth at their stated rate over many counts; replay gives identical counts.
+2. GV-02: two authorities' counts of one village can disagree; army counts exist only where the army is deployed and running the project.
+3. GV-03: a city divided between rival factions' administrative units conserves people, land and stocks, and so do reunification and formal separation (S33).
+4. GV-04: a common component's effect reaches each faction once, never twice, and the player's choice of faction changes no simulated outcome.
+5. GV-05: the number of districts changes only through derived capacity; no rule or screen shows a fixed slot cap.
+
+Counts after 22.7: mechanics 429 (P37, P38, S34 added), ADRs 56, tests GV-01 to GV-05.

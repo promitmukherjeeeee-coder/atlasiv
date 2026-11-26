@@ -91,7 +91,7 @@ The buildable specification for the simulation clock, phases, event ordering, de
 
 ## 7. Standing orders and Advance Until (hooks only)
 
-- **\[Confirmed\]** Standing-order fields: issuer, authority, target, limits, start condition, constraints, priority, suspension rules, exception policy. States: active, paused, partial, failed, completed. No irreversible action continues without authority, and committed costs are not refunded.
+- **\[Confirmed\]** Standing-order fields: issuer, authority, target, limits, start condition, constraints, priority, suspension rules, exception policy, expiry (added 26 Nov 2026). States: active, paused, partial, failed, completed. No irreversible action continues without authority, and committed costs are not refunded.
 - **\[Confirmed\]** Advance Until stops by default on war declaration or incursion, succession crisis, first contact, major disaster, famine threshold, hostile plot, treaty needing action, standing-order failure, project milestone, major discovery, and imminent rebellion or constitutional crisis. Filters can be customized but never disable consistency checks.
 - **\[Confirmed\]** Conditional military interruptions exist, but their exact rules are still open.
 - **\[Confirmed\]** Pass 1 builds the data structures, state machine and stop-filter mechanism. The real triggers arrive with their systems.
@@ -199,4 +199,4 @@ Answers to build questions. They follow from the rules above and add no new game
 13. **Substep budget (25 Nov 2026).** The substep driver accepts any N; 4 is the default budget. Escalation beyond the budget follows a deterministic rule based on state and is logged.
 14. **Money and aggregates (25 Nov 2026).** 128-bit accumulation for sums and exposures, with overflow tests for denomination change, high inflation and redenomination in J1.
 15. **Campaign manifest (25 Nov 2026).** The input log starts with the manifest (section 11). There are no third-party mods; a build from modified source has its own build identifier.
-16. **Turn numbering (owner ruling 24 Nov 2026, added to the spec 25 Nov 2026).** Turns count from 1 at the epoch and never reset, including across step switches. Phases are numbered 1 to N within their turn. Pass 1 does not enforce the 10,000-turn cap, which is a design budget, not a clock rule.
+16. **Living City amendment (26 Nov 2026).** The clock, stages, event queue, numerics, random streams and replay already serve the Living City and cartography requirements, so they are unchanged. The only Pass 1 change is an explicit expiry field on standing orders (section 7, job J7), needed by development orders (A17). Map rendering, zoom, filters and selection already fall under section 11: they never change results. Settlement subdivision, construction projects, rights and proposals are later systems that register with the scheduler like any other.

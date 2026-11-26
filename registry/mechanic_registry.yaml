@@ -1,7 +1,7 @@
 registry: ATLASIV Mechanic Registry
 version: 0.1.0-draft
 date: '2026-11-24'
-status: Draft generated from Mechanics Brainstorm (25 Nov 2026). Owners and layers proposed; confirmed in Pass 2
+status: Draft generated from Mechanics Brainstorm (26 Nov 2026). Owners and layers proposed; confirmed in Pass 2
   and Pass 2b.
 source: Mechanics Brainstorm tab
 link_semantics: declared_links = IDs this entry explicitly extends, absorbs or references in the documents. Not
@@ -20,7 +20,9 @@ mechanics:
   owner: OS-TIME
   layer: 0
   summary: Multi-turn orders (migrations, builds, trade routes) progress per phase, carry across turns, and raise
-    alerts only on exceptions.
+    alerts only on exceptions. Development orders add priorities, spending limits, expiry and triggers (A17).
+  declared_links:
+  - A17
 - id: T3
   name: Seasonal aggregation
   series: T
@@ -224,8 +226,11 @@ mechanics:
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Camp, village, town, city, driven by surplus, storage, defense and water. One city per fixed geographic
-    region; administrative subdivision never creates city capacity (exploit test, revised 25 Nov 2026).
+  summary: Camp, village, town, city, driven by surplus, storage, defense and water. One city per administrative
+    region; a second city needs lawful reorganisation (P32, ADR-045), and subdivision alone never creates city capacity
+    (exploit test, revised 25 and 26 Nov 2026).
+  declared_links:
+  - P32
 - id: P6
   name: Settlement costs
   series: P
@@ -239,21 +244,35 @@ mechanics:
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Unique districts, buildings and upgrades for each settlement type.
+  summary: 'Unique districts, buildings and upgrades for each settlement type. Extended by P35 and R32 (26 Nov 2026):
+    districts are repeatable, mixed-use geographic units, and building capacity is a derived summary, not a slot
+    ledger.'
+  declared_links:
+  - P35
+  - R32
 - id: P8
   name: Adjacency
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Improvement benefits come from actual geographic accessibility, infrastructure and service capacity,
-    not fixed bonuses; the former +3 city and +1 town values are a calibration reference only. City-level services
-    can reach the whole region where access allows (revised 25 Nov 2026).
+  summary: Fixed, typed adjacency bonuses between contiguous neighbours (owner-confirmed 26 Nov 2026, superseding
+    the 25 Nov wording). A district, improvement or site earns one bonus of each type for which it has a qualifying
+    neighbour (settlement, district, building, landmark or natural feature), so one district can hold several types.
+    Each type has a fixed value; it counts once (non-stacking), types add, a
+  declared_links:
+  - P35
+  - R32
+  - R33
 - id: P9
   name: Infrastructure
   series: P
   owner: OS-TRANSPORT
   layer: 2
-  summary: Roads, bridges, rail, canals, ports, grids, pipelines, networks. Speeds feed back into the tempo.
+  summary: Roads, bridges, rail, canals, ports, grids, pipelines, networks. Speeds feed back into the tempo. Network
+    capacity is reserved and allocated for development (R33, I20).
+  declared_links:
+  - I20
+  - R33
 - id: P10
   name: Land use
   series: P
@@ -329,7 +348,9 @@ mechanics:
   series: R
   owner: OS-PROD
   layer: 2
-  summary: Cost, labor and time, scaled to turn length.
+  summary: Cost, labor and time, scaled to turn length. Replaced in detail by the shared lifecycle R31 (26 Nov 2026).
+  declared_links:
+  - R31
 - id: R9
   name: Pollution and waste
   series: R
@@ -629,7 +650,11 @@ mechanics:
   series: N
   owner: OS-PROJ
   layer: 4
-  summary: Multi-sponsor and rare projects (wonders, FTL).
+  summary: Multi-sponsor and rare projects (great works, FTL). Great works are built under R32 with no artificial
+    global races; wonders are designated from them at each era's end (X29) (revised 26 Nov 2026).
+  declared_links:
+  - R32
+  - X29
 - id: N9
   name: Lineage
   series: N
@@ -809,7 +834,9 @@ mechanics:
   series: X
   owner: OS-PROJ
   layer: 4
-  summary: Wonders, large national efforts, the FTL project.
+  summary: Great works and landmarks (R32), large national efforts, the FTL project.
+  declared_links:
+  - R32
 - id: X4
   name: FTL project
   series: X
@@ -988,13 +1015,19 @@ mechanics:
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Housing, zoning, slums, transit, congestion, land value.
+  summary: Housing, zoning, slums, transit, congestion, land value. Linked to P34 to P36.
+  declared_links:
+  - P34
+  - P35
+  - P36
 - id: P15
   name: Real estate
   series: P
   owner: OS-MARKET
   layer: 3
-  summary: Housing markets, mortgages, bubbles.
+  summary: Housing markets, mortgages, bubbles. Land values feed site ranking (P34).
+  declared_links:
+  - P34
 - id: P16
   name: Public services
   series: P
@@ -1487,7 +1520,10 @@ mechanics:
   series: P
   owner: OS-SETTLE
   layer: 2
-  summary: Demand for housing, commerce, industry and infrastructure allocated to eligible cells.
+  summary: Demand for housing, commerce, industry and infrastructure allocated to eligible cells. Expanded by P34
+    (26 Nov 2026).
+  declared_links:
+  - P34
 - id: P30
   name: Collective behavior
   series: P
@@ -1862,6 +1898,22 @@ mechanics:
   owner: OS-POLITY
   layer: 3
   summary: Explicit division of territory, people, assets, liabilities and claims.
+- id: S34
+  name: Divided polity
+  series: S
+  owner: OS-POLITY
+  layer: 3
+  summary: 'After a coup, civil war or contested succession a state can be neither separated nor unified: one entity
+    and identity, several claimant factions, control resolved per domain (formations, treasury and mint, taxation,
+    administration, courts, diplomacy and recognition, institutions) and per place (provinces, administrative units,
+    parts of a city) through the separate rights relations (I19), with vali'
+  declared_links:
+  - I19
+  - L10
+  - N14
+  - S32
+  - S33
+  - S7
 - id: N15
   name: Knowledge states and uncertainty
   series: N
@@ -1969,7 +2021,10 @@ mechanics:
   series: X
   owner: OS-OBS
   layer: 5
-  summary: Estimate, interval, date, source, reliability.
+  summary: Estimate, interval, date, source, reliability, for the player's own statistics as well as foreign ones
+    (P37).
+  declared_links:
+  - P37
 - id: X14
   name: Forecasting
   series: X
@@ -2056,7 +2111,10 @@ mechanics:
   series: U
   owner: OS-UI
   layer: 5
-  summary: More detail without inventing entities.
+  summary: More detail without inventing entities. Global, regional, local and detailed levels show the same state
+    (U13).
+  declared_links:
+  - U13
 - id: U6
   name: Data provenance
   series: U
@@ -2451,6 +2509,19 @@ mechanics:
   declared_links:
   - K50
   - X4
+- id: X29
+  name: Wonders of the World
+  series: X
+  owner: OS-OBS
+  layer: 5
+  summary: 'At the end of each of four world eras (Prehistoric, Ancient, Middle Ages, Modern), seven great works
+    (R32) completed worldwide in that era are designated wonders automatically: 28 per campaign. Proposed era windows
+    on fixed dates, half-open: 10,000 to 3000 BCE, 3000 BCE to 500 CE, 500 to 1500 CE, 1500 CE to the end of the
+    campaign; the designation runs at the first turn boundary at or after each e'
+  declared_links:
+  - R32
+  - X16
+  - X6
 - id: A14
   name: Information access modes
   series: A
@@ -2743,6 +2814,203 @@ mechanics:
     Extends T9.
   declared_links:
   - T9
+- id: P32
+  name: Nested geography and settlement-driven subdivision
+  series: P
+  owner: OS-POLITY
+  layer: 3
+  summary: 'Natural zone ancestry, provinces carved when a promoted town or city''s catchment meets deterministic
+    eligibility, administrative regions as province groupings, one city per administrative region with lawful reorganisation
+    for a second, dated versions and full ancestry. Conserves people, stocks, debt, scoring and territory. Extends
+    P5, P6, N12, S33. Owner: OS-POLITY, geometry identities in OS-IDENT'
+  declared_links:
+  - N12
+  - P5
+  - P6
+  - S33
+- id: P33
+  name: Settlement identity and lifecycle
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: 'Stable identity through growth, promotion, decline, renaming, ownership change, destruction and reconstruction;
+    physical absorption into a conurbation is distinct from legal annexation. Extends P5. Owner: OS-SETTLE.'
+  declared_links:
+  - P5
+- id: P34
+  name: Urban land development
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: 'Candidate-area suitability and ranking, independent candidate states, organic, incentivised, planned
+    and compulsory growth, several emergent directions, reserves kept in prior use until converted, and separate
+    land, floor, capacity and occupancy accounts. Extends P10, P14, P15, P29. Owner: OS-SETTLE.'
+  declared_links:
+  - P10
+  - P14
+  - P15
+  - P29
+- id: P35
+  name: Districts, specialisation, mixed use and profiles
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: 'Repeatable data-driven district families with separate identity, specialisations, actual and designated
+    use; mixed use without extra districts; development profiles as objectives and weights; split, merge and lineage;
+    the number of districts a city sustains is derived from multidimensional capacity (R33), never a slot count
+    (26 Nov 2026). Extends P7, P14. Owner: OS-SETTLE.'
+  declared_links:
+  - P14
+  - P7
+  - R33
+- id: P36
+  name: Employer and institutional housing and services
+  series: P
+  owner: OS-SETTLE
+  layer: 2
+  summary: 'Company colonies, railway and mining settlements, cooperative and employer housing with rent-free, subsidised,
+    tied or market terms paid for by the provider; separate places, households, workforce and occupancy; services
+    as real assets; dependence risk on closure. Extends P14, P16, E14, I1. Owner: OS-SETTLE, with costs in OS-MARKET
+    and assets in OS-PROD.'
+  declared_links:
+  - E14
+  - I1
+  - P14
+  - P16
+- id: P37
+  name: Censuses and population knowledge
+  series: P
+  owner: OS-INFO
+  layer: 3
+  summary: 'Population is known only through counts: censuses, registers, tax, parish and conscription rolls and
+    estimates, each a record with unit, date, method, coverage, estimate and accuracy, never exact. Made by whoever
+    holds authority and capability: village councils, city administrations, provincial and state offices, and the
+    army as a special project in areas where it is actively deployed. Accuracy de'
+  declared_links:
+  - K63
+  - N8
+  - P1
+  - X13
+- id: P38
+  name: Administrative units below the province
+  series: P
+  owner: OS-POLITY
+  layer: 3
+  summary: Municipalities, city wards and boroughs, village councils and special-purpose areas as jurisdiction relations
+    (I19 administration) over geography at any level of the nesting, with dated versions and ancestry; created,
+    merged, split and redrawn by the governing authority; need not match physical districts; can carry authority,
+    records, taxes and services; never create city capacity. A city can be d
+  declared_links:
+  - I19
+  - N12
+  - P32
+  - S15
+  - S34
+- id: R31
+  name: Shared construction project lifecycle
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: 'One lifecycle for every actor, from inspection through commissioning, operation, maintenance, damage,
+    retirement, demolition and reuse; real inputs consumed once; no instant completion; deterministic allocation
+    of shared resources; commissioning prerequisites separate from physical completion. Extends R8, R28, N7. Owner:
+    OS-PROD.'
+  declared_links:
+  - N7
+  - R28
+  - R8
+- id: R32
+  name: Building families, significant assets and landmarks
+  series: R
+  owner: OS-PROD
+  layer: 2
+  summary: 'Aggregated fabric versus individual assets; classes from generic fabric to great works; branching families;
+    compounds without double counting; persistent identity, naming, lineage, reuse and heritage; benefits only through
+    real mechanisms. Extends P7, X3, N8, S25. Owner: OS-PROD.'
+  declared_links:
+  - N8
+  - P7
+  - S25
+  - X3
+- id: R33
+  name: Multidimensional capacity and functional proximity
+  series: R
+  owner: OS-SETTLE
+  layer: 2
+  summary: Site, floor, housing, utility, transport and logistics, workforce, materials and construction, finance,
+    administrative, environmental, legal and technical capacity as separate quantities; proximity effects through
+    accessibility, networks, catchments and exposure; network and distance effects beyond contiguity, separate from
+    fixed typed adjacency (P8); a pair of places counts through one channel on
+  declared_links:
+  - P8
+- id: I19
+  name: Land and development rights
+  series: I
+  owner: OS-LEDGER
+  layer: 0
+  summary: 'Ownership, lease, concession, access, use, development, operation, administration, taxation, sovereignty,
+    influence and control as separate relations with full terms and provenance; exclusive versus nonexclusive validation;
+    grants never confer sovereignty or direct control. Extends I4, I5, R29, E17. Owner: OS-LEDGER.'
+  declared_links:
+  - E17
+  - I4
+  - I5
+  - R29
+- id: I20
+  name: Development proposals, competition and partnerships
+  series: I
+  owner: OS-POLITY
+  layer: 3
+  summary: 'Proposal records, resolution through existing allocation, market and political processes on one snapshot,
+    deterministic tie-breaks, no simultaneous exclusive grants; shared infrastructure capacity reservation and cost-sharing
+    through existing contracts; privatisation, nationalisation, concessions, bankruptcy and expropriation reconciled.
+    Extends D19, E8, I3, I16. Owner: OS-POLITY for allocation de'
+  declared_links:
+  - D19
+  - E8
+  - I16
+  - I3
+- id: A17
+  name: Urban delegation and development packages
+  series: A
+  owner: OS-AI
+  layer: cross-cutting
+  summary: 'Direct, Guided and Autonomous management of lawfully delegable development; standing orders with priorities,
+    spending limits, constraints, expiry, triggers and exception policy; packages that generate real component projects;
+    same rules and information for AI. Extends A16, M42, T2, T10. Owner: OS-AI (orders through OS-TIME).'
+  declared_links:
+  - A16
+  - M42
+  - T10
+  - T2
+- id: U12
+  name: The Living City view
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: 'Full-screen dismissible view inside WS-A1 with seven tabs, the district register, inspector, catalogue,
+    proposals, partners, dependencies and actions, linked to existing dossiers and analyses. Owner: OS-UI (owns
+    nothing authoritative).'
+  declared_links:
+  - A1
+- id: U13
+  name: Cartographic presentation
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: 'One canonical geometry and a separate display transform (candidates evaluated, ADR-050), four semantic
+    zoom levels, six compositions, eighteen filter families, twelve expressions, knowledge-gated display and picking,
+    Living Engraved Cartography art rules, tiled GPU rendering with LOD. Extends U4, U5. Owner: OS-UI.'
+  declared_links:
+  - U4
+  - U5
+- id: U14
+  name: Urban map layers, selection and planning preview
+  series: U
+  owner: OS-UI
+  layer: 5
+  summary: 'Urban filters, city, district and building selection states, the boundary and hatch grammar, landmark
+    labels, and planning previews that never change state. Owner: OS-UI.'
 - id: M29
   name: Strategic command and war planning
   series: M

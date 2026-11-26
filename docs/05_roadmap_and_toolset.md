@@ -58,11 +58,35 @@ The architecture, determinism rules and data model are built for the full vision
 
 - **Pass 1 (Time): no amendment required.** The confirmed clock, event ordering, stable IDs and replay already give what the amendment needs (exact event times, the eight distinct time stamps as clock values, deterministic replay). Artifact identities, access relations and multi-time stamps are Pass 2 entities. Rendering sits outside the hashed state, and access modes are a Pass 2 and Pass 10 policy.
 - **Pass 2 (World State):** permanent identities for artifacts, claims, editions and copies; access and rights relations; capability states; ownership per Doctrine 18.2 and state\_ownership.yaml (28 owner systems, ADR-038); the registry files from draft 0.1.0 (interface, mechanic, ownership, dependency; ADR-037) committed, reviewed and placed under schema validation.
-- **Pass 2b (Dependencies):** declared causal inputs for every knowledge and history mechanic (AX-1); the feedback loops in Mechanics section Q checked for saturation. Starts from system\_dependency\_map.yaml: every cross-system link gets a timing (same stage, next phase or turn end), and the 17-system coupled core is broken into solvable loops.
+- **Pass 2b (Dependencies):** declared causal inputs for every knowledge and history mechanic (AX-1); the feedback loops in Mechanics section Q checked for saturation. Starts from system\_dependency\_map.yaml: every cross-system link gets a timing (same stage, next phase or turn end), and the coupled core (19 systems as of 26 Nov 2026) is broken into solvable loops.
 - **Gate 1:** the knowledge-environment benchmark worlds (Doctrine 19.2) join the synthetic early and late-game worlds.
 - **Pass 7a:** a knowledge prototype built first (artifacts, access, absorption, capability, synthesis on a small world), with its own gate on tests KH-016 to KH-071 and KH-100, before the full system.
-- **Pass 8:** historiography (X16 to X24).
+- **Pass 8:** historiography (X16 to X24), and from 26 Nov 2026 the Wonders of the World designation (X29).
 - **Pass 10:** deterministic offline renderer, historical reader and intellectual library, export and access modes (X25 to X27, A14, U11).
+
+**Living City and cartography amendment in the pass order (26 Nov 2026).** No new pass. The work lands in existing passes:
+
+- **Pass 1 (Time):** one addition, an expiry field on standing orders (job J7). Nothing else changes.
+- **Pass 2 (World State):** place and asset identities with dated geometry versions and ancestry; relations between zones, provinces, administrative regions, development areas, sectors, districts, sites and facility footprints; land and floor-area accounts; rights relations (I19); proposals, reservations and project records; WS-A1/V1 in the interface registry.
+- **Pass 2b (Dependencies):** declared links and timing for Mechanics section T, loop detection and double-benefit checks.
+- **Pass 3 (Conservation):** land, floor-area, project, housing, service-capacity and rights invariants (Doctrine 22.3).
+- **Gate 1:** benchmark worlds add an early village, an industrial metropolis and a late-game urban world to measure settlements, projects, rights and network edges.
+- **Pass 4 and prototype P1:** settlement formation, promotion, the first settlement-driven province subdivision (P32, P33) and fixed typed adjacency (P8), because towns and early cities appear inside the 10,000 to 3000 BCE prototype window.
+- **Pass 5 (Institutions and actors):** shared construction lifecycle (R31), universal institutional participation, rights and grants, proposals and competition (I20), delegation and development packages (A17), proposal allocation algorithm (ADR-048).
+- **Pass 7b and 7d:** land values, project finance, utilities and industrial capacity feeding urban growth.
+- **Pass 10 (Interface):** WS-A1/V1, urban map layers and selection (U12, U14), the cartographic renderer and the display projection decision (U13, ADR-050).
+- **Data track (parallel, from Gate 2):** licensed real and palaeogeographic geometry with provenance; a projection evaluation and a small tiled-renderer test should run early, before Pass 10, because map performance is a major risk.
+- **Gates:** Gate 2's fun criterion is unchanged. Gate 3 adds UR-01 to UR-08, UR-11 and UR-12 for the pre-1500 slice (three of the four wonder eras fall inside it); Gate 4 adds the urban playability tests (UR-09, UR-10).
+
+**Censuses, administrative units and divided polities in the pass order (26 Nov 2026).** No new pass, and Pass 1 is unchanged: census error uses ordinary seeded random streams, and faction choice is already covered by Pass 1 section 11.
+
+- **Pass 2:** administrative unit relations, census records and the divided-polity control relation in the schema.
+- **Pass 3:** conservation through city divisions, reunification and separation.
+- **Pass 4 and P1:** village and settlement counts, because early populations are known only roughly.
+- **Pass 5:** factions, coups and divided polities (S34); census authority of councils and administrations; sub-province units (P38).
+- **Pass 7c:** army census projects in deployed areas.
+- **Pass 10:** accuracy display for every count.
+- **Gates 3 and 4:** tests GV-01 to GV-05.
 
 Content production (technologies, cultures, religions, recipes, names, art) runs in parallel from Gate 2 onward.
 

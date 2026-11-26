@@ -7,7 +7,7 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 ## A. Time and turns (L0)
 
 - **T1 Variable turn length.** Stepped lengths from 50 years down to 1 month. All rates are stored per year, and the world's tempo follows the leading edge. Each step has a phase count (20, 10, 10, 5, 4, 4, 3 and 5 phases per turn).
-- **T2 Standing orders.** Multi-turn orders (migrations, builds, trade routes) progress per phase, carry across turns, and raise alerts only on exceptions.
+- **T2 Standing orders.** Multi-turn orders (migrations, builds, trade routes) progress per phase, carry across turns, and raise alerts only on exceptions. Development orders add priorities, spending limits, expiry and triggers (A17).
 - **T3 Seasonal aggregation.** Long turns still run harvest, flood and migration cycles inside the turn, so annual rhythms matter even at 50-year turns. Precomputed annual profiles per biome drive them.
 - **T4 Event queue.** Scheduled and conditional events resolve in a fixed order each phase.
 - **T5 Calendar.** BCE/CE dating (owner decision 24 Nov 2026), era names, cultural calendars.
@@ -54,11 +54,11 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 - **P2 Demography.** Births, deaths, aging, life expectancy, with famine, epidemic and war losses and a demographic transition with development.
 - **P3 Carrying capacity.** Food, water, tech and land use set the ceiling.
 - **P4 Migration.** Push and pull factors, seasonal rounds for bands, refugees, mass migrations.
-- **P5 Settlement formation.** Camp, village, town, city, driven by surplus, storage, defense and water. One city per fixed geographic region; administrative subdivision never creates city capacity (exploit test, revised 25 Nov 2026).
+- **P5 Settlement formation.** Camp, village, town, city, driven by surplus, storage, defense and water. One city per administrative region; a second city needs lawful reorganisation (P32, ADR-045), and subdivision alone never creates city capacity (exploit test, revised 25 and 26 Nov 2026).
 - **P6 Settlement costs.** City and town costs rise steeply, derived mainly from land, infrastructure, labour, administration and resource constraints; any remaining geometric factor is a labelled, justified gameplay abstraction (revised 25 Nov 2026).
-- **P7 Districts and buildings.** Unique districts, buildings and upgrades for each settlement type.
-- **P8 Adjacency.** Improvement benefits come from actual geographic accessibility, infrastructure and service capacity, not fixed bonuses; the former +3 city and +1 town values are a calibration reference only. City-level services can reach the whole region where access allows (revised 25 Nov 2026).
-- **P9 Infrastructure.** Roads, bridges, rail, canals, ports, grids, pipelines, networks. Speeds feed back into the tempo.
+- **P7 Districts and buildings.** Unique districts, buildings and upgrades for each settlement type. Extended by P35 and R32 (26 Nov 2026): districts are repeatable, mixed-use geographic units, and building capacity is a derived summary, not a slot ledger.
+- **P8 Adjacency.** Fixed, typed adjacency bonuses between contiguous neighbours (owner-confirmed 26 Nov 2026, superseding the 25 Nov wording). A district, improvement or site earns one bonus of each type for which it has a qualifying neighbour (settlement, district, building, landmark or natural feature), so one district can hold several types. Each type has a fixed value; it counts once (non-stacking), types add, and no bonus multiplies another (non-compounding). The original +3 city and +1 town are the settlement type; the type catalogue grows with city planning and building families (P35, R32). A bonus lasts while its neighbour exists and operates. Network and distance benefits are separate (R33). City-level services can reach the whole region where access allows.
+- **P9 Infrastructure.** Roads, bridges, rail, canals, ports, grids, pipelines, networks. Speeds feed back into the tempo. Network capacity is reserved and allocated for development (R33, I20).
 - **P10 Land use.** Farmland, pasture, forest, urban footprint and their competition.
 - **P11 Health and education.** Sanitation, medicine, literacy, schooling.
 - **P12 Class and occupation.** Specialization grows with surplus.
@@ -73,7 +73,7 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 - **R5 Energy.** Muscle, biomass, water, wind, coal, oil, gas, nuclear, solar, fusion, with grids and storage.
 - **R6 Nuclear materials.** Uranium, thorium, plutonium and polonium from shared deposits, convertible by tech or breeder programs.
 - **R7 Logistics and stockpiles.** Transport capacity, spoilage, storage.
-- **R8 Construction.** Cost, labor and time, scaled to turn length.
+- **R8 Construction.** Cost, labor and time, scaled to turn length. Replaced in detail by the shared lifecycle R31 (26 Nov 2026).
 - **R9 Pollution and waste.** Local damage and global emissions.
 
 ## E. Knowledge (L3)
@@ -129,7 +129,7 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 - **N5 Trait inheritance.** Absorbed traits blend into the entity's culture.
 - **N6 Fission and fusion.** Bands split, merge, settle, collapse, revolt.
 - **N7 National projects.** Single-entity projects that change form or institutions.
-- **N8 Joint and special projects.** Multi-sponsor and rare projects (wonders, FTL).
+- **N8 Joint and special projects.** Multi-sponsor and rare projects (great works, FTL). Great works are built under R32 with no artificial global races; wonders are designated from them at each era's end (X29) (revised 26 Nov 2026).
 - **N9 Lineage.** The player's history and scoring persist across form changes.
 - **N10 Subjects.** Vassals, tributaries, colonies, protectorates.
 
@@ -168,7 +168,7 @@ The complete mechanics set for the grand 4X game, grouped by domain. Each entry 
 
 - **X1 Story engine.** Events generated from simulation state (famine, discovery, schism) with scripted overlays and anomalies.
 - **X2 Chronicle.** An auto-written history with named ages.
-- **X3 Special projects.** Wonders, large national efforts, the FTL project.
+- **X3 Special projects.** Great works and landmarks (R32), large national efforts, the FTL project.
 - **X4 FTL project.** Stages, sponsor shares, espionage, sanctions, secrecy, a final test run that ends the game.
 - **X5 FTL pressure.** Two sources, kept separate: emergent pressure from simulated scarcity, demand, project payoffs and competition; and the hard-coded FTL horizon value (X28), which stands for benefits outside the simulation (revised twice on 24 Nov 2026; owner-confirmed).
 - **X6 Scoring.** 24 categories ranked across all peoples.
@@ -233,8 +233,8 @@ These extend the domains above. A star (★) marks the twelve you approved. The 
 
 **Population, cities, services**
 
-- **P14 Urban planning.** Housing, zoning, slums, transit, congestion, land value.
-- **P15 Real estate.** Housing markets, mortgages, bubbles.
+- **P14 Urban planning.** Housing, zoning, slums, transit, congestion, land value. Linked to P34 to P36.
+- **P15 Real estate.** Housing markets, mortgages, bubbles. Land values feed site ranking (P34).
 - **P16 Public services.** Water, sanitation, healthcare, education, pensions, welfare and their fiscal cost.
 - **P17 Transport systems.** Modes, networks, vehicles, airports, speed and capacity.
 - **P18 Telecommunications.** Courier, telegraph, telephone, broadcast, internet, satellites. Sets information speed and censorship options.
@@ -398,7 +398,7 @@ Mechanic ID, name, purpose, dependency layer, authoritative owner, state variabl
 - **P26 Migration decisions and conservation.** Utility-based destination choice, matched departures and arrivals.
 - **P27 Compartmental disease.** Extended susceptible, exposed, infectious, recovered models linked by trade, armies and migration.
 - **P28 Households and families.** Statistical households, explicit families for notables.
-- **P29 Urban land consumption.** Demand for housing, commerce, industry and infrastructure allocated to eligible cells.
+- **P29 Urban land consumption.** Demand for housing, commerce, industry and infrastructure allocated to eligible cells. Expanded by P34 (26 Nov 2026).
 - **P30 Collective behavior.** Group preferences from conditions, producing protest, migration, mobilization or rebellion.
 - **P31 Demographic reconciliation.** The population identity checked every update.
 
@@ -461,6 +461,7 @@ Mechanic ID, name, purpose, dependency layer, authoritative owner, state variabl
 - **S31 Institutional continuity.** Institutions outlive officeholders and dynasties.
 - **S32 Revolution conditions.** Grievance, organization, leadership, resources, support, security loyalty, response, triggers, outside help.
 - **S33 Fragmentation allocation.** Explicit division of territory, people, assets, liabilities and claims.
+- **S34 Divided polity (owner-confirmed 26 Nov 2026).** After a coup, civil war or contested succession a state can be neither separated nor unified: one entity and identity, several claimant factions, control resolved per domain (formations, treasury and mint, taxation, administration, courts, diplomacy and recognition, institutions) and per place (provinces, administrative units, parts of a city) through the separate rights relations (I19), with validity and effectiveness tracked apart (L10). Uncaptured components stay common to all factions (currency, laws in force, citizenship and identity, culture and religion, knowledge, honoured treaties, shared institutions and infrastructure) and their effects reach every faction once. The player chooses which faction to lead. Ends in reunification, settlement, formal separation (S33) or persistence. Extends S7, S32, S33, N14, L10. Owner: OS-POLITY.
 
 **Entities and projects**
 
@@ -487,7 +488,7 @@ Mechanic ID, name, purpose, dependency layer, authoritative owner, state variabl
 - **X10 Event identity and causal attribution.** Permanent IDs, direct, contributing and background causes.
 - **X11 Counterfactuals.** Exact reruns or labeled approximations.
 - **X12 Historical replay.** Same state hashes as the original run.
-- **X13 Uncertainty presentation.** Estimate, interval, date, source, reliability.
+- **X13 Uncertainty presentation.** Estimate, interval, date, source, reliability, for the player's own statistics as well as foreign ones (P37).
 - **X14 Forecasting.** Central, optimistic and adverse scenarios.
 - **X15 Narrative selection and explainability checks.** Importance ranking, explanations verified against recorded data.
 
@@ -507,7 +508,7 @@ Mechanic ID, name, purpose, dependency layer, authoritative owner, state variabl
 - **U2 Shared entity selection.** One service, many workspace views.
 - **U3 Dossiers.** Universal sections plus domain modules.
 - **U4 Map layer combinations.** Semantic categories with visible priority.
-- **U5 Semantic zoom.** More detail without inventing entities.
+- **U5 Semantic zoom.** More detail without inventing entities. Global, regional, local and detailed levels show the same state (U13).
 - **U6 Data provenance.** Every statistic links to variable, owner, method, inputs and uncertainty.
 - **U7 Action states and permissions.** Inspect, plan, issue, resolve, with explained blockers.
 - **U8 Alert priority.** Critical, important, informational.
@@ -569,6 +570,7 @@ Implements the Truth–Evidence–Belief–Consequence Separation axiom (Final M
 - **X26 Historical reader and intellectual library.** Reading, navigation, search, edition comparison, evidence and dependency inspection, uncertainty indicators, delegation-friendly collection views.
 - **X27 Export.** Open formats without DRM, respecting access modes; omniscient export only in debug.
 - **X28 FTL horizon value (owner-confirmed 24 Nov 2026).** The real benefits of FTL lie beyond Earth and after the game ends, so no simulated system can produce them. They are represented by one hard-coded, declared incentive: the declared exception to Universal Emergent Causality. The declared value is public and identical for all, but its weight in each actor's valuation scales with that actor's credible institutional awareness, feasible research paths and expected consequences of investment, so it has no practical influence in prehistory and early civilisation (revised 25 Nov 2026). FTL stays explicitly speculative physics, and the simulation does not guarantee it. It enters only declared valuation paths (AI and institutional utility for FTL-related research, institutions, funding and sponsorship; the value of FTL sponsor shares; the existing FTL contribution score) and does so only where an FTL-related option exists. It never grants research progress, capability or project stages; those still need the full capability path (K50, X4). Its size and any change over time are calibration parameters, not yet set.
+- **X29 Wonders of the World (owner-confirmed 26 Nov 2026).** At the end of each of four world eras (Prehistoric, Ancient, Middle Ages, Modern), seven great works (R32) completed worldwide in that era are designated wonders automatically: 28 per campaign. Proposed era windows on fixed dates, half-open: 10,000 to 3000 BCE, 3000 BCE to 500 CE, 500 to 1500 CE, 1500 CE to the end of the campaign; the designation runs at the first turn boundary at or after each end date, and at campaign end for the last era. Score: the owner's factors grandeur (physical scale), cost (real inputs normalised by world output at construction) and uniqueness (distinctness from other great works), plus proposed technical ambition (capability relative to the world frontier) and renown (how widely the work is known); each factor ranked within the era's candidates, weighted sum, stable tie-break by completion date then identity. Damaged or destroyed works stay eligible. If fewer than seven great works qualify, the list is completed from named signature landmarks, and otherwise stays short, never padded. Recorded in the historiography (X16) and the Heritage score (X6); descriptive only, no simulated bonus. Owner: OS-OBS.
 
 ### Engine and interface
 
@@ -662,6 +664,29 @@ Detail in Final Master Vision sections 9.15 to 9.17. Note on IDs: your proposed 
 - **M42 Command delegation.** Direct, Guided and Autonomous modes that redistribute decisions, information, authorisation time and commander-independence risk, never an efficiency bonus. Personal command depends on era and institutions.
 - **M43 Conditional military interruptions.** Campaigns advance under standing orders until a strategically significant event needs authorisation (rules to be specified and tested). Extends T10 and T13.
 - **M44 Event-driven military time.** Operational, engagement and consequence events resolve at their own timestamps inside the strategic phase. Extends T9.
+
+## T. The Living City and Living Engraved Cartography (owner-directed, 26 Nov 2026)
+
+Rules in Final Master Vision 9.20; engineering in Computational Doctrine 22. IDs continue P31, R30, I18, A16 and U11 after a collision check. Extends P5 to P10, P14, P15, P29, R8, R28, R29, N7, N8, X3, T2, M42, A16, I1 to I18 and U1 to U11 rather than duplicating them. Owners use existing systems; no parallel population, treasury, land, construction or institution ledger.
+
+- **P32 Nested geography and settlement-driven subdivision.** Natural zone ancestry, provinces carved when a promoted town or city's catchment meets deterministic eligibility, administrative regions as province groupings, one city per administrative region with lawful reorganisation for a second, dated versions and full ancestry. Conserves people, stocks, debt, scoring and territory. Extends P5, P6, N12, S33. Owner: OS-POLITY, geometry identities in OS-IDENT.
+- **P33 Settlement identity and lifecycle.** Stable identity through growth, promotion, decline, renaming, ownership change, destruction and reconstruction; physical absorption into a conurbation is distinct from legal annexation. Extends P5. Owner: OS-SETTLE.
+- **P34 Urban land development.** Candidate-area suitability and ranking, independent candidate states, organic, incentivised, planned and compulsory growth, several emergent directions, reserves kept in prior use until converted, and separate land, floor, capacity and occupancy accounts. Extends P10, P14, P15, P29. Owner: OS-SETTLE.
+- **P35 Districts, specialisation, mixed use and profiles.** Repeatable data-driven district families with separate identity, specialisations, actual and designated use; mixed use without extra districts; development profiles as objectives and weights; split, merge and lineage; the number of districts a city sustains is derived from multidimensional capacity (R33), never a slot count (26 Nov 2026). Extends P7, P14. Owner: OS-SETTLE.
+- **P36 Employer and institutional housing and services.** Company colonies, railway and mining settlements, cooperative and employer housing with rent-free, subsidised, tied or market terms paid for by the provider; separate places, households, workforce and occupancy; services as real assets; dependence risk on closure. Extends P14, P16, E14, I1. Owner: OS-SETTLE, with costs in OS-MARKET and assets in OS-PROD.
+- **P37 Censuses and population knowledge (owner-confirmed 26 Nov 2026).** Population is known only through counts: censuses, registers, tax, parish and conscription rolls and estimates, each a record with unit, date, method, coverage, estimate and accuracy, never exact. Made by whoever holds authority and capability: village councils, city administrations, provincial and state offices, and the army as a special project in areas where it is actively deployed. Accuracy depends on method, records and literacy, administrative reach, cooperation, conflict and migration, and decays with time since the count; counts by different authorities can disagree. Taxation, conscription, planning and AI use counts, not truth. Extends P1, X13, K63, N8. Owner: OS-INFO.
+- **P38 Administrative units below the province (owner-confirmed 26 Nov 2026).** Municipalities, city wards and boroughs, village councils and special-purpose areas as jurisdiction relations (I19 administration) over geography at any level of the nesting, with dated versions and ancestry; created, merged, split and redrawn by the governing authority; need not match physical districts; can carry authority, records, taxes and services; never create city capacity. A city can be divided among several units, including units held by rival factions (S34). Extends P32, S15, N12. Owner: OS-POLITY, geometry identities in OS-IDENT.
+- **R31 Shared construction project lifecycle.** One lifecycle for every actor, from inspection through commissioning, operation, maintenance, damage, retirement, demolition and reuse; real inputs consumed once; no instant completion; deterministic allocation of shared resources; commissioning prerequisites separate from physical completion. Extends R8, R28, N7. Owner: OS-PROD.
+- **R32 Building families, significant assets and landmarks.** Aggregated fabric versus individual assets; classes from generic fabric to great works; branching families; compounds without double counting; persistent identity, naming, lineage, reuse and heritage; benefits only through real mechanisms. Extends P7, X3, N8, S25. Owner: OS-PROD.
+- **R33 Multidimensional capacity and functional proximity.** Site, floor, housing, utility, transport and logistics, workforce, materials and construction, finance, administrative, environmental, legal and technical capacity as separate quantities; proximity effects through accessibility, networks, catchments and exposure; network and distance effects beyond contiguity, separate from fixed typed adjacency (P8); a pair of places counts through one channel only (revised 26 Nov 2026). Owner: OS-SETTLE.
+- **I19 Land and development rights.** Ownership, lease, concession, access, use, development, operation, administration, taxation, sovereignty, influence and control as separate relations with full terms and provenance; exclusive versus nonexclusive validation; grants never confer sovereignty or direct control. Extends I4, I5, R29, E17. Owner: OS-LEDGER.
+- **I20 Development proposals, competition and partnerships.** Proposal records, resolution through existing allocation, market and political processes on one snapshot, deterministic tie-breaks, no simultaneous exclusive grants; shared infrastructure capacity reservation and cost-sharing through existing contracts; privatisation, nationalisation, concessions, bankruptcy and expropriation reconciled. Extends D19, E8, I3, I16. Owner: OS-POLITY for allocation decisions, contracts in OS-DIPLO and OS-MARKET as today.
+- **A17 Urban delegation and development packages.** Direct, Guided and Autonomous management of lawfully delegable development; standing orders with priorities, spending limits, constraints, expiry, triggers and exception policy; packages that generate real component projects; same rules and information for AI. Extends A16, M42, T2, T10. Owner: OS-AI (orders through OS-TIME).
+- **U12 The Living City view (WS-A1/V1).** Full-screen dismissible view inside WS-A1 with seven tabs, the district register, inspector, catalogue, proposals, partners, dependencies and actions, linked to existing dossiers and analyses. Owner: OS-UI (owns nothing authoritative).
+- **U13 Cartographic presentation.** One canonical geometry and a separate display transform (candidates evaluated, ADR-050), four semantic zoom levels, six compositions, eighteen filter families, twelve expressions, knowledge-gated display and picking, Living Engraved Cartography art rules, tiled GPU rendering with LOD. Extends U4, U5. Owner: OS-UI.
+- **U14 Urban map layers, selection and planning preview.** Urban filters, city, district and building selection states, the boundary and hatch grammar, landmark labels, and planning previews that never change state. Owner: OS-UI.
+
+**Dependencies (inputs to Pass 2b).** Housing and jobs with migration and wages; construction with credit and material demand; new land use with food, habitat, runoff and pollution; transport with access, congestion and land value; utility capacity with feasible development and output; charters with project authority; service access with health, education and competence; population and revenue with local service demand; milestones with chronicle and scoring only through existing paths. Loops are checked for strongly connected components and given a bounded solver or a justified lag.
 
 ## S. Next pass
 

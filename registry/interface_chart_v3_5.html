@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATLASIV Interface Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a survey sheet read top to bottom — four interface levels as bands, LV2 as eight colour-keyed group columns. */
+:root{
+  --paper:#f3ead6; --paper-2:#ebdfc4; --ink:#2b2318; --ink-2:#5a4a35; --rule:#b89f73; --gold:#8a6420;
+  --card:#fbf5e8; --hl:#f6d98a;
+  --gA:#3f6b3a; --gB:#9b3b34; --gC:#2f5689; --gD:#8a6420; --gE:#2b6f6a; --gF:#6a4592; --gG:#8c2f2f; --gH:#5c6b2a;
+  --display:'Cormorant SC', 'Iowan Old Style', Georgia, serif;
+  --body:'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#17140f; --paper-2:#211c15; --ink:#efe4cc; --ink-2:#c3b393; --rule:#6b5a3d; --gold:#d9b25e;
+  --card:#1e1a14; --hl:#5a4718;
+  --gA:#7fae74; --gB:#d98278; --gC:#83a8de; --gD:#d9b25e; --gE:#6cc2ba; --gF:#b493dc; --gG:#e07c74; --gH:#adbc6a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#17140f; --paper-2:#211c15; --ink:#efe4cc; --ink-2:#c3b393; --rule:#6b5a3d; --gold:#d9b25e;
+  --card:#1e1a14; --hl:#5a4718;
+  --gA:#7fae74; --gB:#d98278; --gC:#83a8de; --gD:#d9b25e; --gE:#6cc2ba; --gF:#b493dc; --gG:#e07c74; --gH:#adbc6a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  background-image:radial-gradient(circle at 20% 0%, var(--paper-2), transparent 55%);}
+.wrap{max-width:1480px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.02em;text-wrap:balance;margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header.sheet{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end;border-bottom:2px solid var(--ink);padding-bottom:14px}
+header.sheet h1{font-size:clamp(28px,4.4vw,50px);line-height:1}
+header.sheet .sub{color:var(--ink-2);margin-top:6px;max-width:70ch}
+.stamp{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink-2);border:1px solid var(--rule);padding:8px 10px;line-height:1.6}
+.counts{display:flex;flex-wrap:wrap;gap:6px 18px;margin:14px 0 4px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+.counts b{color:var(--ink);font-weight:500}
+.band{margin-top:28px}
+.band>.lab{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:12px}
+.band>.lab .lv{font-family:var(--mono);font-size:12px;color:var(--paper);background:var(--ink);padding:2px 7px;border-radius:2px}
+.band>.lab h2{font-size:24px}
+.band>.lab span.note{color:var(--ink-2);font-size:13px}
+.levels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.level{border:1px solid var(--rule);background:var(--card);padding:10px 12px;position:relative}
+.level .id{font-family:var(--mono);font-size:12px;color:var(--gold)}
+.level h3{font-size:19px;margin:2px 0 4px}
+.level p{margin:0;font-size:13px;color:var(--ink-2)}
+.level:not(:last-child)::after{content:"→";position:absolute;right:-9px;top:40%;font-family:var(--mono);color:var(--gold);background:var(--paper);line-height:1}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.tools label{font-size:13px;color:var(--ink-2)}
+.tools input{font-family:var(--mono);font-size:13px;padding:6px 9px;border:1px solid var(--rule);background:var(--card);color:var(--ink);min-width:0;width:min(320px,100%)}
+.tools input:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.tools .hits{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.groups{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
+.group{display:flex;flex-direction:column;gap:8px;min-width:0}
+.group>.gh{background:var(--g);color:var(--paper);padding:8px 9px;min-height:62px}
+.group>.gh .id{font-family:var(--mono);font-size:11px;opacity:.85}
+.group>.gh h3{font-size:16px;line-height:1.1;margin-top:2px}
+.ws{border:1px solid var(--rule);border-top:3px solid var(--g);background:var(--card);padding:8px 9px;min-width:0}
+.ws .id{font-family:var(--mono);font-size:11.5px;color:var(--g);font-weight:500}
+.ws h4{font-family:var(--body);font-weight:600;font-size:13.5px;margin:1px 0 5px;line-height:1.2}
+.ws ul{margin:0;padding-left:15px;font-size:12.5px;color:var(--ink-2)}
+.ws li{margin:1px 0}
+.ws li.add{color:var(--ink)}
+.ws li.add::marker{content:"+ ";color:var(--g)}
+.ws .mech{margin-top:6px;font-family:var(--mono);font-size:10.5px;color:var(--ink-2);word-break:break-word}
+.ws .menu{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);margin-top:2px}
+.ws.dim{opacity:.28}
+.ws.hit{box-shadow:0 0 0 2px var(--g);background:var(--hl)}
+.chip{display:inline-block;font-family:var(--mono);font-size:10.5px;border:1px solid var(--g);color:var(--g);padding:0 4px;margin:4px 3px 0 0}
+.grid-cards{display:grid;gap:10px}
+.views{grid-template-columns:repeat(5,minmax(0,1fr))}
+.view{background:var(--card);border:1px solid var(--rule);border-left:4px solid var(--g);padding:8px 10px}
+.view .id{font-family:var(--mono);font-size:12px;color:var(--g);font-weight:500}
+.view h4{margin:2px 0 0;font-size:14px;font-weight:600}
+.view p{margin:2px 0 0;font-size:12px;color:var(--ink-2)}
+.new{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:var(--gold);color:var(--paper);padding:1px 5px;margin-left:4px;vertical-align:2px}
+.six{grid-template-columns:repeat(7,minmax(0,1fr))}
+.five{grid-template-columns:repeat(6,minmax(0,1fr))}
+.box{background:var(--card);border:1px solid var(--rule);padding:8px 10px;min-width:0}
+.box .id{font-family:var(--mono);font-size:12px;color:var(--gold)}
+.box h4{margin:2px 0 4px;font-size:14px;font-weight:600}
+.box ul{margin:0;padding-left:15px;font-size:12px;color:var(--ink-2)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.list5{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--rule);padding:5px 8px;text-align:left;vertical-align:top}
+th{font-family:var(--display);font-size:15px}
+td.mono{font-size:12px}
+ol.fix{margin:0;padding-left:20px;font-size:13.5px}
+footer{margin-top:30px;border-top:2px solid var(--ink);padding-top:10px;font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+@media (max-width:1200px){.groups{grid-template-columns:repeat(4,minmax(0,1fr))}.views{grid-template-columns:repeat(3,minmax(0,1fr))}.six,.five{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:720px){.levels,.groups{grid-template-columns:repeat(2,minmax(0,1fr))}.views,.six,.five{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .two{grid-template-columns:1fr}.level:not(:last-child)::after{display:none}header.sheet{grid-template-columns:1fr}.stamp{text-align:left}}
+@media (max-width:440px){.groups,.views,.six,.five,.levels{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.ws{transition:opacity .15s, box-shadow .15s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="sheet">
+    <div>
+      <h1>ATLASIV Interface Architecture</h1>
+      <div class="sub">Interface hierarchy, workspaces, showcase views, dossiers, analyses and global systems. Generated from <span class="mono">interface_registry.yaml</span> 0.2.0, the machine-readable registry this chart accompanies.</div>
+    </div>
+    <div class="stamp">Chart v3.5<br>26 Nov 2026 CE<br>supersedes v3.4</div>
+  </header>
+  <div class="counts" id="counts"></div>
+
+  <section class="band">
+    <div class="lab"><span class="lv">LV1–LV4</span><h2>Hierarchy and navigation</h2><span class="note">Contextual, not sequential: any level opens from the map, a workspace, a dossier or an analysis.</span></div>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <section class="band">
+    <div class="lab"><span class="lv">LV2</span><h2>Category groups and workspaces</h2><span class="note">28 workspaces in 8 groups. Lines marked + were added on 24 Nov 2026.</span></div>
+    <div class="tools">
+      <label for="q">Find a workspace by ID, name or mechanic</label>
+      <input id="q" type="search" placeholder="e.g. K50, WS-G2, ledger" autocomplete="off">
+      <span class="hits mono" id="hits" aria-live="polite"></span>
+    </div>
+    <div class="groups" id="groups"></div>
+  </section>
+
+  <section class="band">
+    <div class="lab"><span class="lv">LV2/V</span><h2>Registered showcase views</h2><span class="note">Major views inside an existing workspace, not extra workspaces.</span></div>
+    <div class="grid-cards views" id="views"></div>
+  </section>
+
+  <section class="band">
+    <div class="lab"><span class="lv">LV3</span><h2>Dossier types</h2><span class="note">Universal sections: identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions.</span></div>
+    <div class="grid-cards six" id="dossiers"></div>
+  </section>
+
+  <section class="band">
+    <div class="lab"><span class="lv">LV4</span><h2>Analytical investigations</h2></div>
+    <div class="grid-cards five" id="analyses"></div>
+  </section>
+
+  <section class="band two">
+    <div>
+      <div class="lab" style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:12px"><span class="lv" style="font-family:var(--mono);font-size:12px;color:var(--paper);background:var(--ink);padding:2px 7px">GS</span><h2 style="font-size:24px">Global interface systems</h2></div>
+      <div class="list5" id="gs"></div>
+      <div class="lab" style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:6px;margin:20px 0 12px"><span class="lv" style="font-family:var(--mono);font-size:12px;color:var(--paper);background:var(--ink);padding:2px 7px">AP</span><h2 style="font-size:24px">Analytical patterns</h2></div>
+      <div class="list5" id="ap"></div>
+    </div>
+    <div>
+      <div class="lab" style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:12px"><span class="lv" style="font-family:var(--mono);font-size:12px;color:var(--paper);background:var(--ink);padding:2px 7px">ID</span><h2 style="font-size:24px">Identification convention</h2></div>
+      <div class="tbl"><table id="ids"><thead><tr><th>Element</th><th>Format</th><th>Example</th></tr></thead><tbody></tbody></table></div>
+      <div class="lab" style="display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:6px;margin:20px 0 12px"><span class="lv" style="font-family:var(--mono);font-size:12px;color:var(--paper);background:var(--ink);padding:2px 7px">Δ</span><h2 style="font-size:24px">Changes since v3.3</h2></div>
+      <ol class="fix" id="fixes"></ol>
+    </div>
+  </section>
+
+  <footer>
+    <span>Coverage: geography · population · economy · technology · society · government · diplomacy and war · ecology · history · legacy</span>
+    <span class="mono">Data ownership is defined in state_ownership.yaml (ADR-018), not in this registry.</span>
+  </footer>
+</div>
+
+<script>
+const R = {"counts":{"levels":4,"category_groups":8,"workspaces":28,"showcase_views":11,"dossier_types":7,"analysis_types":6,"global_systems":5,"analytical_patterns":6,"menu_items":13},"id_convention":{"level":"LV1 to LV4","category_group":"CG-A to CG-H","workspace":"WS-[A-H][1-6]","showcase_view":"WS-[A-H][1-6]/V[n]","dossier_type":"DS-01 to DS-07","analysis_type":"AN-01 to AN-06","global_system":"GS-01 to GS-05","analytical_pattern":"AP-01 to AP-06","cross_link":"XL-0001 onward (allocated when each link is specified)","rule":"Interface IDs never reuse mechanic codes; a bare ID such as E1 is always a mechanic."},"levels":[{"id":"LV1","name":"Living Survey Map","role":"Locked core interface: world, regions, actors, conditions and actions"},{"id":"LV2","name":"Domain Workspaces","role":"28 primary interfaces for management, planning, operations and policy"},{"id":"LV3","name":"Entity and System Dossiers","role":"Detailed multi-aspect views of entities, organisations, places, systems, processes and knowledge artifacts"},{"id":"LV4","name":"Analytical Investigations","role":"Causal, comparative and historical analysis: causes, effects, scenarios, what-if, replay, forecast"}],"category_groups":[{"id":"CG-A","name":"World, Identity and Development","workspaces":["WS-A1","WS-A2","WS-A3"]},{"id":"CG-B","name":"Population and Society","workspaces":["WS-B1","WS-B2"]},{"id":"CG-C","name":"Government and Institutions","workspaces":["WS-C1","WS-C2","WS-C3","WS-C4"]},{"id":"CG-D","name":"Economy and Finance","workspaces":["WS-D1","WS-D2","WS-D3","WS-D4","WS-D5","WS-D6"]},{"id":"CG-E","name":"Technology and Industry","workspaces":["WS-E1","WS-E2","WS-E3","WS-E4","WS-E5"]},{"id":"CG-F","name":"Culture and Religion","workspaces":["WS-F1","WS-F2"]},{"id":"CG-G","name":"Diplomacy, Intelligence and War","workspaces":["WS-G1","WS-G2","WS-G3"]},{"id":"CG-H","name":"Planetary Systems, History and Legacy","workspaces":["WS-H1","WS-H2","WS-H3"]}],"workspaces":[{"id":"WS-A1","group":"CG-A","name":"World and Territorial Structure","menu_item":"World","contents":["Province and region","Settlement and land use","Exploration and navigation","Urban Development and City Administration (V1) (added 26 Nov 2026)"],"showcase_views":["WS-A1/V1"],"linked_mechanics":["P5","P6","P8","P32","P33","P34","P35","R31","R32","I19","I20","A17","U12","N13","D14"],"owner_systems_read":["OS-AI","OS-DIPLO","OS-INFO","OS-LEDGER","OS-POLITY","OS-PROD","OS-SETTLE","OS-UI"]},{"id":"WS-A2","group":"CG-A","name":"Projects and Transformations","menu_item":"World","contents":["National, joint and special projects","Sponsorship and stages","Transformation paths","FTL Grand Project and Consortium (V1)"],"showcase_views":["WS-A2/V1"],"linked_mechanics":["N7","N8","X3","X4","X5","X28"],"owner_systems_read":["OS-PROJ"]},{"id":"WS-A3","group":"CG-A","name":"Civilisation Identity and Lineage","menu_item":"World","contents":["Civilisation identity","Historical lineage","Country switching","Player Career Record"],"showcase_views":[],"linked_mechanics":["N1","N2","N9","N17","N18","T7"],"owner_systems_read":["OS-AI","OS-ENTITY","OS-OBS"]},{"id":"WS-B1","group":"CG-B","name":"Population and Migration","menu_item":"People and Society","contents":["Population groups","Migration flows","Demographic account"],"showcase_views":[],"linked_mechanics":["P1","P2","P4","P25","P26","P31","P37"],"owner_systems_read":["OS-INFO","OS-POP"]},{"id":"WS-B2","group":"CG-B","name":"Social Development","menu_item":"People and Society","contents":["Health and healthcare","Education and literacy","Welfare, inequality and quality of life"],"showcase_views":[],"linked_mechanics":["P11","P16","P19","P22","S11","E15"],"owner_systems_read":["OS-INST","OS-POLITY","OS-POP"]},{"id":"WS-C1","group":"CG-C","name":"Government and Administration","menu_item":"Government","contents":["Institutions and charters (V1)","Administrative reach and territory","Governors and state capacity"],"showcase_views":["WS-C1/V1"],"linked_mechanics":["S28","S15","N12","I1","I10","P38"],"owner_systems_read":["OS-INST","OS-POLITY"]},{"id":"WS-C2","group":"CG-C","name":"Civics and State","menu_item":"Government","contents":["Governance civics","Culture civics","Religion civics"],"showcase_views":[],"linked_mechanics":["K6","L1","S29"],"owner_systems_read":["OS-POLITY"]},{"id":"WS-C3","group":"CG-C","name":"Law, Rights and Politics","menu_item":"Government","contents":["Constitutional Archive and Governance Ledger (V1)","Law and rights","Political factions","Legitimacy","Courts and press"],"showcase_views":["WS-C3/V1"],"linked_mechanics":["L2","L3","L4","L7","S1","S14","S30","S34"],"owner_systems_read":["OS-POLITY"]},{"id":"WS-C4","group":"CG-C","name":"Leaders, Families and Dynasties","menu_item":"Court and Dynasty","contents":["Ruler and court","Dynasty and succession","Characters and relationships"],"showcase_views":[],"linked_mechanics":["S5","S6","N14"],"owner_systems_read":["OS-CHAR"]},{"id":"WS-D1","group":"CG-D","name":"National Accounts and Macroeconomics","menu_item":"Economy","contents":["Economic sectors","Output, wages and prices","Inflation and business cycle"],"showcase_views":[],"linked_mechanics":["E1","E18","E31","E33"],"owner_systems_read":["OS-MARKET"]},{"id":"WS-D2","group":"CG-D","name":"Treasury and Public Finance","menu_item":"Economy","contents":["Revenue sources","Budget account","Debt and spending priorities"],"showcase_views":[],"linked_mechanics":["E11","E30","E7"],"owner_systems_read":["OS-MARKET","OS-POLITY"]},{"id":"WS-D3","group":"CG-D","name":"Currency and Monetary Hegemony","menu_item":"Economy","contents":["Individual currencies","Exchange rates and relations","Reserves and hegemony"],"showcase_views":[],"linked_mechanics":["E4","E5","E28","E32"],"owner_systems_read":["OS-MARKET"]},{"id":"WS-D4","group":"CG-D","name":"Banking, Credit and Capital Markets","menu_item":"Economy","contents":["Central bank and monetary authority","Commercial banking","Exposure"],"showcase_views":[],"linked_mechanics":["E6","E19","E29"],"owner_systems_read":["OS-MARKET"]},{"id":"WS-D5","group":"CG-D","name":"Corporations and Monopolies","menu_item":"Economy","contents":["Firms and ownership","Market power and antitrust","Listings and corporate finance"],"showcase_views":[],"linked_mechanics":["E8","E9","R29","I2"],"owner_systems_read":["OS-INST","OS-LEDGER"]},{"id":"WS-D6","group":"CG-D","name":"Trade, Supply Chains and Logistics","menu_item":"Economy","contents":["Trade nodes and routes","Supply chains","Logistics and stockpiles"],"showcase_views":[],"linked_mechanics":["E2","E21","R7","R22","R24"],"owner_systems_read":["OS-MARKET","OS-TRANSPORT"]},{"id":"WS-E1","group":"CG-E","name":"Technology Tree","menu_item":"Technology","contents":["Individual technologies","Dependency chain","Path style","Capability states per actor and region (added 24 Nov 2026)"],"showcase_views":[],"linked_mechanics":["K1","K44","K50","K51"],"owner_systems_read":["OS-KNOW","OS-PROD"]},{"id":"WS-E2","group":"CG-E","name":"Research, Knowledge Diffusion and Innovation","menu_item":"Technology","contents":["Research institutions and programmes (V1)","Scientific competence and specialisation","Research allocation and infrastructure","Collaboration and knowledge networks","Diffusion and absorptive capacity","First-mover rents and knowledge loss","Collections, artifacts and acquisition (added 24 Nov 2026)","Synthesis, peer review and consensus (added 24 Nov 2026)","Global Knowledge Atlas and Intellectual Genealogy (V2)"],"showcase_views":["WS-E2/V1","WS-E2/V2"],"linked_mechanics":["K22","K26","K27","K40","K45","K48","K52","K53","K56","K57","K60"],"owner_systems_read":["OS-INST","OS-KNOW"]},{"id":"WS-E3","group":"CG-E","name":"Materials and Industrial Engineering","menu_item":"Technology","contents":["Resource clusters","Production chains","Industrial capabilities"],"showcase_views":[],"linked_mechanics":["R3","R4","R20","R21","R27"],"owner_systems_read":["OS-PROD"]},{"id":"WS-E4","group":"CG-E","name":"Energy, Infrastructure and Utility Networks","menu_item":"Technology","contents":["Power generation and fuels","Grid and interconnection","Utility networks"],"showcase_views":[],"linked_mechanics":["R5","R10","R11","R12","R30","P9"],"owner_systems_read":["OS-PROD","OS-TRANSPORT"]},{"id":"WS-E5","group":"CG-E","name":"Information, Communications and Media Systems","menu_item":"Technology","contents":["Telecom, internet and platforms","Censorship, propaganda and digital sovereignty","Publication and digital distribution (added 24 Nov 2026)"],"showcase_views":[],"linked_mechanics":["P18","E13","S20","K46","K47"],"owner_systems_read":["OS-CULTURE","OS-KNOW","OS-TRANSPORT"]},{"id":"WS-F1","group":"CG-F","name":"Culture, Philosophy and Traditions","menu_item":"Culture","contents":["Culture and identity","Language","Philosophical movements","Heritage"],"showcase_views":[],"linked_mechanics":["S3","P13","S24","S25"],"owner_systems_read":["OS-CULTURE"]},{"id":"WS-F2","group":"CG-F","name":"Religion and Religious Institutions","menu_item":"Religion","contents":["Belief systems and sects","Institutions and factions","Doctrine and religious diplomacy"],"showcase_views":[],"linked_mechanics":["S4","D7"],"owner_systems_read":["OS-CULTURE","OS-DIPLO"]},{"id":"WS-G1","group":"CG-G","name":"Diplomacy and International Order","menu_item":"Diplomacy","contents":["Diplomatic relations","Treaties, subjects and agreements","Leagues, blocs and imperial structures"],"showcase_views":[],"linked_mechanics":["D2","D3","D4","D6","D19","N10"],"owner_systems_read":["OS-DIPLO","OS-ENTITY"]},{"id":"WS-G2","group":"CG-G","name":"Intelligence and Espionage","menu_item":"Diplomacy","contents":["Espionage operations","Spy networks","Counterintelligence","Sabotage and subversion","Information leverage (added 24 Nov 2026)"],"showcase_views":[],"linked_mechanics":["D11","D21","D22","K8","M32"],"owner_systems_read":["OS-DIPLO","OS-INFO","OS-MIL"]},{"id":"WS-G3","group":"CG-G","name":"Military Grand Command","menu_item":"Military","contents":["Formations and theatres","Operations and logistics","Occupation, peace and reconstruction"],"showcase_views":["WS-G3/V1","WS-G3/V2","WS-G3/V3","WS-G3/V4"],"linked_mechanics":["M22","M29","M30","M31","M37","M42"],"owner_systems_read":["OS-MIL"]},{"id":"WS-H1","group":"CG-H","name":"Planetary Environment and Ecology","menu_item":"Environment","contents":["Climate and hydrology","Species and biomes","Conservation","Disasters and environmental pressures"],"showcase_views":[],"linked_mechanics":["W6","W8","W12","W10","W19","W26"],"owner_systems_read":["OS-CLIMATE","OS-ECOLOGY","OS-HAZARD","OS-HYDRO"]},{"id":"WS-H2","group":"CG-H","name":"Historical Atlas and World Chronicle","menu_item":"History","contents":["Historical events","Maps, ages and replay","Lineage timeline","Living Historiography and Historical Library (V1)"],"showcase_views":["WS-H2/V1"],"linked_mechanics":["X2","X10","X12","X16","X20","X26","X29"],"owner_systems_read":["OS-EVENT","OS-OBS"]},{"id":"WS-H3","group":"CG-H","name":"Scoring and Civilisation Legacy","menu_item":"Scoring","contents":["Scoring categories","Historical rankings","Metric audit","Civilisation legacy"],"showcase_views":[],"linked_mechanics":["X6","K60"],"owner_systems_read":["OS-KNOW","OS-OBS"]}],"showcase_views":[{"id":"WS-A1/V1","name":"Urban Development and City Administration (The Living City)","note":"Added 26 Nov 2026"},{"id":"WS-A2/V1","name":"FTL Grand Project and Consortium","note":"Endgame"},{"id":"WS-C1/V1","name":"Institutions and Charters","note":"Guilds, universities, companies, international bodies"},{"id":"WS-C3/V1","name":"Constitutional Archive and Governance Ledger","note":"Living Constitutional Order"},{"id":"WS-E2/V1","name":"Scientific and Institutional Research Ecosystem","note":"Programmes, competence, allocation, networks"},{"id":"WS-E2/V2","name":"Global Knowledge Atlas and Intellectual Genealogy","note":"Added 24 Nov 2026"},{"id":"WS-G3/V1","name":"Theatre Operations and Campaign Planning"},{"id":"WS-G3/V2","name":"Military Logistics and Supply Network"},{"id":"WS-G3/V3","name":"Armed Forces, Formations and Commands"},{"id":"WS-G3/V4","name":"War Council and Peace Negotiations"},{"id":"WS-H2/V1","name":"Living Historiography and Historical Library","note":"Added 24 Nov 2026"}],"dossier_types":[{"id":"DS-01","name":"Entity","covers":["Rulers, characters","Families, dynasties"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"},{"id":"DS-02","name":"Place","covers":["Settlements, regions","Territory, sites","Sector, district and site modules"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"},{"id":"DS-03","name":"Organization","covers":["States, institutions","Corporations, banks","Governing-document module (links DS-07)"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"},{"id":"DS-04","name":"System","covers":["Economy, population","Technology, ecology"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"},{"id":"DS-05","name":"Asset","covers":["Facilities, networks","Fleets, armies","Landmarks, physical copies of works"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"},{"id":"DS-06","name":"Event","covers":["Key events, crises","Treaties, projects","Battle and Campaign Dossier"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"},{"id":"DS-07","name":"Knowledge Artifact","covers":["Content, claims, editions","Access, validation, lineage","Added 24 Nov 2026"],"universal_sections":"identity, classification, location, ownership, lineage, condition, relationships, statistics, events, actions"}],"analysis_types":[{"id":"AN-01","name":"Causal Analysis","covers":["Cause-effect chains","Contributing factors","System interactions","Military causal analysis"]},{"id":"AN-02","name":"Comparative Analysis","covers":["Entities, regions, eras","Performance and outcomes","Structural differences"]},{"id":"AN-03","name":"Counterfactual / What-If","covers":["Alternative decisions","Plausible divergences","Impact assessment"]},{"id":"AN-04","name":"Historical Replay","covers":["Timed reconstruction","Multi-scale playback","Annotated chronicle"]},{"id":"AN-05","name":"Trend and Forecast","covers":["Trajectory and scenarios","Risk and sensitivity","Uncertainty ranges"]},{"id":"AN-06","name":"Structural Analysis","covers":["Institutions, networks","Resilience and fragility","Long-term evolution"]}],"global_systems":[{"id":"GS-01","name":"World Creation and Starting Conditions"},{"id":"GS-02","name":"Turn Resolution, Standing Orders and Exception Management"},{"id":"GS-03","name":"Knowledge, Information Access and Uncertainty"},{"id":"GS-04","name":"Universal Causal Inspector and Historical Replay"},{"id":"GS-05","name":"Search and Entity Selection"}],"analytical_patterns":[{"id":"AP-01","name":"Entity Analysis"},{"id":"AP-02","name":"Relationship Analysis"},{"id":"AP-03","name":"Process Analysis"},{"id":"AP-04","name":"Comparative Analysis"},{"id":"AP-05","name":"Causal Analysis"},{"id":"AP-06","name":"Historical Analysis"}],"chart_corrections_v3_4":["WS-A1/V1 The Living City added (v3.5, 26 Nov 2026); showcase views 10 to 11","P8 typed adjacency linked to WS-A1; X29 Wonders of the World linked to WS-H2 (26 Nov 2026)","P37 censuses linked to WS-B1, P38 administrative units to WS-C1, S34 divided polity to WS-C3 (26 Nov 2026)","F2 label (chart showed P2)","Showcase views 8 to 10 (WS-E2/V2, WS-H2/V1)","DS-07 Knowledge Artifact added; ID format DS-01 to DS-07","WS-E4 and WS-E5 bullets separated (communications bullets belong to WS-E5)","Dates as BCE/CE","Levels labelled LV1 to LV4"]};
+const G = {A:'--gA',B:'--gB',C:'--gC',D:'--gD',E:'--gE',F:'--gF',G:'--gG',H:'--gH'};
+const el = (t, a = {}, ...kids) => { const e = document.createElement(t); for (const [k, v] of Object.entries(a)) { if (k === 'class') e.className = v; else if (k === 'style') e.setAttribute('style', v); else e.setAttribute(k, v); } for (const k of kids) e.append(k); return e; };
+const isNew = s => /added 2[46] Nov 2026|\(V2\)|Living Historiography/.test(s);
+const clean = s => s.replace(/\s*\(added 2[46] Nov 2026\)/, '');
+const c = R.counts;
+document.getElementById('counts').innerHTML = [['levels',c.levels],['groups',c.category_groups],['workspaces',c.workspaces],['showcase views',c.showcase_views],['dossier types',c.dossier_types],['analysis types',c.analysis_types],['global systems',c.global_systems],['analytical patterns',c.analytical_patterns],['menu items',c.menu_items]].map(([k,v])=>`<span><b>${v}</b> ${k}</span>`).join('');
+const lv = document.getElementById('levels');
+R.levels.forEach(l => lv.append(el('div',{class:'level'}, el('div',{class:'id'}, l.id), el('h3',{}, l.name), el('p',{}, l.role))));
+const gwrap = document.getElementById('groups');
+const cards = [];
+R.category_groups.forEach(g => {
+  const L = g.id.slice(-1);
+  const col = el('div',{class:'group',style:`--g:var(${G[L]})`});
+  col.append(el('div',{class:'gh'}, el('div',{class:'id'}, g.id), el('h3',{}, g.name)));
+  g.workspaces.forEach(id => {
+    const w = R.workspaces.find(x => x.id === id);
+    const ul = el('ul');
+    w.contents.forEach(s => ul.append(el('li',{class: isNew(s) ? 'add' : ''}, clean(s))));
+    const card = el('div',{class:'ws','data-search':[w.id,w.name,w.menu_item,...w.contents,...w.linked_mechanics,...w.showcase_views].join(' ').toLowerCase()},
+      el('div',{class:'id'}, w.id), el('h4',{}, w.name), ul);
+    if (w.showcase_views.length) { const d = el('div'); w.showcase_views.forEach(v => d.append(el('span',{class:'chip'}, v.split('/')[1]))); card.append(d); }
+    card.append(el('div',{class:'mech'}, 'Mechanics: ' + w.linked_mechanics.join(' ')));
+    card.append(el('div',{class:'menu'}, 'Menu: ' + w.menu_item));
+    cards.push(card); col.append(card);
+  });
+  gwrap.append(col);
+});
+const q = document.getElementById('q'), hits = document.getElementById('hits');
+q.addEventListener('input', () => {
+  const s = q.value.trim().toLowerCase(); let n = 0;
+  cards.forEach(cd => { const m = s && cd.dataset.search.split(' ').some(t => t === s) || (s.length > 2 && cd.dataset.search.includes(s));
+    cd.classList.toggle('hit', !!(s && m)); cd.classList.toggle('dim', !!(s && !m)); if (s && m) n++; });
+  hits.textContent = s ? `${n} workspace${n === 1 ? '' : 's'}` : '';
+});
+const vw = document.getElementById('views');
+R.showcase_views.forEach(v => { const L = v.id[3]; const h = el('h4',{}, v.name); if (v.note && /Added/.test(v.note)) h.append(el('span',{class:'new'},'new'));
+  vw.append(el('div',{class:'view',style:`--g:var(${G[L]})`}, el('div',{class:'id'}, v.id), h, el('p',{}, v.note && !/Added/.test(v.note) ? v.note : ''))); });
+const box = (id, name, list, fresh) => { const h = el('h4',{}, name); if (fresh) h.append(el('span',{class:'new'},'new')); const b = el('div',{class:'box'}, el('div',{class:'id'}, id), h);
+  if (list) { const ul = el('ul'); list.filter(s => !/Added/.test(s)).forEach(s => ul.append(el('li',{}, s))); b.append(ul); } return b; };
+const ds = document.getElementById('dossiers'); R.dossier_types.forEach(d => ds.append(box(d.id, d.name, d.covers, d.covers.some(s => /Added/.test(s)))));
+const an = document.getElementById('analyses'); R.analysis_types.forEach(a => an.append(box(a.id, a.name, a.covers)));
+const gs = document.getElementById('gs'); R.global_systems.forEach(g => gs.append(box(g.id, g.name)));
+const ap = document.getElementById('ap'); R.analytical_patterns.forEach(a => ap.append(box(a.id, a.name)));
+const ic = R.id_convention, tb = document.querySelector('#ids tbody');
+[['Interface level',ic.level,'LV2'],['Category group',ic.category_group,'CG-C'],['Primary workspace',ic.workspace,'WS-E2'],['Showcase view',ic.showcase_view,'WS-C3/V1'],['Dossier type',ic.dossier_type,'DS-07'],['Analysis type',ic.analysis_type,'AN-04'],['Global system',ic.global_system,'GS-05'],['Analytical pattern',ic.analytical_pattern,'AP-03'],['Cross-link',ic.cross_link,'XL-0001']]
+  .forEach(([a,b,e]) => tb.append(el('tr',{}, el('td',{}, a), el('td',{class:'mono'}, b), el('td',{class:'mono'}, e))));
+const fx = document.getElementById('fixes'); R.chart_corrections_v3_4.forEach(s => fx.append(el('li',{}, s)));
+</script>
+
+</body>
+</html>
