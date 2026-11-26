@@ -1,5 +1,6 @@
 using Atlasiv.Core.Numerics;
 using Atlasiv.Core.Randomness;
+using Atlasiv.Core.Time;
 using BenchmarkDotNet.Attributes;
 
 namespace Atlasiv.Benchmarks;
@@ -11,7 +12,7 @@ namespace Atlasiv.Benchmarks;
 [MemoryDiagnoser]
 public class RandomBenchmark
 {
-    private readonly DrawAddress _address = new(0x5EED_0000_0000_0001UL, 12, DrawSlot.Phase(3), 0, 7, 42);
+    private readonly DrawAddress _address = new(0x5EED_0000_0000_0001UL, 12, TurnSlot.Phase(3), 0, 7, 42);
     private readonly Q32 _halfChance = Q32.FromRatio(1, 2);
     private readonly Q32 _poissonMean = Q32.FromRatio(5, 2);
     private readonly Q32 _rate = Q32.FromRatio(3, 100);

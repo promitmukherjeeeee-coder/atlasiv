@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Atlasiv.Core.Randomness;
+using Atlasiv.Core.Time;
 using Atlasiv.Core.Tests.Numerics;
 using FsCheck;
 using FsCheck.Fluent;
@@ -19,7 +20,7 @@ public sealed class DrawAddressTests
     private const uint System = 7;
 
     private static DrawAddress Key(ulong entity, long turn = 12, int phase = 3, int substep = 0) =>
-        new(Seed, turn, DrawSlot.Phase(phase), substep, System, entity);
+        new(Seed, turn, TurnSlot.Phase(phase), substep, System, entity);
 
     // ---- Adding unrelated entities leaves existing draws unchanged ----
 
@@ -74,8 +75,8 @@ public sealed class DrawAddressTests
     public void The_turn_end_and_the_last_phase_never_share_a_draw()
     {
         // The 50-year step has 20 phases, the most of any step (spec section 3).
-        var lastPhase = new DrawAddress(Seed, 12, DrawSlot.Phase(20), 0, System, 42);
-        var turnEnd = new DrawAddress(Seed, 12, DrawSlot.TurnEnd, 0, System, 42);
+        var lastPhase = new DrawAddress(Seed, 12, TurnSlot.Phase(20), 0, System, 42);
+        var turnEnd = new DrawAddress(Seed, 12, TurnSlot.TurnEnd, 0, System, 42);
         var draws = new HashSet<ulong>();
         for (ulong index = 0; index < 1_024; index++)
         {
@@ -87,22 +88,22 @@ public sealed class DrawAddressTests
     [Fact]
     public void The_turn_end_slot_comes_after_every_phase()
     {
-        Assert.True(DrawSlot.TurnEnd.IsTurnEnd);
-        Assert.False(DrawSlot.Phase(20).IsTurnEnd);
-        Assert.True(DrawSlot.TurnEnd.Value > DrawSlot.Phase(int.MaxValue).Value);
+        Assert.True(TurnSlot.TurnEnd.IsTurnEnd);
+        Assert.False(TurnSlot.Phase(20).IsTurnEnd);
+        Assert.True(TurnSlot.TurnEnd.Value > TurnSlot.Phase(int.MaxValue).Value);
     }
 
     [Fact]
     public void Each_field_of_the_address_changes_the_draw()
     {
-        var baseKey = new DrawAddress(Seed, 12, DrawSlot.Phase(3), 1, System, 42);
+        var baseKey = new DrawAddress(Seed, 12, TurnSlot.Phase(3), 1, System, 42);
         var variants = new[]
         {
             baseKey,
             baseKey with { WorldSeed = Seed + 1 },
             baseKey with { Turn = 13 },
-            baseKey with { Slot = DrawSlot.Phase(4) },
-            baseKey with { Slot = DrawSlot.TurnEnd },
+            baseKey with { Slot = TurnSlot.Phase(4) },
+            baseKey with { Slot = TurnSlot.TurnEnd },
             baseKey with { Substep = 2 },
             baseKey with { SystemId = System + 1 },
             baseKey with { EntityId = 43 },
@@ -123,7 +124,7 @@ public sealed class DrawAddressTests
         var address =
             from seed in Gen.Elements(0UL, 1UL, ulong.MaxValue)
             from turn in Gen.Elements(1L, 2L, long.MaxValue)
-            from slot in Gen.Elements(DrawSlot.Phase(1), DrawSlot.Phase(2), DrawSlot.Phase(int.MaxValue), DrawSlot.TurnEnd)
+            from slot in Gen.Elements(TurnSlot.Phase(1), TurnSlot.Phase(2), TurnSlot.Phase(int.MaxValue), TurnSlot.TurnEnd)
             from substep in Gen.Elements(0, 1, int.MaxValue)
             from system in Gen.Elements(0U, 1U, uint.MaxValue)
             from entity in Gen.Elements(0UL, 1UL, ulong.MaxValue)
@@ -152,19 +153,19 @@ public sealed class DrawAddressTests
     [Fact]
     public void Turns_count_from_one()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new DrawAddress(Seed, 0, DrawSlot.Phase(1), 0, System, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DrawAddress(Seed, 0, TurnSlot.Phase(1), 0, System, 1));
     }
 
     [Fact]
     public void Phases_count_from_one()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => DrawSlot.Phase(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => TurnSlot.Phase(0));
     }
 
     [Fact]
     public void Substeps_count_from_zero()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new DrawAddress(Seed, 1, DrawSlot.Phase(1), -1, System, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DrawAddress(Seed, 1, TurnSlot.Phase(1), -1, System, 1));
     }
 
     [Fact]

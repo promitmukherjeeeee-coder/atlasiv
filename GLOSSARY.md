@@ -55,6 +55,16 @@ _Avoid_: Target step
 The announced event, with a preview, that marks a change of step.
 _Avoid_: Era change (eras are descriptive and never change the step)
 
+**Slot**:
+Where in a turn something happens: one of its phases, or the turn end, which has its own slot after the last phase. Used in random-draw keys and stable event IDs. Not a stage.
+
+**Event queue**:
+The single queue that resolves events in order of timestamp, stage, event priority and stable event ID. Events at the same instant resolve turn-end stages first, then phase stages; a lower priority number resolves first.
+
+**Stable event ID**:
+An event's unique identity: the system that created it, the turn, the slot, and that system's sequence number within the slot. It breaks every remaining tie in the event queue.
+_Avoid_: Event index, event number
+
 ## Orders
 
 **Standing order**:

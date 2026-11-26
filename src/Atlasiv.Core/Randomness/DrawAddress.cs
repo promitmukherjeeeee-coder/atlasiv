@@ -1,4 +1,5 @@
 using System;
+using Atlasiv.Core.Time;
 
 namespace Atlasiv.Core.Randomness;
 
@@ -34,7 +35,7 @@ namespace Atlasiv.Core.Randomness;
 public readonly record struct DrawAddress
 {
     private readonly long _turn;
-    private readonly DrawSlot _slot;
+    private readonly TurnSlot _slot;
     private readonly int _substep;
 
     /// <summary>Creates a stream address.</summary>
@@ -45,7 +46,7 @@ public readonly record struct DrawAddress
     /// <param name="systemId">The drawing system's ID.</param>
     /// <param name="entityId">The entity the draw is for (a placeholder 64-bit ID until Pass 2).</param>
     /// <exception cref="ArgumentOutOfRangeException">The turn is below 1, the slot is the default value, or the substep is negative.</exception>
-    public DrawAddress(ulong worldSeed, long turn, DrawSlot slot, int substep, uint systemId, ulong entityId)
+    public DrawAddress(ulong worldSeed, long turn, TurnSlot slot, int substep, uint systemId, ulong entityId)
     {
         WorldSeed = worldSeed;
         Turn = turn;
@@ -70,7 +71,7 @@ public readonly record struct DrawAddress
     }
 
     /// <summary>The phase, or the turn end.</summary>
-    public DrawSlot Slot
+    public TurnSlot Slot
     {
         get => _slot;
         init

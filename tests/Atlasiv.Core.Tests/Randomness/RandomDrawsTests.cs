@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Atlasiv.Core.Numerics;
 using Atlasiv.Core.Randomness;
+using Atlasiv.Core.Time;
 using Xunit;
 
 namespace Atlasiv.Core.Tests.Randomness;
@@ -15,7 +16,7 @@ namespace Atlasiv.Core.Tests.Randomness;
 public sealed class RandomDrawsTests
 {
     private static DrawAddress Key(ulong entity = 1) =>
-        new(0xA71A_5100_0000_0002UL, 5, DrawSlot.Phase(2), 0, 3, entity);
+        new(0xA71A_5100_0000_0002UL, 5, TurnSlot.Phase(2), 0, 3, entity);
 
     // ---- Raw draws ----
 

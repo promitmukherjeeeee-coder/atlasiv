@@ -1,4 +1,5 @@
 using Atlasiv.Core.Randomness;
+using Atlasiv.Core.Time;
 using Xunit;
 
 namespace Atlasiv.Core.Tests.Randomness;
@@ -11,7 +12,7 @@ namespace Atlasiv.Core.Tests.Randomness;
 /// </summary>
 public sealed class DrawVectorTests
 {
-    private const int TurnEnd = -1; // stands for DrawSlot.TurnEnd in the table below
+    private const int TurnEnd = -1; // stands for TurnSlot.TurnEnd in the table below
 
     [Theory]
     // seed, turn, slot, substep, system, entity, draw index, expected draw
@@ -30,7 +31,7 @@ public sealed class DrawVectorTests
     public void Keyed_draws_match_the_published_vectors(
         ulong seed, long turn, int slot, int substep, uint system, ulong entity, ulong drawIndex, ulong expected)
     {
-        var key = new DrawAddress(seed, turn, slot == TurnEnd ? DrawSlot.TurnEnd : DrawSlot.Phase(slot), substep, system, entity);
+        var key = new DrawAddress(seed, turn, slot == TurnEnd ? TurnSlot.TurnEnd : TurnSlot.Phase(slot), substep, system, entity);
 
         Assert.Equal(expected, key.Draw(drawIndex));
     }
