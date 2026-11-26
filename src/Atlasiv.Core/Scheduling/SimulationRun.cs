@@ -64,7 +64,7 @@ public sealed class SimulationRun
 
     // Where the current slot is.
     private long _slotTurn;
-    private TurnSlot _slotKind;
+    private TurnSlot _slot;
     private TurnDates _slotTurnDates;
 
     // The earliest point a new event may be scheduled at: (time, stage) while systems run, or after
@@ -72,6 +72,10 @@ public sealed class SimulationRun
     private Instant _cursorTime;
     private ResolutionStage _cursorStage;
     private EventKey? _cursorEvent;
+
+    // Numbers each call into a system; a context is usable only while its own call is running. 0 when none is.
+    private long _callCount;
+    private long _activeCall;
 
     // What the current slot has done.
     private List<SystemRun> _runs = [];
@@ -171,14 +175,14 @@ public sealed class SimulationRun
     internal StableEventId Schedule(
         SystemContext context, Instant at, ResolutionStage stage, int priority, InterruptionClass interruption, EventPayload payload)
     {
-        if (context.Turn != _slotTurn || context.Slot != _slotKind)
+        if (context.CallNumber != _activeCall)
         {
             throw new InvalidOperationException("This SystemContext belongs to a call that has finished.");
         }
 
         if (!stage.IsValid)
         {
-            throw new ArgumentException("An event needs one of the 21 stages.", nameof(stage));
+            throw new ArgumentOutOfRangeException(nameof(stage), stage, "An event needs one of the 21 stages.");
         }
 
         if (stage.IsTurnEnd && at != _slotTurnDates.End)
@@ -251,7 +255,7 @@ public sealed class SimulationRun
         }
 
         _slotTurn = turnNumber;
-        _slotKind = slot;
+        _slot = slot;
         _slotTurnDates = turn;
         Array.Clear(_sequences);
         _runs = [];
@@ -259,7 +263,7 @@ public sealed class SimulationRun
     }
 
     private TimelineEntry EndSlot(TimeInterval span, EraTransition? announced) =>
-        new(_slotTurn, _slotKind, _slotTurnDates.Step, span, _runs, _resolved, announced);
+        new(_slotTurn, _slot, _slotTurnDates.Step, span, _runs, _resolved, announced);
 
     private void RunStage(
         ResolutionStage stage, int[] members, TimeInterval slotSpan, Instant now, Instant coverEnd, IReadOnlyList<Order> orders)
@@ -278,6 +282,7 @@ public sealed class SimulationRun
             var covered = new TimeInterval(_coveredUntil[index], coverEnd);
             var context = Context(_ids[index], slotSpan, now, stage, orders);
             _systems[index].Run(context, covered);
+            _activeCall = 0;
             _runs.Add(new SystemRun(stage, _ids[index], covered));
             _coveredUntil[index] = coverEnd;
             _nextBoundary[index] = _registrations[index].Period.NextBoundaryAfter(coverEnd);
@@ -301,17 +306,21 @@ public sealed class SimulationRun
             {
                 var context = Context(systemId, slotSpan, next.Key.Timestamp, next.Key.Stage, orders);
                 _systems[IndexOf(systemId)].Resolve(next, context);
+                _activeCall = 0;
             }
         }
     }
 
-    private SystemContext Context(uint systemId, TimeInterval slotSpan, Instant now, ResolutionStage stage, IReadOnlyList<Order> orders) =>
-        new(this, systemId, _slotTurn, _slotKind, _slotTurnDates.Step, _slotTurnDates.Span, slotSpan, now, stage, orders, _setup.WorldSeed);
+    private SystemContext Context(uint systemId, TimeInterval slotSpan, Instant now, ResolutionStage stage, IReadOnlyList<Order> orders)
+    {
+        _activeCall = ++_callCount;
+        return new(this, _activeCall, systemId, _slotTurn, _slot, _slotTurnDates.Step, _slotTurnDates.Span, slotSpan, now, stage, orders, _setup.WorldSeed);
+    }
 
     private StableEventId NextId(uint systemId)
     {
-        var slot = systemId == SystemRegistration.ClockSystemId ? 0 : IndexOf(systemId) + 1;
-        var sequence = _sequences[slot] ??= new EventIdSequence(systemId, _slotTurn, _slotKind);
+        var index = systemId == SystemRegistration.ClockSystemId ? 0 : IndexOf(systemId) + 1;
+        var sequence = _sequences[index] ??= new EventIdSequence(systemId, _slotTurn, _slot);
         return sequence.Next();
     }
 

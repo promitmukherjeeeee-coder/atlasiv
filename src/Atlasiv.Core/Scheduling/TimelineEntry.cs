@@ -10,7 +10,8 @@ namespace Atlasiv.Core.Scheduling;
 /// its dates, the systems that ran (in order), the events that resolved (in order) and, at a turn
 /// end, any step switch announced there.
 /// </summary>
-public sealed record TimelineEntry
+/// <remarks>A class, not a record: record equality would compare its lists by reference, not by contents.</remarks>
+public sealed class TimelineEntry
 {
     internal TimelineEntry(
         long turn,
@@ -64,5 +65,5 @@ public sealed record TimelineEntry
     public EraTransition? Announced { get; }
 
     /// <summary>The state hash after this phase or turn end. Empty until J8 adds the canonical serializer.</summary>
-    public UInt128? StateHash { get; init; }
+    public UInt128? StateHash { get; internal set; }
 }

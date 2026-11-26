@@ -200,6 +200,18 @@ public sealed class EventResolutionTests
     }
 
     [Fact]
+    public void A_context_kept_after_its_call_has_returned_cannot_schedule_events()
+    {
+        SystemContext? kept = null;
+        var keeper = new ScriptedSystem(1, ResolutionStage.Phase(2), EveryPhase, onRun: (c, _) => kept ??= c, onResolve: (_, _) => { });
+        var user = new ScriptedSystem(2, ResolutionStage.Phase(3), EveryPhase, onRun: (_, _) =>
+            kept!.Schedule(kept.SlotSpan.End.AddSeconds(-1), ResolutionStage.Phase(9), 0, InterruptionClass.Informational, new Note("stale")));
+        var run = Start(new ScriptedLeadingEdge(TurnStep.OneYear), new InputLog(), keeper, user);
+
+        Assert.Throws<InvalidOperationException>(() => run.RunTurns(1));
+    }
+
+    [Fact]
     public void An_event_far_in_the_future_waits_in_the_queue_until_its_phase()
     {
         var run = Start(TurnStep.TenYears, OneShot(Date(-9969, 3, 1), ResolutionStage.Phase(4)));

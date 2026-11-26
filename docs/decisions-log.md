@@ -550,6 +550,7 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011.
    - A turn-end-stage event must be timestamped at the current turn's end (ENG-012, consequence 2).
    - No event may be scheduled before the point the run has reached. While systems run, the new event's (timestamp, stage) must not be earlier than (now, current stage). While an event resolves, the new event's key must be later than that event's key.
    - Each system has one `EventIdSequence` per turn and slot, made on first use and shared by its run and its event resolutions there.
+   - A context works only during the call it was passed to. A system that keeps one and uses it later is refused.
 7. **The era-transition event** is created by the clock (system 0) after the turn end, at the boundary where the switch is decided. It is informational, timestamped at that boundary, in phase stage 4 (scheduled events and communications), with priority 0 and ID (0, old turn, turn end, n). It therefore resolves in the first phase of the turn that starts there; for a slower switch, that is before the switch takes effect. The turn end's timeline entry also records the `EraTransition`.
 8. **Orders and the snapshot.** The input log returns a phase's orders in one canonical order (issuer, then sequence number), whatever order they were added in. It refuses a repeated (issuer, sequence) within one phase. Every system running in a phase sees all of that phase's orders at once; turn-end stages see none. Pass 1 has no state store, so "the same snapshot" means one complete batch in a fixed order, never one order at a time. A system that settles a contest by list position would still have a bug, and the scheduler cannot detect it.
 9. **Stop filter and continuing.** `RunTurns` takes an optional `IStopFilter`. When the filter stops on a resolved event, the run finishes the current phase or turn end and stops at that boundary. The next call carries on from there. Running in several calls, or stopping and continuing, gives exactly the same timeline as one uninterrupted call. J7 builds Advance Until's stop list and consistency checks on this hook.
@@ -589,6 +590,7 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011.
   - refused: a turn-end event away from the turn end, and scheduling in the past or in an earlier stage;
   - far-future events wait in the queue;
   - ID fields are correct, and run and resolution share one sequence per slot.
+  - a context kept after its call has returned is refused;
 - **Orders:**
   - each system in a phase sees exactly that phase's orders, and turn ends see none;
   - FsCheck: the same orders logged in two shuffled orders give identical runs;
@@ -600,6 +602,7 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011.
   - informational events, and a run with no filter, do not stop;
   - stopping and continuing, or splitting the run into several calls, gives the same timeline as one call.
 - **Mutation check.** Each of these deliberate bugs fails at least one test:
+  - the check for a finished context removed;
   - due tested with `>=` instead of `>`;
   - phase due measured at the phase's start;
   - systems not sorted by ID;
@@ -627,6 +630,7 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011.
   - a 30-month system on the 1-year step covers 3 years and then 2.
 
   None of those spans is a legal length. The code follows the confirmed due rule. J6b's propagator cache must handle such intervals (for example by composing legal lengths, or by computing on a miss), or the owner may restrict which periods are allowed with which steps.
+- **Also for the owner to confirm:** decision 8 reads "against the same snapshot" as "one complete batch of orders in a fixed order", because Pass 1 has no world state to snapshot. Stage 1 (snapshot state) and stage 2 (collect and validate orders) run no built-in work; the real snapshot arrives with the Pass 2 state store.
 - J6b adds the substep driver, the solver interface and the propagator cache to the run.
 - J7 builds Advance Until on `IStopFilter`.
 - J8 fills `StateHash` and serializes the run's state: decision 11, plus the controller (ENG-011) and the queue in key order (ENG-012). J8 also extends `InputLog` with the campaign manifest.

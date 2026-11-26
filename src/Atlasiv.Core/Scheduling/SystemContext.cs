@@ -17,6 +17,7 @@ public sealed class SystemContext
 
     internal SystemContext(
         SimulationRun run,
+        long callNumber,
         uint systemId,
         long turn,
         TurnSlot slot,
@@ -29,6 +30,7 @@ public sealed class SystemContext
         ulong worldSeed)
     {
         _run = run;
+        CallNumber = callNumber;
         SystemId = systemId;
         Turn = turn;
         Slot = slot;
@@ -40,6 +42,9 @@ public sealed class SystemContext
         Orders = orders;
         WorldSeed = worldSeed;
     }
+
+    // Which call into a system this context belongs to; the run refuses it once that call has returned.
+    internal long CallNumber { get; }
 
     /// <summary>The system being called.</summary>
     public uint SystemId { get; }
