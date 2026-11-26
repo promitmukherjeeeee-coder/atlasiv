@@ -415,7 +415,7 @@ Related: ADR-006, ADR-012, ENG-004, ENG-005, ENG-006, ENG-008.
 
 ### Consequences
 
-- `TurnDates` describes a turn's dates only; it does not carry the turn's number. Turn numbers (from 1 at the epoch, never reset, spec clarification 16) belong to whoever advances turns: J4's step controller or J6's scheduler.
+- `TurnDates` describes a turn's dates only; it does not carry the turn's number. Turn numbers (from 1 at the epoch, never reset, spec clarification 17; it was clarification 16 until the 26 Nov 2026 spec renumbering) belong to whoever advances turns: J4's step controller or J6's scheduler.
 - J4 (step controller) decides switches with `TurnDates.IsValidStart` and `TurnStep` order. J5 (event queue) orders events by `Instant`. J6 (scheduler) runs phases from `TurnDates.Phase` and passes `TimeInterval.Seconds` to the hazard and rate primitives.
 - No values are left open: J3 adds no `// CALIBRATE` placeholders.
 
@@ -629,7 +629,7 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011.
   - a 5-year system on the 2-year step runs at years 6 and 10, covering 6 years and then 4;
   - a 30-month system on the 1-year step covers 3 years and then 2.
 
-  None of those spans is a legal length. The code follows the confirmed due rule. J6b's propagator cache must handle such intervals (for example by composing legal lengths, or by computing on a miss), or the owner may restrict which periods are allowed with which steps.
+  None of those spans is a legal length. The code follows the confirmed due rule. J6b's propagator cache must handle such intervals (for example by composing legal lengths, or by computing on a miss), or the owner may restrict which periods are allowed with which steps. **Resolved 27 Nov 2026:** the owner chose to compute any other length on first use and keep it (spec clarification 18, ENG-014).
 - **Also for the owner to confirm:** decision 8 reads "against the same snapshot" as "one complete batch of orders in a fixed order", because Pass 1 has no world state to snapshot. Stage 1 (snapshot state) and stage 2 (collect and validate orders) run no built-in work; the real snapshot arrives with the Pass 2 state store.
 - J6b adds the substep driver, the solver interface and the propagator cache to the run.
 - J7 builds Advance Until on `IStopFilter`.
@@ -638,3 +638,160 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011.
 - No values are left open: J6a adds no `// CALIBRATE` placeholders. The run still uses J4's `ReferenceUndertaking` placeholder, which every caller must name.
 
 Related: ENG-001, ENG-008, ENG-010, ENG-011, ENG-012.
+
+---
+
+## ENG-014: Substep driver, solver interface and propagator cache
+
+- **Status:** Proposed (Pass 1, J6b, 27 Nov 2026).
+  - Decision 2 is an owner ruling given during J6b (27 Nov 2026).
+  - Decision 6 follows the owner's ruling in spec clarification 18 (27 Nov 2026).
+- **Context:**
+  - **Substeps and the solver.** Spec section 10 (Confirmed) asks Pass 1 for:
+    - a substep driver that splits an interval into 1 to N calendar-exact subintervals, N configurable with a default budget of 4;
+    - a solver interface with an iteration cap, a tolerance and a fallback.
+  - **Substep budget.** Clarification 13 lets the driver accept any N. Going past the budget follows a deterministic rule based on state and is logged. ADR-041 leaves that rule to Pass 3.
+  - **Propagator cache.** Clarification 18 keys the cache by the exact elapsed interval:
+    - the eight steps and the phase lengths are precomputed;
+    - any other interval is computed on first use and kept;
+    - a propagator is never built from shorter ones;
+    - systems are never restricted to particular steps.
+  - **Draws.** Clarification 3 puts the substep index in the draw key, and ENG-008 decision 4 numbers substeps from 0.
+  - **Left open by the spec:** where substeps are cut, what "logged" means, how the solver reports a fallback, and what the time-step consistency bound is for a quantity that decays.
+
+### Decisions
+
+1. **Types.**
+   - **In `Atlasiv.Core.Integration`:**
+     - `SubstepDriver` (`Split`, `DefaultBudget`);
+     - `IIterativeProblem<TState>`, `SolverSettings`, `SolverResult<TState>` and `SolverOutcome`;
+     - the internal `IterativeSolver`;
+     - `IPropagatorSource<TRegime, TPropagator>`, `PropagatorCache<TRegime, TPropagator>` and `LegalLengths`.
+   - **In `Atlasiv.Core.Scheduling`:**
+     - `Substep`, `SubstepEscalation` and `SolverFallback`;
+     - `SystemContext.Substeps` and `SystemContext.Solve`;
+     - `TimelineEntry.SubstepEscalations` and `TimelineEntry.SolverFallbacks`;
+     - `SimulationSetup.SubstepBudget`.
+2. **Where substeps are cut (owner ruling).** Substeps are whole days, shared out as evenly as possible.
+   - Substep k (from 0) of N starts ⌊D·k/N⌋ days into an interval of D days, so a 365-day year in 4 substeps is 91, 91, 91 and 92 days.
+   - The interval must start and end at 00:00, which every covered interval does, and N must be from 1 to D.
+   - **For the owner:** clarification 13 says the driver "accepts any N", but whole days allow at most one substep per day. A 28-day turn can therefore have at most 28 substeps. The two rules meet only at that ceiling, far above the budget of 4.
+3. **Substeps belong to a turn-end run.** Spec section 10 places them "at the turn-end tick", and a system splits the time it covers. So `SystemContext.Substeps` works only while a system runs in a turn-end stage, not while it resolves an event, and the interval must lie within the time the run covers (all or part of it).
+   - Substep k draws from (seed, turn, turn end, k, system, entity), so no two substeps share a draw.
+   - As ENG-008 decision 4 fixes, substep 0 shares its streams with the unsplit turn end (`SystemContext.Draws`). A system that draws both ways in one run must use different draw indices or entity IDs.
+4. **The budget, and escalation.**
+   - `SimulationSetup.SubstepBudget` defaults to 4, the spec's value, not a placeholder, and must be at least 1.
+   - A system may ask for any N. Each request above the budget is logged in the timeline entry as a `SubstepEscalation`: stage, system, interval, count and budget. The log changes nothing else.
+   - When a system asks for more is its own rule, based on its own state. Pass 3 proposes that rule (ADR-041). **For the owner:** issue #11 reads as if Pass 1 supplies the rule. Pass 1 builds only the logging, following ADR-041.
+5. **The solver.**
+   - It iterates from `Initial`. It has converged as soon as a residual is at or below the tolerance; converging on the last allowed iteration still counts.
+   - At the cap it returns the problem's `Fallback(last state)` with the outcome `FellBack`.
+   - Systems reach the solver only through `SystemContext.Solve`, which logs every fallback in the timeline entry as a `SolverFallback`, so a failure to converge is never silent.
+   - The loop is the interface's one fixed behaviour: cap, tolerance and fallback in one place, so no solver can skip them. Pass 3's solvers supply the iteration. Solvers that do not iterate one state at a time (Newton steps over several variables, allocation) may need a richer state type, or a second problem shape added beside this one.
+   - The defaults are placeholders (decision 10).
+6. **Bad inputs.** Following ENG-004 and ENG-008 decision 7, a value that can come from game or calibration data throws `SimulationDomainException`, which stops the commit:
+   - a cap below 1 or a negative tolerance;
+   - a negative residual from a problem;
+   - a negative elapsed time given to the cache.
+
+   Misuse of the run (a stale context, substeps in the wrong place, or a bad substep count or interval) throws the plain .NET exceptions, as ENG-013 does.
+7. **The propagator cache** follows clarification 18. It keys propagators by (regime, exact elapsed seconds).
+   - The first use of a regime computes all 40 legal lengths for it (decision 8) in advance. Any other length is computed on first use, and everything is kept.
+   - `Clear` forgets everything and changes no result, because the source must be a pure function of its two inputs.
+   - Each system owns its cache. The cache is not world state, so J8's serializer and hash must leave it out.
+   - The dictionary is only looked up, never iterated.
+   - It has no memory budget yet. It grows by 40 entries per regime, plus one per other length a run covers. Doctrine section 9 asks for a memory budget for every cache. Pass 1 has no real regimes to size one, so the budget is left to Pass 4, which brings the real propagators and benchmarks them.
+8. **The legal lengths** are every exact length a turn or phase of any step can have. They are worked out from every month start over one 400-year Gregorian cycle, after which the calendar repeats. There are 40, in days:
+   - the 1-month step's phases: 4, 5, 6 and 7;
+   - 28 to 31; 59 to 62; 89 to 92; 181 to 184; 365 and 366;
+   - 730 and 731; 911 to 915; 1,825 to 1,827; 3,651 to 3,653;
+   - 7,304 and 7,305; 18,261 to 18,263.
+
+   The list includes a few lengths no turn reaches (a 6-month span starting in February, say), which costs only a little precomputation. The 1-month step's phase lengths are taken from `TurnDates.Phase`, so the list cannot disagree with the calendar's own rule.
+9. **Time-step consistency and its bound.**
+   - **Hazards:** a hazard over one 6-year pass and over 2 + 2 + 2 years is identical, because H is an exact integer sum (ENG-006).
+   - **Why a decayed quantity differs:** a quantity Q decayed by the survival factor exp(-λΔt) is rounded after every pass, so the two results can differ. Each factor is within 2 raw units (2^-31) of the true exp(-λΔt):
+     - H is rounded by at most half a unit;
+     - exp is within 1.5 units of the true value (ENG-005).
+   - **The bound:** each multiply rounds by at most half a unit, so one pass is within Q·2^-31 + 1/2 of the true value and three passes within 3·Q·2^-31 + 3/2. They differ by at most **⌈8Q / 2^32⌉ + 3** for Q below 2^62.
+   - **In practice:**
+     - for 8 billion people this is at most 18 people;
+     - over 200,000 random cases (quantities up to 2^50, rates up to 2 per year, start months from 10,000 BCE to 3000 CE) the largest difference was 34% of the bound;
+     - the FsCheck test checks 2,000 cases each run.
+10. **Placeholders.** The spec says tolerances are set in calibration. `SolverSettings.Uncalibrated` holds:
+   - `PlaceholderIterationCap` = 100 (`// CALIBRATE`);
+   - `PlaceholderTolerance` = 2^-32, the smallest Q32 step (`// CALIBRATE`).
+
+   A system passes its settings explicitly. Unlike J4's placeholder reference undertaking (distance 0), neither value can be "obviously wrong": a cap of 0 runs no iteration at all. The strictest tolerance is chosen instead. An uncalibrated solver then tends to fall back, and every fallback is logged, so it shows in the timeline rather than passing quietly.
+11. **Turn-numbering references.** The four code comments that cited "clarification 16" for turn numbering now cite clarification 17, as does ENG-010's consequence.
+
+### Tests
+
+- **Substep driver:**
+  - hand-worked splits of a 365-day and a 366-day year;
+  - one substep is the whole interval;
+  - 31 substeps of a month are allowed;
+  - an FsCheck property: the substeps tile the interval on midnights, with lengths differing by at most a day;
+  - bad counts and off-midnight intervals are refused.
+- **Substeps in a run:**
+  - the context returns the driver's split, with one draw address per substep and distinct draws;
+  - 6 substeps against the budget of 4 are logged at each turn end, and 4 are not;
+  - the budget is configurable, and a budget below 1 is refused;
+  - part of the covered time can be split, but time outside it cannot;
+  - substeps are refused while resolving an event, in a phase stage and from a stale context.
+- **Solver:**
+  - convergence on the iteration whose residual equals the tolerance;
+  - convergence on the last allowed iteration;
+  - at the cap, the fallback state with the outcome `FellBack`, and the fallback is given the last state;
+  - a negative residual, a cap below 1 and a negative tolerance are refused;
+  - the placeholder settings.
+- **Solver in a run:**
+  - a fallback is logged in the entry where the system called the solver;
+  - a converged solve is not logged;
+  - a stale context is refused.
+- **Propagator cache:**
+  - hand-worked legal lengths are present;
+  - every turn and phase the calendar produces over 800 years, for every step, has a legal length;
+  - the list is ascending and distinct, and excludes 6 years;
+  - a regime's first use computes exactly the legal lengths once;
+  - 6 years is computed once on first use and then kept;
+  - regimes are kept apart;
+  - cold, warm and cleared caches return the same values;
+  - a negative length is refused.
+- **Time-step consistency:**
+  - FsCheck: the hazard is identical over 6 against 2 + 2 + 2 years;
+  - FsCheck: the decay is within the bound, and at least one case differs;
+  - a 5-year decay system on the 2-year step gives identical quantities and runs with a cold cache, a warm cache and a cache cleared before every run.
+- **Scheduler:** a 5-year system on the 2-year step runs at turns 3 and 5, covering 6 years and then 4 (PASS1_PLAN J6).
+- **Mutation check.** Each of these deliberate bugs fails at least one test:
+  - substep cuts rounded up;
+  - escalation logged at the budget;
+  - escalation not logged;
+  - one draw stream for all substeps;
+  - substeps allowed in phase stages;
+  - a strict tolerance;
+  - the fallback state not used;
+  - the fallback not logged;
+  - no precomputation;
+  - nothing kept;
+  - lookup ignoring the regime;
+  - the last 1-month phase length missing.
+
+### Alternatives considered
+
+- **Substep cuts on whole months where possible, or equal seconds.** Offered to the owner, who chose whole days (decision 2).
+- **Building propagators from shorter ones, or restricting periods to steps.** Rejected by the owner in clarification 18.
+- **Computing only on first use, with no precomputation.** Rejected, because the spec says the legal lengths are precomputed. The results are identical either way.
+- **One cache shared by the whole run.** Rejected for Pass 1. A propagator belongs to its system's regime, and a system-owned cache keeps it out of the run's state. A shared cache can be added if benchmarks show repeated regimes across systems.
+- **A public solver function.** Rejected. A system could then call it without the run logging a fallback.
+- **Substeps in any stage.** Rejected. Spec section 10 places them at the turn-end tick.
+
+### Consequences
+
+- J8's serializer and hash exclude propagator caches. They include `SubstepBudget` with the rest of the setup.
+- J9's test systems can use substeps, the solver and the cache. RC-06 (a stiff test system exceeding the budget) can use the escalation log.
+- Pass 3 brings the real solvers and the escalation rule, and Pass 4 the real propagators.
+- The propagator cache needs a memory budget before real propagators arrive (Pass 4; decision 7).
+- `SolverSettings` placeholders: `PlaceholderIterationCap` = 100 and `PlaceholderTolerance` = 2^-32, both `// CALIBRATE`.
+
+Related: ADR-011, ADR-041, ENG-005, ENG-006, ENG-008, ENG-013.

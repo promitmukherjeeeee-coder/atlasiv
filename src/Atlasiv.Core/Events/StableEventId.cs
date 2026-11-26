@@ -25,7 +25,7 @@ public readonly record struct StableEventId : IComparable<StableEventId>
 {
     /// <summary>Creates an ID.</summary>
     /// <param name="systemId">The creating system's ID.</param>
-    /// <param name="turn">The turn the event was created in, counting from 1 (spec clarification 16).</param>
+    /// <param name="turn">The turn the event was created in, counting from 1 (spec clarification 17).</param>
     /// <param name="slot">The phase, or the turn end, the event was created in.</param>
     /// <param name="sequence">The creating system's sequence number within that slot, from 0.</param>
     /// <exception cref="ArgumentOutOfRangeException">The turn is below 1 or the slot is the default value.</exception>

@@ -7,8 +7,8 @@ namespace Atlasiv.Core.Scheduling;
 
 /// <summary>
 /// What happened in one phase or one turn end of a simulation run: where it sits in the turn,
-/// its dates, the systems that ran (in order), the events that resolved (in order) and, at a turn
-/// end, any step switch announced there.
+/// its dates, the systems that ran (in order), the events that resolved (in order), any solver
+/// fallbacks and, at a turn end, any substep escalations and any step switch announced there.
 /// </summary>
 /// <remarks>A class, not a record: record equality would compare its lists by reference, not by contents.</remarks>
 public sealed class TimelineEntry
@@ -20,6 +20,8 @@ public sealed class TimelineEntry
         TimeInterval span,
         IReadOnlyList<SystemRun> runs,
         IReadOnlyList<SimulationEvent<EventPayload>> events,
+        IReadOnlyList<SubstepEscalation> substepEscalations,
+        IReadOnlyList<SolverFallback> solverFallbacks,
         EraTransition? announced)
     {
         Turn = turn;
@@ -28,10 +30,12 @@ public sealed class TimelineEntry
         Span = span;
         Runs = runs;
         Events = events;
+        SubstepEscalations = substepEscalations;
+        SolverFallbacks = solverFallbacks;
         Announced = announced;
     }
 
-    /// <summary>The turn number, counting from 1 at the epoch and never reset (spec clarification 16).</summary>
+    /// <summary>The turn number, counting from 1 at the epoch and never reset (spec clarification 17).</summary>
     public long Turn { get; }
 
     /// <summary>The phase (1 to <see cref="PhaseCount"/>) or the turn end.</summary>
@@ -60,6 +64,12 @@ public sealed class TimelineEntry
 
     /// <summary>Every event resolved, in the order it resolved.</summary>
     public IReadOnlyList<SimulationEvent<EventPayload>> Events { get; }
+
+    /// <summary>Every request for more substeps than the budget, in the order they were made; always empty for a phase.</summary>
+    public IReadOnlyList<SubstepEscalation> SubstepEscalations { get; }
+
+    /// <summary>Every solver that reached its iteration cap and fell back, in the order they ran.</summary>
+    public IReadOnlyList<SolverFallback> SolverFallbacks { get; }
 
     /// <summary>At a turn end, the step switch decided at the boundary after it, if any; always null for a phase.</summary>
     public EraTransition? Announced { get; }

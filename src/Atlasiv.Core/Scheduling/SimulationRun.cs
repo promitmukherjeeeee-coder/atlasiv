@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Atlasiv.Core.Events;
+using Atlasiv.Core.Integration;
 using Atlasiv.Core.Orders;
 using Atlasiv.Core.Time;
 
@@ -77,9 +78,14 @@ public sealed class SimulationRun
     private long _callCount;
     private long _activeCall;
 
+    // The interval the running system covers, while a system runs; null otherwise (including while an event resolves).
+    private TimeInterval? _activeCovered;
+
     // What the current slot has done.
     private List<SystemRun> _runs = [];
     private List<SimulationEvent<EventPayload>> _resolved = [];
+    private List<SubstepEscalation> _escalations = [];
+    private List<SolverFallback> _fallbacks = [];
     private IStopFilter? _stopFilter;
     private SimulationEvent<EventPayload>? _stoppedBy;
 
@@ -91,6 +97,7 @@ public sealed class SimulationRun
         ArgumentNullException.ThrowIfNull(setup.LeadingEdge);
         ArgumentNullException.ThrowIfNull(setup.Systems);
         ArgumentNullException.ThrowIfNull(setup.InputLog);
+        ArgumentOutOfRangeException.ThrowIfLessThan(setup.SubstepBudget, 1);
         _setup = setup;
 
         // Read each registration once, then order everything by ascending system ID (hard rule 5).
@@ -175,10 +182,7 @@ public sealed class SimulationRun
     internal StableEventId Schedule(
         SystemContext context, Instant at, ResolutionStage stage, int priority, InterruptionClass interruption, EventPayload payload)
     {
-        if (context.CallNumber != _activeCall)
-        {
-            throw new InvalidOperationException("This SystemContext belongs to a call that has finished.");
-        }
+        EnsureActive(context);
 
         if (!stage.IsValid)
         {
@@ -202,6 +206,53 @@ public sealed class SimulationRun
 
         _queue.Enqueue(new SimulationEvent<EventPayload>(key, interruption, payload));
         return key.Id;
+    }
+
+    internal IReadOnlyList<Substep> Substeps(SystemContext context, TimeInterval interval, int count)
+    {
+        EnsureActive(context);
+        if (!context.Stage.IsTurnEnd)
+        {
+            throw new InvalidOperationException("Substeps are used only in a turn-end stage (spec section 10), not in " + context.Stage + ".");
+        }
+
+        if (_activeCovered is not { } covered)
+        {
+            throw new InvalidOperationException("Substeps split the time a system's run covers, so they are used only while the system runs, not while it resolves an event.");
+        }
+
+        if (interval.Start < covered.Start || interval.End > covered.End)
+        {
+            throw new ArgumentException(
+                "Substeps must lie within the time this run covers (" + covered.Start + " to " + covered.End + "), not " + interval.Start + " to " + interval.End + ".",
+                nameof(interval));
+        }
+
+        var spans = SubstepDriver.Split(interval, count);
+        if (count > _setup.SubstepBudget)
+        {
+            _escalations.Add(new SubstepEscalation(context.Stage, context.SystemId, interval, count, _setup.SubstepBudget));
+        }
+
+        var substeps = new Substep[spans.Count];
+        for (var k = 0; k < spans.Count; k++)
+        {
+            substeps[k] = new Substep(k, spans[k], context.Draws);
+        }
+
+        return substeps;
+    }
+
+    internal SolverResult<TState> Solve<TState>(SystemContext context, IIterativeProblem<TState> problem, SolverSettings settings)
+    {
+        EnsureActive(context);
+        var result = IterativeSolver.Solve(problem, settings);
+        if (result.Outcome == SolverOutcome.FellBack)
+        {
+            _fallbacks.Add(new SolverFallback(context.Stage, context.SystemId, settings, result.Residual));
+        }
+
+        return result;
     }
 
     private TimelineEntry RunPhase(long turnNumber, TurnDates turn, int phase)
@@ -260,10 +311,12 @@ public sealed class SimulationRun
         Array.Clear(_sequences);
         _runs = [];
         _resolved = [];
+        _escalations = [];
+        _fallbacks = [];
     }
 
     private TimelineEntry EndSlot(TimeInterval span, EraTransition? announced) =>
-        new(_slotTurn, _slot, _slotTurnDates.Step, span, _runs, _resolved, announced);
+        new(_slotTurn, _slot, _slotTurnDates.Step, span, _runs, _resolved, _escalations, _fallbacks, announced);
 
     private void RunStage(
         ResolutionStage stage, int[] members, TimeInterval slotSpan, Instant now, Instant coverEnd, IReadOnlyList<Order> orders)
@@ -281,8 +334,10 @@ public sealed class SimulationRun
 
             var covered = new TimeInterval(_coveredUntil[index], coverEnd);
             var context = Context(_ids[index], slotSpan, now, stage, orders);
+            _activeCovered = covered;
             _systems[index].Run(context, covered);
             _activeCall = 0;
+            _activeCovered = null;
             _runs.Add(new SystemRun(stage, _ids[index], covered));
             _coveredUntil[index] = coverEnd;
             _nextBoundary[index] = _registrations[index].Period.NextBoundaryAfter(coverEnd);
@@ -315,6 +370,14 @@ public sealed class SimulationRun
     {
         _activeCall = ++_callCount;
         return new(this, _activeCall, systemId, _slotTurn, _slot, _slotTurnDates.Step, _slotTurnDates.Span, slotSpan, now, stage, orders, _setup.WorldSeed);
+    }
+
+    private void EnsureActive(SystemContext context)
+    {
+        if (context.CallNumber != _activeCall)
+        {
+            throw new InvalidOperationException("This SystemContext belongs to a call that has finished.");
+        }
     }
 
     private StableEventId NextId(uint systemId)
