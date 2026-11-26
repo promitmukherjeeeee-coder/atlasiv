@@ -469,3 +469,55 @@ Related: ADR-004, ENG-001, ENG-004, ENG-006, ENG-008.
 - Placeholders left: the reference undertaking and its distance (decision 10).
 
 Related: ENG-001, ENG-004, ENG-010.
+
+---
+
+## ENG-012: Event queue, ordering key and stable event IDs
+
+- **Status:** Proposed (Pass 1, J5, 26 Nov 2026). Decisions 3 and 4 are owner rulings given during J5 (26 Nov 2026).
+- **Context:** Spec section 5 (Confirmed) fixes the queue: events ordered by (timestamp, resolution stage, event priority, stable event ID) in a binary heap keyed by the full tuple; stable IDs built from (creating system ID, turn, phase, per-system sequence number); informational and decision-critical interruption classes; no two events ever compare equal. Clarification 3 gives the turn end its own slot after the last phase in stable event IDs. Issue #9 cites "ADR-039 §4"; that was the repository's former record of the owner's 24 Nov rulings, now superseded by clarification 3 (ENG-001). The spec does not say how stages of different kinds compare, which way priority runs, how the ID fields are ordered, or what the queue does with a repeated ID.
+
+### Decisions
+
+1. **Types** (namespace `Atlasiv.Core.Events` unless stated):
+   - `StableEventId`: (system ID, turn, slot, sequence number), with `IsValid` false only for the default value.
+   - `EventIdSequence`: hands out one system's IDs for one turn and slot, from 0 in creation order. A system makes a new one for each phase or turn end it runs in. It carries on across substeps, so no two substeps share an ID.
+   - `Scheduling.ResolutionStage`: phase stages 1 to 11 and turn-end stages 1 to 10. It lives in `Scheduling` because J6 registers systems by stage.
+   - `EventKey`: the ordering tuple.
+   - `InterruptionClass`: `Informational = 1`, `DecisionCritical = 2`. There is no 0, so an event whose class was never set is refused instead of silently becoming informational.
+   - `SimulationEvent<TPayload>`: key, interruption class and payload. Refuses a key with no valid stage or ID, and an undefined class.
+   - `EventQueue<TPayload>`: the heap.
+2. **One slot type for draws and events.** J2's `DrawSlot` (a phase number, or the turn end at `uint.MaxValue`) is renamed `Time.TurnSlot` and used by both random-draw keys and stable event IDs, since clarification 3 gives the turn end the same slot in both. The rename changes no values: draw keys and test vectors are unchanged.
+3. **Turn-end stages come before phase stages at the same instant (owner ruling).** Stage order is turn-end stages 1 to 10, then phase stages 1 to 11. The two kinds can only share a timestamp on a turn boundary, and there spec section 3 runs the old turn's turn-end stages before the new turn's first phase. Within a kind, stages run in number order (section 6).
+4. **Lower priority numbers resolve first (owner ruling).** Priority is a signed 32-bit integer; priority 0 resolves before priority 1. The interruption class is not part of the key, so whether an event stops Advance Until never changes when it resolves.
+5. **ID field order:** system, then turn, then slot (every phase before the turn end), then sequence number: the order the spec lists them. It is only the last tie-breaker, so any fixed order is deterministic; following the spec is the least surprising.
+6. **A repeated ID is refused.** `Enqueue` throws if an event with the same stable ID is already queued, so no two queued events can compare equal. The check uses a hash set for membership only, never iterated (hard rule 5). The queue cannot see IDs that have already left it; uniqueness over a whole run comes from `EventIdSequence` and from J6 giving each system its own ID.
+7. **Sequence numbers are 64-bit.** Running out is a `SimulationOverflowException`, never a wrap (hard rule 2).
+8. **Heap:** a hand-written array-backed binary min-heap. Enqueue and dequeue are O(log n).
+9. **Analyzer:** CA1711 (type names ending in "Queue") is suppressed on `EventQueue` only, with the reason in the attribute: "event queue" is the spec's name.
+
+### Tests
+
+- Stable IDs: turn-end IDs never repeat the last phase's for every step's phase count, and sort after every phase of their turn and before the next turn; sequences number from 0; two systems in one phase never share an ID; running out of sequence numbers is an overflow error; field order; turn 0 and the default slot are refused.
+- Key: each field outranks all later fields (timestamp, stage, priority, ID); turn-end stage 10 comes before phase stage 1 at the same instant; stages in number order; 11 phase stages and 10 turn-end stages, others refused. FsCheck: keys with different IDs never compare equal and the order is antisymmetric and transitive.
+- Queue: FsCheck, the same events (with many ties on timestamp, stage and priority) inserted in two shuffled orders both resolve in sorted order; FsCheck, random interleaved inserts and dequeues always return the earliest event still queued; a repeated ID is refused and can be queued again once its event has left; the interruption class and payload come out with the event; an undefined class, a default stage or a default ID is refused; an empty queue; peeking does not remove.
+- Mutation check: making the heap always sift towards the left child fails three queue tests.
+
+### Alternatives considered
+
+- **.NET's `PriorityQueue<TElement, TPriority>`.** Rejected: it is a 4-ary heap, and the spec says binary. With a total order either gives the same results, so this is about following the spec, not determinism.
+- **Phase stages before turn-end stages.** Offered to the owner and rejected: it would resolve a new turn's phase events before the old turn's turn end on a boundary, against section 3.
+- **Higher priority numbers first.** Offered to the owner, who chose lower first.
+- **Detecting a repeated ID only when the comparison returns 0.** Rejected: the heap does not compare every pair, so a repeat could slip through.
+- **An `object` payload.** Rejected for a type parameter, which keeps payloads typed without casts.
+
+### Consequences
+
+- J6's scheduler resolves events from this queue within each phase and turn end, gives each system its own `EventIdSequence` per slot (and never two for the same system, turn and slot), and queues `EraTransition` as an informational event.
+- Decision 3 assumes turn-end-stage events carry the turn's end instant as their timestamp, so they meet phase-stage events only on a boundary. J6 must timestamp them that way, or bring the stage order back to the owner. The key applies the stage order at every instant.
+- The queue has no size budget. The doctrine's "Budgets and scalability" rule (docs/06) asks for per-subsystem queue-size budgets, but the spec sets none for Pass 1; the J10 benchmarks are where one would be proposed.
+- J8 must serialize the queued events in key order (the heap's internal order is not canonical) and restore them.
+- Pass 2 replaces `StableEventId` with the permanent event identity, keeping the same ordering guarantee.
+- No values are left open: J5 adds no `// CALIBRATE` placeholders.
+
+Related: ENG-001, ENG-008, ENG-010, ENG-011.
