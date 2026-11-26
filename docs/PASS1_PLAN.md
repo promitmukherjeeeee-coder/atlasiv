@@ -50,6 +50,7 @@ Every job follows the same loop:
 
 ## J3 Calendar and clock
 
+- Turn numbers count from 1 at the epoch and never reset; phases are numbered from 1 within each turn (spec clarification 17).
 - A signed 64-bit clock in seconds from the epoch, 1 January 10,000 BCE 00:00, proleptic Gregorian.
 - Astronomical year numbering internally. BCE/CE display with no year zero. Gregorian leap rule over the whole timeline.
 - The step table (8 steps and their phase counts) and the boundary calculator for every step's phase dates. Turns and phases are half-open intervals [start, end), so a boundary instant belongs to the phase that starts there.
@@ -76,8 +77,8 @@ Every job follows the same loop:
 - System registration with a declared stage, natural period and cadence. Systems run only in their stage, and only when due.
 - The phase runner (phase stages 1 to 11) and the turn-end runner (turn-end stages 1 to 10), in the order fixed by spec section 6. "Step" always means turn length; "stage" always means a resolution slot (spec section 6, Terms).
 - A substep driver (1 to N calendar-exact subintervals, N configurable, default budget 4; escalation beyond the budget is deterministic and logged) and a solver interface (iteration cap, tolerance, fallback).
-- The propagator cache keyed by legal time step.
-- Done when stage order, due-period logic and time-step consistency (the same elapsed time split differently gives identical results, or documented bounded differences) pass.
+- The propagator cache keyed by exact elapsed interval: the eight steps and phase lengths precomputed, any other interval computed on first use and kept, never composed from shorter propagators (spec clarification 18).
+- Done when stage order, due-period logic and time-step consistency (the same elapsed time split differently gives identical results, or documented bounded differences) pass; a 5-year system on the 2-year step runs after years 6 and 10, covering 6 then 4 years; and a cold cache and a warm cache give identical hashes.
 
 ## J7 Standing orders and Advance Until
 
