@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Atlasiv.Core.Events;
+using Atlasiv.Core.Integration;
 using Atlasiv.Core.Orders;
 using Atlasiv.Core.Randomness;
 using Atlasiv.Core.Time;
@@ -84,6 +85,26 @@ public sealed class SystemContext
 
     /// <summary>The random stream for <paramref name="entityId"/> in this system, turn and slot (substep 0).</summary>
     public DrawAddress Draws(ulong entityId) => new(WorldSeed, Turn, Slot, 0, SystemId, entityId);
+
+    /// <summary>
+    /// Splits <paramref name="interval"/>, all or part of the time this run covers, into <paramref name="count"/> substeps of whole days (see
+    /// <see cref="Integration.SubstepDriver"/>), each with its own random streams. Asking for more than the
+    /// run's substep budget is allowed and is logged in the timeline (spec section 10, clarification 13).
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">Not while this system runs in a turn-end stage (for example, while it resolves an event), or this context's call has finished.</exception>
+    /// <exception cref="System.ArgumentException">The interval is not within the time this run covers, or does not start and end at 00:00.</exception>
+    /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="count"/> is below 1 or above the interval's number of days.</exception>
+    public IReadOnlyList<Substep> Substeps(TimeInterval interval, int count) => _run.Substeps(this, interval, count);
+
+    /// <summary>
+    /// Runs <paramref name="problem"/> through the solver interface (spec section 10). If it reaches the
+    /// iteration cap without converging, the result is the problem's fallback, the outcome says so, and
+    /// the run logs it in the timeline.
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">This context's call has finished.</exception>
+    /// <exception cref="Numerics.SimulationDomainException">The problem gave a negative residual.</exception>
+    public SolverResult<TState> Solve<TState>(IIterativeProblem<TState> problem, SolverSettings settings) =>
+        _run.Solve(this, problem, settings);
 
     /// <summary>
     /// Schedules an event created by this system and returns its stable ID. The event resolves

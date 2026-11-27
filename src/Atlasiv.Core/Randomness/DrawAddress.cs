@@ -40,7 +40,7 @@ public readonly record struct DrawAddress
 
     /// <summary>Creates a stream address.</summary>
     /// <param name="worldSeed">The campaign's world seed.</param>
-    /// <param name="turn">The turn, counting from 1 at the epoch (spec clarification 16).</param>
+    /// <param name="turn">The turn, counting from 1 at the epoch (spec clarification 17).</param>
     /// <param name="slot">The phase, or the turn end.</param>
     /// <param name="substep">The substep within the stage, counting from 0; 0 when the stage is not split.</param>
     /// <param name="systemId">The drawing system's ID.</param>

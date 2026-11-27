@@ -37,8 +37,12 @@ Either a phase stage or a turn-end stage. Every system belongs to exactly one st
 _Avoid_: Step, slot
 
 **Substep**:
-One of 1 to 4 smaller calendar-exact time slices that a volatile province can use within a turn-end stage.
+One of the smaller time slices, of whole days, into which a system in a turn-end stage splits the time it covers (for example, a volatile province). Any number up to one per day can be used; more than the substep budget is logged.
 _Avoid_: Subtick, step
+
+**Substep budget**:
+The number of substeps a system may use before the run logs an escalation: 4 by default. A budget, not a cap.
+_Avoid_: Substep limit, maximum substeps
 
 **Natural period**:
 How much calendar time passes between a system's runs. A system runs only in its own stage, and only when its natural period is due.
@@ -52,8 +56,24 @@ _Avoid_: Scheduled, elapsed (due never counts time since the last run)
 The scheduler resolving phases and turn ends in order from the epoch, given a world seed, a leading edge, the registered systems and the input log. What it did is its timeline.
 
 **Timeline**:
-The record of a simulation run: for each phase and turn end, its turn, slot, step and dates, the systems that ran and what they covered, the events resolved in order, any step switch decided, and the state hash.
+The record of a simulation run: for each phase and turn end, its turn, slot, step and dates, the systems that ran and what they covered, the events resolved in order, any substep escalations and solver fallbacks, any step switch decided, and the state hash.
 _Avoid_: Log (the input log is the orders that go in; the timeline is what came out)
+
+**Propagator**:
+What advances a system's state in closed form over an exact elapsed time, such as a decay factor or a transition matrix. It depends only on the system's regime and parameters and the elapsed seconds, and is never built by combining propagators for shorter times.
+
+**Regime**:
+Everything a propagator depends on besides elapsed time: a system's mode and parameters, such as a decay rate.
+
+**Legal length**:
+An exact length, in seconds, that a turn or phase of one of the eight steps can have (a 1-year turn is 365 or 366 days). The propagator cache computes these in advance.
+_Avoid_: Legal step (a step is a turn length, not an exact number of seconds)
+
+**Propagator cache**:
+The store of propagators already computed, keyed by regime and exact elapsed seconds. Every legal turn and phase length is computed in advance; any other length is computed on first use. It never changes results.
+
+**Solver fallback**:
+What a solver returns when it reaches its iteration cap without converging. Every fallback is logged in the timeline.
 
 **Leading edge**:
 The fastest transport capability that is usable at meaningful capacity by any entity holding at least 0.5% of world population.

@@ -123,6 +123,21 @@ public sealed class SchedulerTests
     }
 
     [Fact]
+    public void A_5_year_system_on_the_2_year_step_covers_6_years_then_4()
+    {
+        // Clarification 18: boundaries at years 5 and 10 are first reached by the turn ends after
+        // years 6 (turn 3) and 10 (turn 5). Neither 6 nor 4 years is a legal step.
+        var fiveYearly = NaturalPeriod.TurnOf(TurnStep.FiveYears);
+        var run = Start(TurnStep.TwoYears, new ScriptedSystem(1, ResolutionStage.TurnEnd(1), fiveYearly));
+
+        var timeline = run.RunTurns(5);
+
+        Assert.Equal(
+            [(3L, Span(Date(-9999, 1, 1), Date(-9993, 1, 1))), (5L, Span(Date(-9993, 1, 1), Date(-9989, 1, 1)))],
+            RunsOf(timeline, 1));
+    }
+
+    [Fact]
     public void A_30_month_system_follows_its_alternating_1_January_and_1_July_boundaries()
     {
         // Boundaries at 1 July 9,998 BCE (30 months in) and 1 January 9,995 BCE (60 months in).

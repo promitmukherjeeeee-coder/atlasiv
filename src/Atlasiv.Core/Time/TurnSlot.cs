@@ -28,7 +28,7 @@ public readonly record struct TurnSlot
     /// <summary>True for the turn-end slot.</summary>
     public bool IsTurnEnd => Value == TurnEndValue;
 
-    /// <summary>The slot of phase <paramref name="number"/> of a turn. Phases count from 1 (spec clarification 16).</summary>
+    /// <summary>The slot of phase <paramref name="number"/> of a turn. Phases count from 1 (spec clarification 17).</summary>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="number"/> is below 1.</exception>
     public static TurnSlot Phase(int number)
     {
