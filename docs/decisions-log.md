@@ -645,7 +645,8 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011, ENG-012.
 
 - **Status:** Proposed (Pass 1, J6b, 27 Nov 2026).
   - Decision 2 is an owner ruling given during J6b (27 Nov 2026).
-  - Decision 6 follows the owner's ruling in spec clarification 18 (27 Nov 2026).
+  - Decision 7 follows the owner's ruling in spec clarification 18 (27 Nov 2026).
+  - After review, the owner confirmed three points (27 Nov 2026): the one-substep-per-day ceiling (decision 2), leaving the escalation rule to each system and Pass 3 (decision 4), and system-owned caches (decision 7).
 - **Context:**
   - **Substeps and the solver.** Spec section 10 (Confirmed) asks Pass 1 for:
     - a substep driver that splits an interval into 1 to N calendar-exact subintervals, N configurable with a default budget of 4;
@@ -675,14 +676,14 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011, ENG-012.
 2. **Where substeps are cut (owner ruling).** Substeps are whole days, shared out as evenly as possible.
    - Substep k (from 0) of N starts ⌊D·k/N⌋ days into an interval of D days, so a 365-day year in 4 substeps is 91, 91, 91 and 92 days.
    - The interval must start and end at 00:00, which every covered interval does, and N must be from 1 to D.
-   - **For the owner:** clarification 13 says the driver "accepts any N", but whole days allow at most one substep per day. A 28-day turn can therefore have at most 28 substeps. The two rules meet only at that ceiling, far above the budget of 4.
+   - **Confirmed by the owner (27 Nov 2026):** clarification 13 says the driver "accepts any N", but whole days allow at most one substep per day, so a 28-day turn can have at most 28 substeps. The owner accepted this ceiling, which is far above the budget of 4.
 3. **Substeps belong to a turn-end run.** Spec section 10 places them "at the turn-end tick", and a system splits the time it covers. So `SystemContext.Substeps` works only while a system runs in a turn-end stage, not while it resolves an event, and the interval must lie within the time the run covers (all or part of it).
    - Substep k draws from (seed, turn, turn end, k, system, entity), so no two substeps share a draw.
    - As ENG-008 decision 4 fixes, substep 0 shares its streams with the unsplit turn end (`SystemContext.Draws`). A system that draws both ways in one run must use different draw indices or entity IDs.
 4. **The budget, and escalation.**
    - `SimulationSetup.SubstepBudget` defaults to 4, the spec's value, not a placeholder, and must be at least 1.
    - A system may ask for any N. Each request above the budget is logged in the timeline entry as a `SubstepEscalation`: stage, system, interval, count and budget. The log changes nothing else.
-   - When a system asks for more is its own rule, based on its own state. Pass 3 proposes that rule (ADR-041). **For the owner:** issue #11 reads as if Pass 1 supplies the rule. Pass 1 builds only the logging, following ADR-041.
+   - When a system asks for more is its own rule, based on its own state. Pass 3 proposes that rule (ADR-041). **Confirmed by the owner (27 Nov 2026):** Pass 1 builds only the logging, following ADR-041, although issue #11 reads as if Pass 1 supplied the rule.
 5. **The solver.**
    - It iterates from `Initial`. It has converged as soon as a residual is at or below the tolerance; converging on the last allowed iteration still counts.
    - At the cap it returns the problem's `Fallback(last state)` with the outcome `FellBack`.
@@ -698,7 +699,7 @@ Related: ENG-001, ENG-008, ENG-010, ENG-011, ENG-012.
 7. **The propagator cache** follows clarification 18. It keys propagators by (regime, exact elapsed seconds).
    - The first use of a regime computes all 40 legal lengths for it (decision 8) in advance. Any other length is computed on first use, and everything is kept.
    - `Clear` forgets everything and changes no result, because the source must be a pure function of its two inputs.
-   - Each system owns its cache. The cache is not world state, so J8's serializer and hash must leave it out.
+   - Each system owns its cache. The cache is not world state, so J8's serializer and hash must leave it out. The owner confirmed system-owned caches (27 Nov 2026).
    - The dictionary is only looked up, never iterated.
    - It has no memory budget yet. It grows by 40 entries per regime, plus one per other length a run covers. Doctrine section 9 asks for a memory budget for every cache. Pass 1 has no real regimes to size one, so the budget is left to Pass 4, which brings the real propagators and benchmarks them.
 8. **The legal lengths** are every exact length a turn or phase of any step can have. They are worked out from every month start over one 400-year Gregorian cycle, after which the calendar repeats. There are 40, in days:
